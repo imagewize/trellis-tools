@@ -29,7 +29,7 @@ diff -rq $TEMP_DIR/trellis/ $TRELLIS_DIR/ > $DIFF_DIR/changes.txt
 rm -rf $TEMP_DIR/trellis/.git
 
 # Step 6: Update Trellis files using rsync with explicit excludes
-rsync -av \
+rsync -av --delete \
   --exclude=".vault_pass" \
   --exclude=".trellis/" \
   --exclude=".git/" \
