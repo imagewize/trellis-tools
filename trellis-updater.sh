@@ -33,6 +33,7 @@ rsync -av \
   --exclude=".vault_pass" \
   --exclude=".trellis/" \
   --exclude=".git/" \
+  --exclude=".github/" \
   --exclude="group_vars/all/vault.yml" \
   --exclude="group_vars/development/vault.yml" \
   --exclude="group_vars/production/vault.yml" \
