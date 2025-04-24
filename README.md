@@ -17,7 +17,7 @@ This script automates the process of updating your Trellis installation to the l
   - User configurations
   - Host configurations
   - Trellis CLI configuration
-- Commits changes to your Git repository
+- Commits changes to your Git repository (commented out by default)
 
 ## Usage
 
