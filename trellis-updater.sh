@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Set your project slug here
+# Set your project slug here like imagewize.com
 PROJECT="site.com"
 
 # Paths based on project
@@ -45,19 +45,19 @@ rsync -av \
   $TEMP_DIR/trellis/ $TRELLIS_DIR/
 
 # Step 7: Clean up temporary directory
-rm -rf $TEMP_DIR
+# rm -rf $TEMP_DIR
 
 # Step 8: Return to project directory
-cd $PROJECT_DIR
+# cd $PROJECT_DIR
 
 # Step 9: Check status of changes
-git status
+# git status
 
 # Step 10: Review diff of changes
-git diff trellis/
+# git diff trellis/
 
 # Step 11: Add changes if everything looks good
-git add trellis/
+# git add trellis/
 
 # Step 12: Commit the changes
-git commit -m "Update Trellis to latest version while preserving custom configurations"
+# git commit -m "Update Trellis to latest version while preserving custom configurations"
