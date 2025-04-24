@@ -14,7 +14,7 @@ DIFF_DIR=~/trellis-diff
 mkdir -p $BACKUP_DIR
 
 # Step 2: Back up the entire current Trellis directory including hidden files
-cp -ra $TRELLIS_DIR/ $BACKUP_DIR/
+cp -r $TRELLIS_DIR/ $BACKUP_DIR/
 
 # Step 3: Clone fresh Trellis to temporary directory
 mkdir -p $TEMP_DIR
