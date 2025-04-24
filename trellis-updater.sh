@@ -36,9 +36,10 @@ rsync -av \
   --exclude=".github/" \
   --exclude="group_vars/all/vault.yml" \
   --exclude="group_vars/development/vault.yml" \
-  --exclude="group_vars/production/vault.yml" \
   --exclude="group_vars/development/wordpress_sites.yml" \
+  --exclude="group_vars/production/vault.yml" \
   --exclude="group_vars/production/wordpress_sites.yml" \
+  --exclude="group_vars/staging/vault.yml" \
   --exclude="group_vars/staging/wordpress_sites.yml" \
   --exclude="group_vars/all/users.yml" \
   --exclude="trellis.cli.yml" \
