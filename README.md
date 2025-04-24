@@ -17,13 +17,13 @@ This script automates the process of updating your Trellis installation to the l
   - User configurations
   - Host configurations
   - Trellis CLI configuration
-- Commits changes to your Git repository (commented out by default)
+- Commits changes to your Git repository
 
 ## Usage
 
 1. Edit the script to set your project slug:
 ```bash
-# Set your project slug here
+# Set your project slug here like imagewize.com
 PROJECT="your-site-name"
 ```
 
@@ -45,11 +45,13 @@ The script specifically preserves the following files/directories:
 - `.vault_pass`
 - `.trellis/`
 - `.git/`
+- `.github/`
 - `group_vars/all/vault.yml`
 - `group_vars/development/vault.yml`
-- `group_vars/production/vault.yml`
 - `group_vars/development/wordpress_sites.yml`
+- `group_vars/production/vault.yml`
 - `group_vars/production/wordpress_sites.yml`
+- `group_vars/staging/vault.yml`
 - `group_vars/staging/wordpress_sites.yml`
 - `group_vars/all/users.yml`
 - `trellis.cli.yml`
