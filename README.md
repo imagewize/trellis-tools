@@ -55,6 +55,8 @@ Tools to configure Nginx for optimized image serving, supporting WebP and AVIF f
 
 The configuration is located in the `nginx.-includes/webp-avf.conf.j2` file. 
 
+For detailed instructions on implementing this in your Trellis project and converting your images to WebP/AVIF formats, please refer to our [Image Optimization Guide](image-optimization.md).
+
 To implement this in your Trellis project:
 1. Copy the `nginx.-includes` directory to your Trellis project
 2. Update your Trellis configuration to include this Nginx configuration
