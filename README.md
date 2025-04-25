@@ -1,12 +1,14 @@
-# Trellis Updater
+# Trellis Tools
 
-A Bash script to safely update your [Roots Trellis](https://roots.io/trellis/) installation while preserving your custom configurations.
+A collection of tools to enhance your [Roots Trellis](https://roots.io/trellis/) workflow and configuration.
 
-## Overview
+## Tools Overview
 
-This script automates the process of updating your Trellis installation to the latest version from the official repository while preserving your site-specific configurations, vaults, and other customizations.
+### 1. Trellis Updater
 
-## Features
+A Bash script to safely update your Trellis installation while preserving your custom configurations.
+
+#### Features
 
 - Creates a backup of your current Trellis directory
 - Downloads the latest version of Trellis
@@ -19,7 +21,7 @@ This script automates the process of updating your Trellis installation to the l
   - Trellis CLI configuration
 - Commits changes to your Git repository
 
-## Usage
+#### Usage
 
 1. Edit the script to set your project slug:
 ```bash
@@ -29,19 +31,50 @@ PROJECT="your-site-name"
 
 2. Make the script executable:
 ```bash
-chmod +x trellis-updater.sh
+chmod +x updates/trellis-updater.sh
 ```
 
 3. Run the script:
 ```bash
-./trellis-updater.sh
+./updates/trellis-updater.sh
 ```
 
 4. Review the changes in your Git repository before pushing them.
 
-## What It Preserves
+### 2. Nginx Image Configuration
 
-The script specifically preserves the following files/directories:
+Tools to configure Nginx for optimized image serving, supporting WebP and AVIF formats.
+
+#### Features
+
+- Automatically serves WebP or AVIF images when browsers support them
+- Falls back to traditional formats for older browsers
+- Improves page load times and performance scores
+
+#### Usage
+
+The configuration is located in the `image-optimization/nginx.-includes/webp-avf.conf.j2` file. 
+
+For detailed instructions on implementing this in your Trellis project and converting your images to WebP/AVIF formats, please refer to our [Image Optimization Guide](image-optimization/image-optimization.md).
+
+To implement this in your Trellis project:
+1. Copy the `image-optimization/nginx.-includes` directory to your Trellis project
+2. Update your Trellis configuration to include this Nginx configuration
+3. Run the appropriate provisioning command to apply the changes:
+   ```bash
+   # For production environment
+   trellis provision production
+   
+   # For staging environment
+   trellis provision staging
+   
+   # For development environment
+   trellis provision development
+   ```
+
+## What Trellis Updater Preserves
+
+The updater script specifically preserves the following files/directories:
 - `.vault_pass`
 - `.trellis/`
 - `.git/`
