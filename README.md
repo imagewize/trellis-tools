@@ -31,12 +31,12 @@ PROJECT="your-site-name"
 
 2. Make the script executable:
 ```bash
-chmod +x trellis-updater.sh
+chmod +x updates/trellis-updater.sh
 ```
 
 3. Run the script:
 ```bash
-./trellis-updater.sh
+./updates/trellis-updater.sh
 ```
 
 4. Review the changes in your Git repository before pushing them.
@@ -53,12 +53,12 @@ Tools to configure Nginx for optimized image serving, supporting WebP and AVIF f
 
 #### Usage
 
-The configuration is located in the `nginx.-includes/webp-avf.conf.j2` file. 
+The configuration is located in the `image-optimization/nginx.-includes/webp-avf.conf.j2` file. 
 
-For detailed instructions on implementing this in your Trellis project and converting your images to WebP/AVIF formats, please refer to our [Image Optimization Guide](image-optimization.md).
+For detailed instructions on implementing this in your Trellis project and converting your images to WebP/AVIF formats, please refer to our [Image Optimization Guide](image-optimization/image-optimization.md).
 
 To implement this in your Trellis project:
-1. Copy the `nginx.-includes` directory to your Trellis project
+1. Copy the `image-optimization/nginx.-includes` directory to your Trellis project
 2. Update your Trellis configuration to include this Nginx configuration
 3. Run the appropriate provisioning command to apply the changes:
    ```bash
