@@ -15,7 +15,7 @@ A Bash script to safely update your Trellis installation while preserving your c
 - Updates your Trellis files while preserving important configurations
 - Commits changes to your Git repository
 
-For detailed usage instructions and information, please refer to the [Trellis Updater documentation](updates/README.md).
+For detailed usage instructions and information, please refer to the [Trellis Updater documentation](updater/README.md).
 
 ### 2. Nginx Image Configuration
 
