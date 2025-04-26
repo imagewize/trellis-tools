@@ -17,6 +17,8 @@ A Bash script to safely update your Trellis installation while preserving your c
 
 For detailed usage instructions and information, please refer to the [Trellis Updater documentation](updater/README.md).
 
+> **Note:** If you prefer not to use the automated shell script, we also provide a [manual update guide](updater/manual-update.md) with step-by-step instructions.
+
 ### 2. Nginx Image Configuration
 
 Tools to configure Nginx for optimized image serving, supporting WebP and AVIF formats.
