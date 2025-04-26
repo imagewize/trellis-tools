@@ -12,34 +12,10 @@ A Bash script to safely update your Trellis installation while preserving your c
 
 - Creates a backup of your current Trellis directory
 - Downloads the latest version of Trellis
-- Generates a diff to see what would change
-- Updates your Trellis files while preserving important configurations:
-  - Vault files with passwords and sensitive data
-  - WordPress site configurations
-  - User configurations
-  - Host configurations
-  - Trellis CLI configuration
+- Updates your Trellis files while preserving important configurations
 - Commits changes to your Git repository
 
-#### Usage
-
-1. Edit the script to set your project slug:
-```bash
-# Set your project slug here like imagewize.com
-PROJECT="your-site-name"
-```
-
-2. Make the script executable:
-```bash
-chmod +x updates/trellis-updater.sh
-```
-
-3. Run the script:
-```bash
-./updates/trellis-updater.sh
-```
-
-4. Review the changes in your Git repository before pushing them.
+For detailed usage instructions and information, please refer to the [Trellis Updater documentation](updates/README.md).
 
 ### 2. Nginx Image Configuration
 
@@ -55,7 +31,7 @@ Tools to configure Nginx for optimized image serving, supporting WebP and AVIF f
 
 The configuration is located in the `image-optimization/nginx.-includes/webp-avf.conf.j2` file. 
 
-For detailed instructions on implementing this in your Trellis project and converting your images to WebP/AVIF formats, please refer to our [Image Optimization Guide](image-optimization/image-optimization.md).
+For detailed instructions on implementing this in your Trellis project and converting your images to WebP/AVIF formats, please refer to our [Image Optimization Guide](image-optimization/README.md).
 
 To implement this in your Trellis project:
 1. Copy the `image-optimization/nginx.-includes` directory to your Trellis project
@@ -71,24 +47,6 @@ To implement this in your Trellis project:
    # For development environment
    trellis provision development
    ```
-
-## What Trellis Updater Preserves
-
-The updater script specifically preserves the following files/directories:
-- `.vault_pass`
-- `.trellis/`
-- `.git/`
-- `.github/`
-- `group_vars/all/vault.yml`
-- `group_vars/development/vault.yml`
-- `group_vars/development/wordpress_sites.yml`
-- `group_vars/production/vault.yml`
-- `group_vars/production/wordpress_sites.yml`
-- `group_vars/staging/vault.yml`
-- `group_vars/staging/wordpress_sites.yml`
-- `group_vars/all/users.yml`
-- `trellis.cli.yml`
-- `hosts/` directory
 
 ## Requirements
 
