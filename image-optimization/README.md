@@ -11,7 +11,7 @@ This guide covers how to optimize images for your Trellis-managed WordPress site
 
 ## Nginx Configuration for WebP and AVIF
 
-The `nginx.-includes/webp-avf.conf.j2` file in this repository contains Nginx configuration to automatically serve WebP or AVIF versions of images when the browser supports them. This configuration works by checking the `Accept` header from the browser and serving the appropriate image format.
+The `nginx-includes/webp-avf.conf.j2` file in this repository contains Nginx configuration to automatically serve WebP or AVIF versions of images when the browser supports them. This configuration works by checking the `Accept` header from the browser and serving the appropriate image format.
 
 ### How it Works
 
@@ -23,7 +23,7 @@ When a browser requests an image:
 
 ### Implementation
 
-1. Copy the `nginx.-includes` directory to your Trellis project
+1. Copy the `nginx-includes` directory to your Trellis project
 2. Update your Trellis WordPress site configuration to include the custom Nginx configuration:
 
 ```yaml
@@ -32,7 +32,7 @@ wordpress_sites:
   example.com:
     # ... existing configuration ...
     nginx_includes:
-      - nginx.-includes/webp-avf.conf.j2
+      - nginx-includes/webp-avf.conf.j2
 ```
 
 3. Provision your environment to apply the changes:
