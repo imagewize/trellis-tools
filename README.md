@@ -50,6 +50,19 @@ To implement this in your Trellis project:
    trellis provision development
    ```
 
+### 3. WordPress Migration Tools
+
+Documentation and commands for managing WordPress migrations, especially when using Trellis and Bedrock.
+
+#### Features
+
+- Domain migration guides for single-site and multisite installations
+- Path conversion from standard WordPress to Bedrock structure
+- Best practices for search-replace operations
+- Troubleshooting common migration issues
+
+For detailed usage instructions and examples, please refer to the [WordPress Migration Guide](migration/README.md).
+
 ## Requirements
 
 - Git
