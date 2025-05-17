@@ -50,7 +50,39 @@ To implement this in your Trellis project:
    trellis provision development
    ```
 
-### 3. WordPress Migration Tools
+### 3. Browser Caching Configuration
+
+Tools to configure Nginx for optimal browser caching of static assets to improve website performance.
+
+#### Features
+
+- Configures appropriate cache durations for different file types (images, CSS, JavaScript, fonts)
+- Prevents caching of HTML and admin areas to ensure fresh content
+- Adds proper cache headers for all static assets
+- Improves load times and reduces bandwidth usage for returning visitors
+
+#### Usage
+
+The configuration is located in the `browser-caching/nginx-includes/assets-expiry.conf.j2` file.
+
+For detailed instructions on implementing this in your Trellis project and understanding the cache duration settings, please refer to our [Browser Caching Guide](browser-caching/README.md).
+
+To implement this in your Trellis project:
+1. Copy the `browser-caching/nginx-includes` directory to your Trellis project
+2. Update your Trellis configuration to include this Nginx configuration
+3. Run the appropriate provisioning command to apply the changes:
+   ```bash
+   # For production environment
+   trellis provision production
+   
+   # For staging environment
+   trellis provision staging
+   
+   # For development environment
+   trellis provision development
+   ```
+
+### 4. WordPress Migration Tools
 
 Documentation and commands for managing WordPress migrations, especially when using Trellis and Bedrock.
 

@@ -1,0 +1,55 @@
+# Nginx configuration for browser caching of static assets
+
+# Cache settings for different file types
+map $sent_http_content_type $expires {
+    default                                 1d;  # Default caching time
+    text/html                               epoch;  # Don't cache HTML
+    text/css                                7d;  # Cache CSS for 7 days
+    text/javascript                         7d;  # Cache JS for 7 days
+    application/javascript                  7d;
+    ~image/                                 30d;  # Cache images for 30 days
+    ~font/                                  30d;  # Cache fonts for 30 days
+    application/vnd.ms-fontobject           30d;
+    application/x-font-ttf                  30d;
+    application/font-woff                   30d;
+    application/font-woff2                  30d;
+    application/x-font-woff                 30d;
+}
+
+# Enable cache for all static files
+location ~* \.(jpg|jpeg|png|gif|ico|webp|avif|css|js|svg|eot|ttf|woff|woff2|otf)$ {
+    expires $expires;
+    add_header Cache-Control "public, no-transform";
+    add_header Vary Accept;
+    access_log off;
+    
+    # Set ETag header for better cache validation
+    etag on;
+    
+    # Try to serve static files from Nginx
+    try_files $uri =404;
+}
+
+# Settings for SVG files
+location ~* \.svg$ {
+    add_header Content-Security-Policy "default-src 'self'";
+    expires $expires;
+    add_header Cache-Control "public, no-transform";
+}
+
+# Cache WordPress common files (minified JS/CSS, emoji JS)
+location ~* ^.*\.(min\.(css|js)|wp-emoji-release\.min\.js)$ {
+    expires $expires;
+    add_header Cache-Control "public, no-transform";
+}
+
+# Don't cache PHP files or admin areas
+location ~* \.php$ {
+    expires epoch;
+    add_header Cache-Control "no-store, no-cache, must-revalidate, max-age=0";
+}
+
+location ~ ^/(wp-admin|wp-login\.php) {
+    expires epoch;
+    add_header Cache-Control "no-store, no-cache, must-revalidate, max-age=0";
+}
