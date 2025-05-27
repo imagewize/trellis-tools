@@ -12,7 +12,11 @@ location ~* \.svg$ {
 }
 
 # Enable cache for all static files (removed svg from this block)
+# Only match files with specific extensions and ensure they exist as static files
 location ~* \.(jpg|jpeg|png|gif|ico|webp|avif|css|js|eot|ttf|woff|woff2|otf)$ {
+    # Only apply caching if the file actually exists as a static file
+    try_files $uri =404;
+    
     expires 30d;
     add_header Cache-Control "public, no-transform";
     add_header Vary Accept;
@@ -20,24 +24,11 @@ location ~* \.(jpg|jpeg|png|gif|ico|webp|avif|css|js|eot|ttf|woff|woff2|otf)$ {
     
     # Set ETag header for better cache validation
     etag on;
-    
-    # Try to serve static files from Nginx
-    try_files $uri =404;
 }
 
-# Cache WordPress common files (minified JS/CSS, emoji JS)
-location ~* ^.*\.(min\.(css|js)|wp-emoji-release\.min\.js)$ {
+# Cache WordPress common files (minified JS/CSS, emoji JS) - be more specific
+location ~* /wp-content/.*\.(min\.(css|js)|wp-emoji-release\.min\.js)$ {
+    try_files $uri =404;
     expires 7d;
     add_header Cache-Control "public, no-transform";
-}
-
-# Don't cache PHP files or admin areas
-location ~* \.php$ {
-    expires epoch;
-    add_header Cache-Control "no-store, no-cache, must-revalidate, max-age=0";
-}
-
-location ~ ^/(wp-admin|wp-login\.php) {
-    expires epoch;
-    add_header Cache-Control "no-store, no-cache, must-revalidate, max-age=0";
 }
