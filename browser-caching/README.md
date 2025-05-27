@@ -23,7 +23,7 @@ Browser caching instructs visitors' browsers to store static resources locally f
 
 ## Nginx Configuration for Browser Caching
 
-The `nginx-includes/assets-expiry.conf.j2` file in this repository contains Nginx configuration to set appropriate caching headers for various file types. The configuration uses the `expires` directive along with `Cache-Control` headers to control how long browsers should cache content.
+The `nginx-includes/all/assets-expiry.conf.j2` file in this repository contains Nginx configuration to set appropriate caching headers for various file types. The configuration uses the `expires` directive along with `Cache-Control` headers to control how long browsers should cache content.
 
 ### How it Works
 
@@ -34,30 +34,22 @@ The `nginx-includes/assets-expiry.conf.j2` file in this repository contains Ngin
 
 ## Implementation
 
-1. Copy the `nginx-includes` directory to your Trellis project
-2. Update your Trellis WordPress site configuration to include the custom Nginx configuration:
-
-```yaml
-# group_vars/production/wordpress_sites.yml (or staging/development)
-wordpress_sites:
-  example.com:
-    # ... existing configuration ...
-    nginx_includes:
-      - nginx-includes/assets-expiry.conf.j2
-```
-
+1. Copy the `nginx-includes` directory to your Trellis project root (same level as `server.yml`)
+2. The configuration in `nginx-includes/all/assets-expiry.conf.j2` will automatically be applied to **all sites** on your server
 3. Provision your environment to apply the changes:
 
 ```bash
 # For production
-trellis provision production
+trellis provision production --tags nginx-includes
 
-# For staging
-trellis provision staging
+# For staging  
+trellis provision staging --tags nginx-includes
 
 # For development
-trellis provision development
+trellis provision development --tags nginx-includes
 ```
+
+**Note**: Since the file is in the `all/` directory, it will be automatically included for every site configured in Trellis. You don't need to modify your `wordpress_sites.yml` configuration.
 
 ## File Types and Cache Duration
 
