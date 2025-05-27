@@ -40,13 +40,13 @@ The `nginx-includes/all/assets-expiry.conf.j2` file in this repository contains 
 
 ```bash
 # For production
-trellis provision production --tags nginx-includes
+trellis provision --tags nginx-includes production 
 
 # For staging  
-trellis provision staging --tags nginx-includes
+trellis provision --tags nginx-includes staging
 
 # For development
-trellis provision development --tags nginx-includes
+trellis provision --tags nginx-includes development
 ```
 
 **Note**: Since the file is in the `all/` directory, it will be automatically included for every site configured in Trellis. You don't need to modify your `wordpress_sites.yml` configuration.
