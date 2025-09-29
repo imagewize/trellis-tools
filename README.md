@@ -95,6 +95,45 @@ Documentation and commands for managing WordPress migrations, especially when us
 
 For detailed usage instructions and examples, please refer to the [WordPress Migration Guide](migration/README.md).
 
+### 5. Backup Tools
+
+Comprehensive backup solutions for WordPress sites running on Trellis servers.
+
+#### Features
+
+- **Ansible Playbooks**: Automated database backup, push, and pull operations between environments
+- **Shell Scripts**: Standalone backup scripts for database and file backups using WP-CLI
+- **Complete Site Backups**: Database, uploads, themes, plugins, and configuration backups
+- **Automated Retention**: Configurable backup retention policies
+- **Environment Management**: Seamless backup operations between development, staging, and production
+
+#### Usage
+
+The backup tools include both Ansible playbooks for Trellis integration and standalone shell scripts:
+
+**Trellis Ansible Playbooks:**
+```bash
+# Backup database from any environment
+ansible-playbook backup/trellis/database-backup.yml -e site=example.com -e env=production
+
+# Pull database from production to development
+ansible-playbook backup/trellis/database-pull.yml -e site=example.com -e env=production
+
+# Push database from development to staging
+ansible-playbook backup/trellis/database-push.yml -e site=example.com -e env=staging
+```
+
+**Standalone Scripts:**
+```bash
+# Complete site backup
+./backup/scripts/site-backup.sh example.com
+
+# Database-only backup
+./backup/scripts/db-backup.sh example.com production
+```
+
+For detailed instructions, configuration options, and best practices, please refer to the [Backup Documentation](backup/README.md).
+
 ## Requirements
 
 - Git
