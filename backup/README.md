@@ -18,6 +18,22 @@ This guide covers multiple backup methods for Trellis-managed WordPress sites:
 - Sufficient storage space for backups
 - Basic knowledge of shell commands
 
+## Trellis Directory Structure
+
+In Trellis, the recommended approach is to store backups in the `shared` directory which persists across deployments:
+
+```
+/srv/www/example.com/
+├── current/           # Current WordPress installation (changes with deployments)
+├── releases/          # Previous releases
+└── shared/           # Persistent data (uploads, logs, configs)
+    ├── uploads/
+    ├── logs/
+    └── database_backup/  # Create this for database backups
+```
+
+When running commands from `/srv/www/example.com/current`, create a `database_backup/` directory within the current WordPress installation (this matches the Trellis playbook approach).
+
 ## Method 1: WP-CLI Database Backup
 
 ### Basic Database Export
@@ -29,18 +45,21 @@ ssh web@your-server.com
 # Navigate to your site directory
 cd /srv/www/example.com/current
 
+# Create backup directory in current WordPress directory (matches Trellis playbooks)
+mkdir -p database_backup
+
 # Export database
-wp db export backups/database-$(date +%Y%m%d_%H%M%S).sql
+wp db export database_backup/database-$(date +%Y%m%d_%H%M%S).sql
 
 # Export with compression
-wp db export backups/database-$(date +%Y%m%d_%H%M%S).sql.gz --add-drop-table
+wp db export database_backup/database-$(date +%Y%m%d_%H%M%S).sql.gz --add-drop-table
 ```
 
 ### Database Backup with Search & Replace
 
 ```bash
 # Export database and replace URLs for local development
-wp db export backups/database-$(date +%Y%m%d_%H%M%S).sql \
+wp db export database_backup/database-$(date +%Y%m%d_%H%M%S).sql \
   --add-drop-table \
   --search-replace=https://example.com,http://example.test
 ```
@@ -228,10 +247,10 @@ sudo crontab -e
 
 ```bash
 # Using WP-CLI
-wp db import backups/database_20231201_020000.sql.gz
+wp db import database_backup/database_20231201_020000.sql.gz
 
 # Using mysql directly
-gunzip < backups/database_20231201_020000.sql.gz | mysql -u username -p database_name
+gunzip < database_backup/database_20231201_020000.sql.gz | mysql -u username -p database_name
 ```
 
 ### File Restoration
