@@ -48,20 +48,26 @@ cd /srv/www/example.com/current
 # Create backup directory in current WordPress directory (matches Trellis playbooks)
 mkdir -p database_backup
 
-# Export database
-wp db export database_backup/database-$(date +%Y%m%d_%H%M%S).sql
+# Export database (uncompressed)
+wp db export database_backup/database-$(date +%Y%m%d_%H%M%S).sql --add-drop-table
 
-# Export with compression
-wp db export database_backup/database-$(date +%Y%m%d_%H%M%S).sql.gz --add-drop-table
+# Export with compression (Mac-friendly .tar.gz extension)
+BACKUP_FILE="database_backup/database-$(date +%Y%m%d_%H%M%S)"
+wp db export ${BACKUP_FILE}.sql --add-drop-table
+gzip ${BACKUP_FILE}.sql
+mv ${BACKUP_FILE}.sql.gz ${BACKUP_FILE}.tar.gz
 ```
 
 ### Database Backup with Search & Replace
 
 ```bash
-# Export database and replace URLs for local development
-wp db export database_backup/database-$(date +%Y%m%d_%H%M%S).sql \
+# Export database and replace URLs for local development (with Mac-friendly compression)
+BACKUP_FILE="database_backup/database-$(date +%Y%m%d_%H%M%S)"
+wp db export ${BACKUP_FILE}.sql \
   --add-drop-table \
   --search-replace=https://example.com,http://example.test
+gzip ${BACKUP_FILE}.sql
+mv ${BACKUP_FILE}.sql.gz ${BACKUP_FILE}.tar.gz
 ```
 
 ## Method 2: Shell Script Database Backup
@@ -246,11 +252,14 @@ sudo crontab -e
 ### Database Restoration
 
 ```bash
-# Using WP-CLI
-wp db import database_backup/database_20231201_020000.sql.gz
+# Using WP-CLI (uncompressed)
+wp db import database_backup/database_20231201_020000.sql
 
-# Using mysql directly
-gunzip < database_backup/database_20231201_020000.sql.gz | mysql -u username -p database_name
+# Using WP-CLI (compressed .tar.gz)
+gunzip -c database_backup/database_20231201_020000.tar.gz | wp db import -
+
+# Using mysql directly (compressed)
+gunzip < database_backup/database_20231201_020000.tar.gz | mysql -u username -p database_name
 ```
 
 ### File Restoration
