@@ -4,11 +4,17 @@ Ansible playbooks for automated database backup, synchronization, and management
 
 ## Overview
 
-This directory contains Ansible playbooks that integrate with your existing Trellis setup to provide automated database operations:
+This directory contains Ansible playbooks that integrate with your existing Trellis setup to provide automated database and files operations:
 
+### Database Operations
 - **database-backup.yml** - Create database backups from any environment
 - **database-pull.yml** - Pull database from remote environment to development
 - **database-push.yml** - Push database from development to remote environment
+
+### Files Operations
+- **files-backup.yml** - Create WordPress uploads backups from any environment
+- **files-pull.yml** - Pull WordPress uploads from remote environment to development
+- **files-push.yml** - Push WordPress uploads from development to remote environment
 
 ## Prerequisites
 
@@ -100,6 +106,67 @@ ansible-playbook database-push.yml -e site=example.com -e env=production
 
 **Note:** Cannot push from development to development (will abort with error).
 
+### Files Backup
+
+Creates a compressed backup of WordPress uploads directory and stores it in the `files_backup` directory.
+
+```bash
+# Backup production uploads
+ansible-playbook files-backup.yml -e site=example.com -e env=production
+
+# Backup staging uploads
+ansible-playbook files-backup.yml -e site=example.com -e env=staging
+
+# Backup development uploads
+ansible-playbook files-backup.yml -e site=example.com -e env=development
+```
+
+**What it does:**
+- Creates timestamped compressed uploads backup
+- For remote environments: downloads backup to development server
+- Stores backup in `web/app/files_backup/` directory
+- Automatically cleans up temporary files
+
+### Files Pull
+
+Pulls WordPress uploads from a remote environment to development.
+
+```bash
+# Pull production uploads to development
+ansible-playbook files-pull.yml -e site=example.com -e env=production
+
+# Pull staging uploads to development
+ansible-playbook files-pull.yml -e site=example.com -e env=staging
+```
+
+**What it does:**
+- Creates backup of current development uploads
+- Creates archive of uploads from remote environment
+- Downloads and extracts to development
+- Cleans up temporary files
+
+**Note:** Cannot pull from development to development (will abort with error).
+
+### Files Push
+
+Pushes WordPress uploads from development to a remote environment.
+
+```bash
+# Push development uploads to staging
+ansible-playbook files-push.yml -e site=example.com -e env=staging
+
+# Push development uploads to production (use with caution!)
+ansible-playbook files-push.yml -e site=example.com -e env=production
+```
+
+**What it does:**
+- Creates backup of target environment uploads
+- Creates archive of development uploads
+- Uploads and extracts to target environment
+- Cleans up temporary files
+
+**Note:** Cannot push from development to development (will abort with error).
+
 ## Configuration
 
 ### Site Configuration
@@ -129,17 +196,29 @@ wordpress_sites:
 
 Backups are stored in the following structure:
 ```
-site/current/web/app/database_backup/
-├── example_com_production_2023_12_01_14_30_45.sql.gz
-├── example_com_staging_2023_12_01_15_15_22.sql.gz
-└── example_com_development_2023_12_01_16_45_33.sql.gz
+site/current/web/app/
+├── database_backup/
+│   ├── example_com_production_2023_12_01_14_30_45.sql.gz
+│   ├── example_com_staging_2023_12_01_15_15_22.sql.gz
+│   └── example_com_development_2023_12_01_16_45_33.sql.gz
+└── files_backup/
+    ├── example_com_production_uploads_2023_12_01_14_30_45.tar.gz
+    ├── example_com_staging_uploads_2023_12_01_15_15_22.tar.gz
+    └── example_com_development_uploads_2023_12_01_16_45_33.tar.gz
 ```
 
 ## File Naming Convention
 
-Backup files use the following naming pattern:
+Backup files use the following naming patterns:
+
+### Database Backups
 ```
 {site_name}_{environment}_{date}_{time}.sql.gz
+```
+
+### Files Backups
+```
+{site_name}_{environment}_uploads_{date}_{time}.tar.gz
 ```
 
 Where:
@@ -150,7 +229,16 @@ Where:
 
 Examples:
 - `example_com_production_2023_12_01_14_30_45.sql.gz`
+- `example_com_production_uploads_2023_12_01_14_30_45.tar.gz`
 - `mysite_co_uk_staging_2023_12_01_15_15_22.sql.gz`
+- `mysite_co_uk_staging_uploads_2023_12_01_15_15_22.tar.gz`
+
+## Compression Methods
+
+Different compression methods are used based on backup type for optimal performance:
+
+- **Database backups: `.sql.gz`** - Uses `gzip` compression for single SQL files. Faster with direct piping (`wp db export - | gzip`) without temporary files.
+- **Files backups: `.tar.gz`** - Uses `tar` + `gzip` for directory archives. Required for preserving directory structure and handling multiple files efficiently.
 
 ## URL Search and Replace
 
@@ -220,10 +308,13 @@ Create a cleanup script to manage old backups:
 # cleanup-backups.sh
 
 SITE_PATH="/srv/www/example.com/current/web/app"
-BACKUP_DIR="$SITE_PATH/database_backup"
 RETENTION_DAYS=30
 
-find "$BACKUP_DIR" -name "*.sql.gz" -mtime +$RETENTION_DAYS -delete
+# Clean up old database backups
+find "$SITE_PATH/database_backup" -name "*.sql.gz" -mtime +$RETENTION_DAYS -delete
+
+# Clean up old files backups
+find "$SITE_PATH/files_backup" -name "*.tar.gz" -mtime +$RETENTION_DAYS -delete
 ```
 
 ## Integration with CI/CD
@@ -276,11 +367,17 @@ ansible-playbook database-backup.yml -e site=example.com -e env=production -vvv
 Verify backup integrity:
 
 ```bash
-# Test backup file
-tar -tzf /path/to/backup.sql.tar.gz
+# Test database backup file
+gunzip -t /path/to/backup.sql.gz
 
-# Check backup contents
-tar -xzOf /path/to/backup.sql.tar.gz | head -20
+# Check database backup contents
+gunzip -c /path/to/backup.sql.gz | head -20
+
+# Test files backup file
+tar -tzf /path/to/uploads.tar.gz
+
+# Check files backup contents
+tar -xzOf /path/to/uploads.tar.gz | head -20
 ```
 
 ### Log Monitoring
