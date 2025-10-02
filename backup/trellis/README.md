@@ -277,10 +277,10 @@ Verify backup integrity:
 
 ```bash
 # Test backup file
-gunzip -t /path/to/backup.sql.gz
+tar -tzf /path/to/backup.sql.tar.gz
 
 # Check backup contents
-gunzip -c /path/to/backup.sql.gz | head -20
+tar -xzOf /path/to/backup.sql.tar.gz | head -20
 ```
 
 ### Log Monitoring

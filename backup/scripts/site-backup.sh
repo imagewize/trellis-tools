@@ -61,9 +61,11 @@ cd "$SITE_PATH/current" || {
 
 # 1. Database backup using WP-CLI
 log "Backing up database..."
-if wp db export "$BACKUP_DIR/database/db_$DATE.sql" --add-drop-table --quiet; then
-    gzip "$BACKUP_DIR/database/db_$DATE.sql"
-    log "Database backup completed: db_$DATE.sql.gz"
+TEMP_SQL="/tmp/db_$DATE.sql"
+if wp db export "$TEMP_SQL" --add-drop-table --quiet; then
+    tar -czf "$BACKUP_DIR/database/db_$DATE.sql.tar.gz" -C /tmp "db_$DATE.sql"
+    rm "$TEMP_SQL"
+    log "Database backup completed: db_$DATE.sql.tar.gz"
 else
     error "Database backup failed"
     exit 1
