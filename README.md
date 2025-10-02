@@ -2,6 +2,19 @@
 
 A collection of tools to enhance your [Roots Trellis](https://roots.io/trellis/) workflow and configuration.
 
+## Table of Contents
+
+- [Tools Overview](#tools-overview)
+  - [1. Trellis Updater](#1-trellis-updater)
+  - [2. Nginx Image Configuration](#2-nginx-image-configuration)
+  - [3. Browser Caching Configuration](#3-browser-caching-configuration)
+  - [4. WordPress Migration Tools](#4-wordpress-migration-tools)
+  - [5. Backup Tools](#5-backup-tools)
+  - [6. Provisioning Documentation](#6-provisioning-documentation)
+- [Requirements](#requirements)
+- [License](#license)
+- [Author](#author)
+
 ## Tools Overview
 
 ### 1. Trellis Updater
@@ -135,6 +148,19 @@ ansible-playbook backup/trellis/files-push.yml -e site=example.com -e env=stagin
 ```
 
 For detailed instructions, configuration options, and best practices, please refer to the [Backup Documentation](backup/README.md).
+
+### 6. Provisioning Documentation
+
+Quick reference guide for common Trellis provisioning commands and workflows.
+
+#### Features
+
+- Development environment provisioning commands
+- Deployment commands for staging and production
+- Server re-provisioning with specific tags
+- PHP version upgrade process and best practices
+
+For detailed provisioning commands and workflows, please refer to the [Provisioning Guide](provision/README.md).
 
 ## Requirements
 
