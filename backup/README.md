@@ -51,23 +51,23 @@ mkdir -p database_backup
 # Export database (uncompressed)
 wp db export database_backup/database-$(date +%Y%m%d_%H%M%S).sql --add-drop-table
 
-# Export with compression (Mac-friendly .tar.gz extension)
+# Export with compression (proper tar.gz archive - industry standard)
 BACKUP_FILE="database_backup/database-$(date +%Y%m%d_%H%M%S)"
 wp db export ${BACKUP_FILE}.sql --add-drop-table
-gzip ${BACKUP_FILE}.sql
-mv ${BACKUP_FILE}.sql.gz ${BACKUP_FILE}.tar.gz
+tar -czf ${BACKUP_FILE}.tar.gz -C database_backup $(basename ${BACKUP_FILE}.sql)
+rm ${BACKUP_FILE}.sql
 ```
 
 ### Database Backup with Search & Replace
 
 ```bash
-# Export database and replace URLs for local development (with Mac-friendly compression)
+# Export database and replace URLs for local development (proper tar.gz archive)
 BACKUP_FILE="database_backup/database-$(date +%Y%m%d_%H%M%S)"
 wp db export ${BACKUP_FILE}.sql \
   --add-drop-table \
   --search-replace=https://example.com,http://example.test
-gzip ${BACKUP_FILE}.sql
-mv ${BACKUP_FILE}.sql.gz ${BACKUP_FILE}.tar.gz
+tar -czf ${BACKUP_FILE}.tar.gz -C database_backup $(basename ${BACKUP_FILE}.sql)
+rm ${BACKUP_FILE}.sql
 ```
 
 ## Method 2: Shell Script Database Backup
@@ -255,11 +255,15 @@ sudo crontab -e
 # Using WP-CLI (uncompressed)
 wp db import database_backup/database_20231201_020000.sql
 
-# Using WP-CLI (compressed .tar.gz)
-gunzip -c database_backup/database_20231201_020000.tar.gz | wp db import -
+# Using WP-CLI (compressed tar.gz archive)
+tar -xzf database_backup/database_20231201_020000.tar.gz
+wp db import database_20231201_020000.sql
+
+# Or in one command
+tar -xzOf database_backup/database_20231201_020000.tar.gz | wp db import -
 
 # Using mysql directly (compressed)
-gunzip < database_backup/database_20231201_020000.tar.gz | mysql -u username -p database_name
+tar -xzOf database_backup/database_20231201_020000.tar.gz | mysql -u username -p database_name
 ```
 
 ### File Restoration
