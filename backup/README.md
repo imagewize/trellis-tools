@@ -18,6 +18,13 @@ This guide covers multiple backup methods for Trellis-managed WordPress sites:
 - Sufficient storage space for backups
 - Basic knowledge of shell commands
 
+## Compression Methods
+
+This guide uses different compression methods optimized for different backup types:
+
+- **Database backups: `.sql.gz`** - Uses `gzip` compression for single SQL files. Faster and more efficient for single-file compression with direct piping (`wp db export - | gzip`).
+- **Directory backups: `.tar.gz`** - Uses `tar` + `gzip` for archiving multiple files and directories. Required for preserving directory structure, file permissions, and handling multiple files efficiently.
+
 ## Trellis Directory Structure
 
 In Trellis, the recommended approach is to store backups in the `shared` directory which persists across deployments:
@@ -51,23 +58,19 @@ mkdir -p database_backup
 # Export database (uncompressed)
 wp db export database_backup/database-$(date +%Y%m%d_%H%M%S).sql --add-drop-table
 
-# Export with compression (proper tar.gz archive - industry standard)
-BACKUP_FILE="database_backup/database-$(date +%Y%m%d_%H%M%S)"
-wp db export ${BACKUP_FILE}.sql --add-drop-table
-tar -czf ${BACKUP_FILE}.tar.gz -C database_backup $(basename ${BACKUP_FILE}.sql)
-rm ${BACKUP_FILE}.sql
+# Export with compression (.gz - optimal for single files)
+wp db export - | gzip > database_backup/database-$(date +%Y%m%d_%H%M%S).sql.gz
 ```
 
 ### Database Backup with Search & Replace
 
 ```bash
-# Export database and replace URLs for local development (proper tar.gz archive)
-BACKUP_FILE="database_backup/database-$(date +%Y%m%d_%H%M%S)"
-wp db export ${BACKUP_FILE}.sql \
+# Export database and replace URLs for local development
+BACKUP_FILE="database_backup/database-$(date +%Y%m%d_%H%M%S).sql"
+wp db export ${BACKUP_FILE} \
   --add-drop-table \
   --search-replace=https://example.com,http://example.test
-tar -czf ${BACKUP_FILE}.tar.gz -C database_backup $(basename ${BACKUP_FILE}.sql)
-rm ${BACKUP_FILE}.sql
+gzip ${BACKUP_FILE}
 ```
 
 ## Method 2: Shell Script Database Backup

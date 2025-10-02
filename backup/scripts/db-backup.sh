@@ -70,19 +70,18 @@ DB_SIZE=$(wp db size --size_format=human --quiet)
 log "Database: $DB_NAME ($DB_SIZE)"
 
 # Perform database backup
-TEMP_SQL="/tmp/${BACKUP_TYPE}_db_$DATE.sql"
-BACKUP_FILE="$BACKUP_DIR/${BACKUP_TYPE}_db_$DATE.sql.tar.gz"
+BACKUP_FILE="$BACKUP_DIR/${BACKUP_TYPE}_db_$DATE.sql"
 log "Creating database backup..."
 
-if wp db export "$TEMP_SQL" \
+if wp db export "$BACKUP_FILE" \
     --add-drop-table \
     --single-transaction \
     --default-character-set=utf8mb4 \
     --quiet; then
 
-    # Compress the backup using tar
-    tar -czf "$BACKUP_FILE" -C /tmp "$(basename "$TEMP_SQL")"
-    rm "$TEMP_SQL"
+    # Compress the backup using gzip (optimal for single file)
+    gzip "$BACKUP_FILE"
+    BACKUP_FILE="${BACKUP_FILE}.gz"
 
     BACKUP_SIZE=$(ls -lh "$BACKUP_FILE" | awk '{print $5}')
     log "Database backup completed: $(basename "$BACKUP_FILE") ($BACKUP_SIZE)"
@@ -108,11 +107,10 @@ if [ "$BACKUP_TYPE" != "production" ]; then
     esac
 
     if [ -n "${STAGING_URL:-}" ] || [ -n "${DEV_URL:-}" ]; then
-        TEMP_REPLACEMENT_SQL="/tmp/${BACKUP_TYPE}_db_with_urls_$DATE.sql"
-        REPLACEMENT_FILE="$BACKUP_DIR/${BACKUP_TYPE}_db_with_urls_$DATE.sql.tar.gz"
+        REPLACEMENT_FILE="$BACKUP_DIR/${BACKUP_TYPE}_db_with_urls_$DATE.sql"
         TARGET_URL="${STAGING_URL:-$DEV_URL}"
 
-        if wp db export "$TEMP_REPLACEMENT_SQL" \
+        if wp db export "$REPLACEMENT_FILE" \
             --add-drop-table \
             --single-transaction \
             --default-character-set=utf8mb4 \
@@ -127,15 +125,14 @@ if [ "$BACKUP_TYPE" != "production" ]; then
                 --quiet
 
             # Export again with replaced URLs
-            wp db export "$TEMP_REPLACEMENT_SQL" \
+            wp db export "$REPLACEMENT_FILE" \
                 --add-drop-table \
                 --single-transaction \
                 --default-character-set=utf8mb4 \
                 --quiet
 
-            tar -czf "$REPLACEMENT_FILE" -C /tmp "$(basename "$TEMP_REPLACEMENT_SQL")"
-            rm "$TEMP_REPLACEMENT_SQL"
-            log "URL-replaced backup created: $(basename "$REPLACEMENT_FILE")"
+            gzip "$REPLACEMENT_FILE"
+            log "URL-replaced backup created: $(basename "$REPLACEMENT_FILE.gz")"
 
             # Restore original URLs
             wp search-replace "$TARGET_URL" "$PROD_URL" \
@@ -165,8 +162,8 @@ Backup Files:
 - Main backup: $(basename "$BACKUP_FILE")
 EOF
 
-if [ -f "$BACKUP_DIR/${BACKUP_TYPE}_db_with_urls_$DATE.sql.tar.gz" ]; then
-    echo "- URL-replaced backup: ${BACKUP_TYPE}_db_with_urls_$DATE.sql.tar.gz" >> "$INFO_FILE"
+if [ -f "$BACKUP_DIR/${BACKUP_TYPE}_db_with_urls_$DATE.sql.gz" ]; then
+    echo "- URL-replaced backup: ${BACKUP_TYPE}_db_with_urls_$DATE.sql.gz" >> "$INFO_FILE"
 fi
 
 echo "" >> "$INFO_FILE"
@@ -175,7 +172,7 @@ find "$BACKUP_DIR" -name "*_$DATE.*" -exec ls -lh {} \; | awk '{print "- " $9 ":
 
 # Clean up old backups
 log "Cleaning up old database backups (older than $RETENTION_DAYS days)..."
-DELETED_COUNT=$(find "$BACKUP_DIR" -name "*.sql.tar.gz" -mtime +$RETENTION_DAYS -delete -print | wc -l)
+DELETED_COUNT=$(find "$BACKUP_DIR" -name "*.sql.gz" -mtime +$RETENTION_DAYS -delete -print | wc -l)
 INFO_DELETED=$(find "$BACKUP_DIR" -name "backup_info_*.txt" -mtime +$RETENTION_DAYS -delete -print | wc -l)
 TOTAL_DELETED=$((DELETED_COUNT + INFO_DELETED))
 
@@ -192,7 +189,7 @@ log "Info file: $(basename "$INFO_FILE")"
 
 # Show recent backups
 log "Recent database backups:"
-find "$BACKUP_DIR" -name "*.sql.tar.gz" -mtime -7 -exec ls -lh {} \; | \
+find "$BACKUP_DIR" -name "*.sql.gz" -mtime -7 -exec ls -lh {} \; | \
     awk '{print "  " $6 " " $7 " " $8 " - " $9 " (" $5 ")"}' | \
     sort -r
 

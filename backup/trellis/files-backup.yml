@@ -1,0 +1,55 @@
+---
+- name: Backup {{ site }} {{ env }} files (uploads)
+  hosts: web:&{{ env }}
+  remote_user: "{{ web_user }}"
+
+  vars:
+    project_root: "{{ www_root }}/{{ site }}"
+    shared_uploads_dir: "{{ project_root }}/shared/uploads"
+    host: "{{ env }}_host"
+    from_host: "{{ hostvars[host] }}"
+    local_bedrock_dir: "{{ from_host.wordpress_sites[site].local_path }}"
+    current_date_and_time: "{{ ansible_date_time.date | regex_replace('\\-+', '_') }}_{{ ansible_date_time.hour }}_{{ ansible_date_time.minute }}_{{ ansible_date_time.second }}"
+    backup_filename: "{{ site | regex_replace('\\.+', '_') }}_{{ env }}_uploads_{{ current_date_and_time }}.tar.gz"
+    backup_dir: "{{ local_bedrock_dir }}/files_backup"
+
+  tasks:
+  - name: Check if {{ site }} uploads folder exists
+    stat:
+      path: "{{ shared_uploads_dir }}"
+    register: uploads_check
+
+  - name: Abort if {{ site }} uploads folder doesn't exist
+    fail:
+      msg: "ERROR: Uploads folder does not exist at {{ shared_uploads_dir }}"
+    when: uploads_check.stat.exists is defined and uploads_check.stat.exists == false
+
+  - block:
+    - name: Create local files_backup directory if it doesn't exist
+      delegate_to: localhost
+      file:
+        path: "{{ backup_dir }}"
+        state: directory
+        mode: 0755
+      become: no
+
+    - name: Create temporary archive of uploads on {{ env }}
+      shell: tar -czf /tmp/{{ backup_filename }} -C {{ shared_uploads_dir }} .
+      args:
+        warn: false
+
+    - name: Pull uploads archive from {{ env }} to local files_backup
+      fetch:
+        src: "/tmp/{{ backup_filename }}"
+        dest: "{{ backup_dir }}/"
+        flat: yes
+
+    - name: Delete temporary archive from {{ env }}
+      shell: rm -f /tmp/{{ backup_filename }}
+      args:
+        warn: false
+
+    - name: Show backup location
+      debug:
+        msg: "Files backup saved to: {{ backup_dir }}/{{ backup_filename }}"
+    when: uploads_check.stat.exists is defined and uploads_check.stat.exists

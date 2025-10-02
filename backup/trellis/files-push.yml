@@ -1,0 +1,56 @@
+---
+- name: Push {{ site }} uploads from development to {{ env }}
+  hosts: web:&{{ env }}
+  remote_user: "{{ web_user }}"
+
+  vars:
+    project_root: "{{ www_root }}/{{ site }}"
+    remote_uploads_dir: "{{ project_root }}/shared/uploads/"
+    local_uploads_dir: "{{ hostvars.development_host.wordpress_sites[site].local_path }}/web/app/uploads/"
+
+  tasks:
+  - name: Abort if environment variable is equal to development
+    fail:
+      msg: "ERROR: development is not a valid environment for this mode (you can't push from development to development)."
+    when: env == "development"
+
+  - name: Check if local uploads folder exists
+    delegate_to: development_host
+    stat:
+      path: "{{ local_uploads_dir }}"
+    register: local_uploads_check
+
+  - name: Abort if local uploads folder doesn't exist
+    fail:
+      msg: "ERROR: Local uploads folder does not exist at {{ local_uploads_dir }}"
+    when: local_uploads_check.stat.exists is defined and local_uploads_check.stat.exists == false
+
+  - name: Ensure remote uploads directory exists
+    file:
+      path: "{{ remote_uploads_dir }}"
+      state: directory
+      mode: 0755
+
+  - name: WARNING - Confirm push operation
+    pause:
+      prompt: "⚠️  WARNING: You are about to push uploads from development to {{ env }}. This may overwrite files on {{ env }}. Press CTRL+C to abort, or ENTER to continue"
+    delegate_to: localhost
+    become: no
+
+  - name: Sync uploads from development to {{ env }} using rsync
+    delegate_to: development_host
+    synchronize:
+      mode: push
+      src: "{{ local_uploads_dir }}"
+      dest: "{{ remote_uploads_dir }}"
+      delete: no
+      rsync_opts:
+        - "--archive"
+        - "--compress"
+        - "--verbose"
+        - "--progress"
+    become: no
+
+  - name: Show sync completion message
+    debug:
+      msg: "Uploads synced from development to {{ env }} at {{ remote_uploads_dir }}"

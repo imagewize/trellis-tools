@@ -1,0 +1,50 @@
+---
+- name: Pull {{ site }} uploads from {{ env }} to development
+  hosts: web:&{{ env }}
+  remote_user: "{{ web_user }}"
+
+  vars:
+    project_root: "{{ www_root }}/{{ site }}"
+    remote_uploads_dir: "{{ project_root }}/shared/uploads/"
+    local_uploads_dir: "{{ hostvars.development_host.wordpress_sites[site].local_path }}/web/app/uploads/"
+
+  tasks:
+  - name: Abort if environment variable is equal to development
+    fail:
+      msg: "ERROR: development is not a valid environment for this mode (you can't pull from development to development)."
+    when: env == "development"
+
+  - name: Check if remote uploads folder exists
+    stat:
+      path: "{{ remote_uploads_dir }}"
+    register: remote_uploads_check
+
+  - name: Abort if remote uploads folder doesn't exist
+    fail:
+      msg: "ERROR: Uploads folder does not exist at {{ remote_uploads_dir }}"
+    when: remote_uploads_check.stat.exists is defined and remote_uploads_check.stat.exists == false
+
+  - name: Ensure local uploads directory exists
+    delegate_to: development_host
+    file:
+      path: "{{ local_uploads_dir }}"
+      state: directory
+      mode: 0755
+
+  - name: Sync uploads from {{ env }} to development using rsync
+    delegate_to: development_host
+    synchronize:
+      mode: pull
+      src: "{{ remote_uploads_dir }}"
+      dest: "{{ local_uploads_dir }}"
+      delete: no
+      rsync_opts:
+        - "--archive"
+        - "--compress"
+        - "--verbose"
+        - "--progress"
+    become: no
+
+  - name: Show sync completion message
+    debug:
+      msg: "Uploads synced from {{ env }} to {{ local_uploads_dir }}"
