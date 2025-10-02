@@ -43,7 +43,7 @@
       mode: 0755
     become: no
 
-  - name: Export development database
+  - name: Export {{ env }} database
     delegate_to: localhost
     shell: wp db export - | gzip > database_backup/{{ backup_file }}
     args:
