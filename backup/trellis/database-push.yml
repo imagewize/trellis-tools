@@ -3,14 +3,16 @@
   hosts: web:&{{ env }}
   remote_user: "{{ web_user }}"
 
+  vars_files:
+    - group_vars/development/wordpress_sites.yml
+
   vars:
     project_root: "{{ www_root }}/{{ site }}"
     project_web_dir: "{{ project_root }}/current"
-    host: "{{ env }}_host"
-    to_host: "{{ hostvars[host] }}"
-    url_from: "{{ hostvars.development_host.wordpress_sites[site].site_hosts.0.canonical }}"
-    url_to: "{{ to_host.wordpress_sites[site].site_hosts.0.canonical }}"
-    local_bedrock_dir: "{{ to_host.wordpress_sites[site].local_path }}"
+    dev_wordpress_sites: "{{ lookup('file', 'group_vars/development/wordpress_sites.yml') | from_yaml }}"
+    url_from: "{{ dev_wordpress_sites.wordpress_sites[site].site_hosts.0.canonical }}"
+    url_to: "{{ wordpress_sites[site].site_hosts.0.canonical }}"
+    local_bedrock_dir: "{{ dev_wordpress_sites.wordpress_sites[site].local_path }}"
     dump_file: "{{ site | regex_replace('\\.+', '_') }}_db_dump.sql.gz"
     current_date_and_time: "{{ ansible_date_time.date | regex_replace('\\-+', '_') }}_{{ ansible_date_time.hour }}_{{ ansible_date_time.minute }}_{{ ansible_date_time.second }}"
     backup_file: "{{ site | regex_replace('\\.+', '_') }}_{{ env }}_{{ current_date_and_time }}.sql.gz"
@@ -21,30 +23,33 @@
       msg: "ERROR: development is not a valid environment for this mode (you can't push from development to development)."
     when: env == "development"
 
-  - name: Check if {{ site }} folder exists
-    delegate_to: development_host
+  - name: Check if {{ site }} local folder exists
+    delegate_to: localhost
     stat:
-      path: "{{ project_root }}"
+      path: "{{ local_bedrock_dir }}"
     register: result
+    become: no
 
-  - name: Abort if {{ site }} folder doesn't exist
+  - name: Abort if {{ site }} local folder doesn't exist
     fail:
-      msg: "ERROR: {{ site }} is not a valid site name ({{ site }} folder does not exist)."
+      msg: "ERROR: {{ site }} is not a valid site (local folder {{ local_bedrock_dir }} does not exist)."
     when: result.stat.exists is defined and result.stat.exists == false or result.stat.isdir is defined and result.stat.isdir == false
 
   - block:
-    - name: Create database_backup directory if it doesn't exist
-      delegate_to: development_host
+    - name: Create local database_backup directory if it doesn't exist
+      delegate_to: localhost
       file:
-        path: "{{ project_web_dir }}/database_backup"
+        path: "{{ local_bedrock_dir }}/database_backup"
         state: directory
         mode: 0755
+      become: no
 
     - name: Create database dump on development
-      delegate_to: development_host
+      delegate_to: localhost
       shell: wp db export --allow-root - | gzip > {{ dump_file }}
       args:
-        chdir: "{{ project_web_dir }}"
+        chdir: "{{ local_bedrock_dir }}/web/wp"
+      become: no
 
     - name: Push database dump from development to {{ env }}
       copy:
@@ -52,11 +57,11 @@
         dest: "{{ project_web_dir }}/{{ dump_file }}"
 
     - name: Delete database dump from development
-      delegate_to: development_host
+      delegate_to: localhost
       shell: rm -f {{ dump_file }}
       args:
-        chdir: "{{ project_web_dir }}"
-        warn: false
+        chdir: "{{ local_bedrock_dir }}"
+      become: no
 
     - name: Export {{ env }} database before importing dump (backup)
       shell: wp db export - | gzip > {{ backup_file }}
@@ -73,7 +78,6 @@
       shell: rm -f {{ backup_file }}
       args:
         chdir: "{{ project_web_dir }}"
-        warn: false
 
     - name: Import database dump on {{ env }}
       shell: gzip -c -d {{ dump_file }} | wp db import -
@@ -84,7 +88,6 @@
       shell: rm -f {{ dump_file }}
       args:
         chdir: "{{ project_web_dir }}"
-        warn: false
 
     - name: Search for {{ url_from }} and replace with {{ url_to }} on development
       command: wp search-replace '//{{ url_from }}' '//{{ url_to }}' --allow-root --all-tables --precise

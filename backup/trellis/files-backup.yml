@@ -6,9 +6,7 @@
   vars:
     project_root: "{{ www_root }}/{{ site }}"
     shared_uploads_dir: "{{ project_root }}/shared/uploads"
-    host: "{{ env }}_host"
-    from_host: "{{ hostvars[host] }}"
-    local_bedrock_dir: "{{ from_host.wordpress_sites[site].local_path }}"
+    local_bedrock_dir: "{{ wordpress_sites[site].local_path }}"
     current_date_and_time: "{{ ansible_date_time.date | regex_replace('\\-+', '_') }}_{{ ansible_date_time.hour }}_{{ ansible_date_time.minute }}_{{ ansible_date_time.second }}"
     backup_filename: "{{ site | regex_replace('\\.+', '_') }}_{{ env }}_uploads_{{ current_date_and_time }}.tar.gz"
     backup_dir: "{{ local_bedrock_dir }}/files_backup"
@@ -35,8 +33,6 @@
 
     - name: Create temporary archive of uploads on {{ env }}
       shell: tar -czf /tmp/{{ backup_filename }} -C {{ shared_uploads_dir }} .
-      args:
-        warn: false
 
     - name: Pull uploads archive from {{ env }} to local files_backup
       fetch:
@@ -46,8 +42,6 @@
 
     - name: Delete temporary archive from {{ env }}
       shell: rm -f /tmp/{{ backup_filename }}
-      args:
-        warn: false
 
     - name: Show backup location
       debug:
