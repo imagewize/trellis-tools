@@ -1,29 +1,41 @@
 ---
+- import_playbook: variable-check.yml
+  vars:
+    playbook: files-pull.yml
+
 - name: Pull {{ site }} uploads from {{ env }} to development
   hosts: web:&{{ env }}
   remote_user: "{{ web_user }}"
 
   vars:
+    project: "{{ wordpress_sites[site] }}"
     project_root: "{{ www_root }}/{{ site }}"
     remote_uploads_dir: "{{ project_root }}/shared/uploads/"
     local_uploads_dir: "{{ hostvars.development_host.wordpress_sites[site].local_path }}/web/app/uploads/"
 
+  pre_tasks:
+    - name: Ensure site is valid
+      delegate_to: localhost
+      fail:
+        msg: "Site `{{ site | default('') }}` is not valid. Available sites: {{ wordpress_sites.keys() | join(', ') }}"
+      when: wordpress_sites[site | default('')] is not defined
+
+    - name: Abort if environment variable is equal to development
+      fail:
+        msg: "ERROR: development is not a valid environment for this mode (you can't pull from development to development)."
+      when: env == "development"
+
+    - name: Check if remote uploads folder exists
+      stat:
+        path: "{{ remote_uploads_dir }}"
+      register: remote_uploads_check
+
+    - name: Abort if remote uploads folder doesn't exist
+      fail:
+        msg: "ERROR: Uploads folder does not exist at {{ remote_uploads_dir }}"
+      when: remote_uploads_check.stat.exists is defined and remote_uploads_check.stat.exists == false
+
   tasks:
-  - name: Abort if environment variable is equal to development
-    fail:
-      msg: "ERROR: development is not a valid environment for this mode (you can't pull from development to development)."
-    when: env == "development"
-
-  - name: Check if remote uploads folder exists
-    stat:
-      path: "{{ remote_uploads_dir }}"
-    register: remote_uploads_check
-
-  - name: Abort if remote uploads folder doesn't exist
-    fail:
-      msg: "ERROR: Uploads folder does not exist at {{ remote_uploads_dir }}"
-    when: remote_uploads_check.stat.exists is defined and remote_uploads_check.stat.exists == false
-
   - name: Ensure local uploads directory exists
     delegate_to: development_host
     file:

@@ -1,61 +1,71 @@
 ---
+- import_playbook: variable-check.yml
+  vars:
+    playbook: database-backup.yml
+
 - name: Backup {{ site }} {{ env }} database
   hosts: web:&{{ env }}
   remote_user: "{{ web_user }}"
 
   vars:
+    project: "{{ wordpress_sites[site] }}"
     project_root: "{{ www_root }}/{{ site }}"
     project_web_dir: "{{ project_root }}/current"
-    local_bedrock_dir: "{{ wordpress_sites[site].local_path }}"
+    project_local_path: "{{ project.local_path }}"
     current_date_and_time: "{{ ansible_date_time.date | regex_replace('\\-+', '_') }}_{{ ansible_date_time.hour }}_{{ ansible_date_time.minute }}_{{ ansible_date_time.second }}"
     backup_file: "{{ site | regex_replace('\\.+', '_') }}_{{ env }}_{{ current_date_and_time }}.sql.gz"
 
+  pre_tasks:
+    - name: Ensure site is valid
+      delegate_to: localhost
+      fail:
+        msg: "Site `{{ site | default('') }}` is not valid. Available sites: {{ wordpress_sites.keys() | join(', ') }}"
+      when: wordpress_sites[site | default('')] is not defined
+
+    - name: Check if {{ site }} local folder exists
+      delegate_to: localhost
+      stat:
+        path: "{{ project_local_path }}"
+      register: result
+      become: no
+
+    - name: Abort if {{ site }} local folder doesn't exist
+      fail:
+        msg: "ERROR: {{ site }} is not a valid site (local folder {{ project_local_path }} does not exist)."
+      when: result.stat.exists is defined and result.stat.exists == false or result.stat.isdir is defined and result.stat.isdir == false
+
   tasks:
-  - name: Check if {{ site }} local folder exists
+  - name: Create local database_backup directory if it doesn't exist
     delegate_to: localhost
-    stat:
-      path: "{{ local_bedrock_dir }}"
-    register: result
+    file:
+      path: "{{ project_local_path }}/database_backup"
+      state: directory
+      mode: 0755
     become: no
 
-  - name: Abort if {{ site }} local folder doesn't exist
-    fail:
-      msg: "ERROR: {{ site }} is not a valid site (local folder {{ local_bedrock_dir }} does not exist)."
-    when: result.stat.exists is defined and result.stat.exists == false or result.stat.isdir is defined and result.stat.isdir == false
+  - name: Export development database
+    delegate_to: localhost
+    shell: wp db export - | gzip > database_backup/{{ backup_file }}
+    args:
+      chdir: "{{ project_local_path }}/web/wp"
+    become: no
+    when: env is defined and env == "development"
 
-  - block:
-    - name: Create local database_backup directory if it doesn't exist
-      delegate_to: localhost
-      file:
-        path: "{{ local_bedrock_dir }}/database_backup"
-        state: directory
-        mode: 0755
-      become: no
+  - name: Export {{ env }} database
+    shell: wp db export - | gzip > {{ backup_file }}
+    args:
+      chdir: "{{ project_web_dir }}"
+    when: env is defined and env != "development"
 
-    - name: Export development database
-      delegate_to: localhost
-      shell: wp db export - | gzip > database_backup/{{ backup_file }}
-      args:
-        chdir: "{{ local_bedrock_dir }}/web/wp"
-      become: no
-      when: env is defined and env == "development"
+  - name: Pull exported database from {{ env }} to local
+    fetch:
+      src: "{{ project_web_dir }}/{{ backup_file }}"
+      dest: "{{ project_local_path }}/database_backup/"
+      flat: yes
+    when: env is defined and env != "development"
 
-    - name: Export {{ env }} database
-      shell: wp db export - | gzip > {{ backup_file }}
-      args:
-        chdir: "{{ project_web_dir }}"
-      when: env is defined and env != "development"
-
-    - name: Pull exported database from {{ env }} to local
-      fetch:
-        src: "{{ project_web_dir }}/{{ backup_file }}"
-        dest: "{{ local_bedrock_dir }}/database_backup/"
-        flat: yes
-      when: env is defined and env != "development"
-
-    - name: Delete exported database from {{ env }}
-      shell: rm -f {{ backup_file }}
-      args:
-        chdir: "{{ project_web_dir }}"
-      when: env is defined and env != "development"
-    when: result.stat.exists is defined and result.stat.exists and result.stat.isdir is defined and result.stat.isdir
+  - name: Delete exported database from {{ env }}
+    shell: rm -f {{ backup_file }}
+    args:
+      chdir: "{{ project_web_dir }}"
+    when: env is defined and env != "development"
