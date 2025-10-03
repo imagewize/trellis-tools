@@ -38,10 +38,17 @@ trellis provision production
 ## PHP Version Upgrade Process
 
 1. Update `php_version` in `trellis/group_vars/all/main.yml`
-2. Run with `php`, `nginx`, and `wordpress-setup` tags (avoids 502 errors):
+2. Run with `php`, `nginx`, `wordpress-setup`, `users`, and `memcached` tags:
 
 ```bash
-trellis provision --tags php,nginx,wordpress-setup production
+trellis provision --tags php,nginx,wordpress-setup,users,memcached production
 ```
 
-This installs PHP, updates Nginx config, and creates the WordPress PHP-FPM pool. The `wordpress-setup` tag creates `/etc/php/X.X/fpm/pool.d/wordpress.conf`.
+**Why these tags are required:**
+- `php` - Installs new PHP version and extensions
+- `nginx` - Updates Nginx configuration for new PHP-FPM socket
+- `wordpress-setup` - Creates `/etc/php/X.X/fpm/pool.d/wordpress.conf`
+- `users` - **Critical**: Regenerates sudoers with new PHP version for passwordless `php-fpm reload`
+- `memcached` - Installs PHP version-specific memcached extension (e.g., `php8.3-memcached`)
+
+**Note:** Without the `users` tag, deployments will fail when trying to reload PHP-FPM because the sudoers configuration still references the old PHP version.
