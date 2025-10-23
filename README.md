@@ -10,7 +10,8 @@ A collection of tools to enhance your [Roots Trellis](https://roots.io/trellis/)
   - [3. Browser Caching Configuration](#3-browser-caching-configuration)
   - [4. WordPress Migration Tools](#4-wordpress-migration-tools)
   - [5. Backup Tools](#5-backup-tools)
-  - [6. Provisioning Documentation](#6-provisioning-documentation)
+  - [6. Theme Sync Script](#6-theme-sync-script)
+  - [7. Provisioning Documentation](#7-provisioning-documentation)
 - [Requirements](#requirements)
 - [License](#license)
 - [Author](#author)
@@ -114,8 +115,9 @@ Comprehensive documentation and commands for managing WordPress migrations, espe
 
 #### Migration Guides
 
-- **[Regular WordPress to Trellis/Bedrock](migration/REGULAR-TO-TRELLIS.md)** - Complete 10-step guide for migrating from shared hosting, Plesk, or cPanel environments to a modern Trellis/Bedrock stack. Covers prerequisites, two migration approaches (full adoption vs. compatibility mode), server provisioning with Trellis CLI, file and database migration, and extensive troubleshooting guidance.
-- **[WordPress Migration Commands](migration/README.md)** - Quick reference for WP-CLI commands including domain migrations, multisite handling, and Bedrock path conversions
+- **[Single-Site Migration: Regular WordPress to Trellis/Bedrock](migration/REGULAR-TO-TRELLIS.md)** - Complete 10-step guide for migrating a single WordPress site from shared hosting, Plesk, or cPanel environments to a modern Trellis/Bedrock stack. Covers prerequisites, two migration approaches (full adoption vs. compatibility mode), server provisioning with Trellis CLI, file and database migration, and extensive troubleshooting guidance.
+- **[Multi-Site Migration Guide](migration/MULTI-SITE-MIGRATION.md)** - Strategies and best practices for migrating **multiple WordPress sites to a single Trellis server**. Covers time-saving tips, batch operations, parallel processing, managing multiple Bedrock installations, and common pitfalls to avoid when consolidating sites.
+- **[WordPress Migration Commands Reference](migration/README.md)** - Quick reference for WP-CLI commands including domain migrations, multisite handling, and Bedrock path conversions
 
 ### 5. Backup Tools
 
@@ -158,7 +160,38 @@ ansible-playbook backup/trellis/files-push.yml -e site=example.com -e env=stagin
 
 For detailed instructions, configuration options, and best practices, please refer to the [Backup Documentation](backup/README.md).
 
-### 6. Provisioning Documentation
+### 6. Theme Sync Script
+
+A simple rsync script to synchronize theme files from your Trellis project to a standalone theme repository, useful for theme development workflows.
+
+#### Features
+
+- One-way sync from Trellis to theme repository
+- Automatically excludes dependencies and git files (node_modules, vendor, .git)
+- Uses rsync for efficient file synchronization
+- Preserves file permissions and timestamps
+
+#### Usage
+
+The [rsync-theme.sh](rsync-theme.sh) script needs to be customized with your specific paths:
+
+1. Edit the script to set your source and destination paths:
+   - Source: Your theme location within the Trellis project (e.g., `~/code/yoursite.com/site/web/app/themes/yourtheme/`)
+   - Destination: Your standalone theme repository (e.g., `~/code/yourtheme/`)
+
+2. Make the script executable:
+   ```bash
+   chmod +x rsync-theme.sh
+   ```
+
+3. Run the script whenever you want to sync changes:
+   ```bash
+   ./rsync-theme.sh
+   ```
+
+The script uses `rsync` with the `--delete` flag, which means files deleted from the source will also be deleted from the destination.
+
+### 7. Provisioning Documentation
 
 Quick reference guide for common Trellis provisioning commands and workflows.
 
