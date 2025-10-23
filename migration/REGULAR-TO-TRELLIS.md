@@ -7,7 +7,9 @@ This guide covers the complete process of migrating a standard WordPress install
 - [Overview](#overview)
 - [Prerequisites](#prerequisites)
 - [Migration Approaches](#migration-approaches)
+- [Choosing Your Migration Workflow](#choosing-your-migration-workflow)
 - [Pre-Migration Checklist](#pre-migration-checklist)
+- [Quick Migration Checklist (Per Site)](#quick-migration-checklist-per-site)
 - [Step-by-Step Migration Process](#step-by-step-migration-process)
   - [Migration Workflow Overview](#migration-workflow-overview)
   - [1. Set Up Trellis and Bedrock Locally](#1-set-up-trellis-and-bedrock-locally)
@@ -17,10 +19,13 @@ This guide covers the complete process of migrating a standard WordPress install
   - [5. Deploy Bedrock to Server](#5-deploy-bedrock-to-server)
   - [6. Migrate the Database](#6-migrate-the-database)
   - [7. Migrate Uploads](#7-migrate-uploads)
+  - [Alternative: Using Automated Backup Playbooks](#alternative-using-automated-backup-playbooks-workflow-b)
   - [8. Choose Your Path Migration Strategy](#8-choose-your-path-migration-strategy)
   - [9. Test and Verify](#9-test-and-verify)
   - [10. DNS and Go-Live](#10-dns-and-go-live)
+- [Time-Saving Tips for Multiple Sites](#time-saving-tips-for-multiple-sites)
 - [Managing Multiple Sites on One Server](#managing-multiple-sites-on-one-server)
+- [Common Pitfalls When Migrating Multiple Sites](#common-pitfalls-when-migrating-multiple-sites)
 - [Troubleshooting](#troubleshooting)
 - [Post-Migration Optimization](#post-migration-optimization)
 
@@ -96,6 +101,59 @@ Keep using `/wp-content/uploads/` paths in the database by modifying Bedrock's c
 - May cause confusion for other developers
 - Could complicate future updates
 
+## Choosing Your Migration Workflow
+
+You have two primary workflows for migrating your site(s), depending on whether you want to test locally first or migrate directly to production.
+
+### Workflow A: Direct Server-to-Server Migration
+**Best for:** Sites currently on shared hosting without local dev environment, or when you need to go live quickly.
+
+**Process:**
+1. Set up Trellis and Bedrock locally (Steps 1-2)
+2. Deploy empty Bedrock to server (Step 5)
+3. **Manually** transfer database and files from old hosting to new server (Steps 6-7)
+4. Apply path conversions (Step 8)
+5. Test and go live (Steps 9-10)
+
+**Time per site:** 3-4 hours (first site), 2-3 hours (additional sites)
+
+**Pros:**
+- Fewer steps overall
+- No need to set up local development environment
+- Direct migration from old to new hosting
+
+**Cons:**
+- Less opportunity to test before going live
+- Manual file transfers can be error-prone
+- Harder to repeat if something goes wrong
+
+### Workflow B: Local-First Migration (Recommended)
+**Best for:** When you want to test locally before going live, or when managing multiple sites.
+
+**Process:**
+1. Set up Trellis and Bedrock locally (Steps 1-2)
+2. Start local development environment (`trellis vm start`)
+3. Import database and files to local environment
+4. Test everything locally at `https://example.test`
+5. Provision production server (Step 2)
+6. **Use automated backup playbooks** to push from local to production
+7. Test production and go live
+
+**Time per site:** 4-5 hours (first site), 2.5-3.5 hours (additional sites)
+
+**Pros:**
+- Test thoroughly before going live
+- Repeatable, automated process using playbooks
+- Safer - production remains untouched until ready
+- Easy to iterate if issues are found
+
+**Cons:**
+- Requires local development setup
+- Additional step to transfer data twice (old → local → production)
+- Requires Vagrant/VirtualBox for local VM
+
+**Recommended for:** Three-site migration projects where consistency and testing are important.
+
 ## Pre-Migration Checklist
 
 Before starting the migration:
@@ -110,6 +168,93 @@ Before starting the migration:
 - [ ] Check for any symlinks or special file permissions
 - [ ] Verify PHP version compatibility (source vs. destination)
 - [ ] Test your site backup locally if possible
+
+## Quick Migration Checklist (Per Site)
+
+Use this condensed checklist to track progress for each site during migration.
+
+### Pre-Migration (15-30 mins)
+- [ ] Download database backup (`.sql` or `.sql.gz`)
+- [ ] Download files (themes, plugins, uploads)
+- [ ] Document active plugins and versions
+- [ ] Generate WordPress salts (https://roots.io/salts.html)
+- [ ] Create Git repository on GitHub/GitLab
+- [ ] Note any custom `wp-config.php` settings
+
+### Trellis Setup (First Site: 60 mins, Additional: 15 mins)
+- [ ] Create Bedrock installation with descriptive name (`site-example`)
+- [ ] Configure `wordpress_sites.yml` for development and production
+- [ ] Edit vault files with database credentials and salts
+- [ ] Update `hosts/production` with server IP
+- [ ] Provision server (first site only - run once for all sites)
+- [ ] Commit Trellis configuration to Git
+
+### Site Preparation (30 mins)
+- [ ] Copy theme to `site/web/app/themes/`
+- [ ] Copy plugins to `site/web/app/plugins/`
+- [ ] Add plugins to `composer.json` where possible
+- [ ] Run `composer install`
+- [ ] Commit and push to Git repository
+
+### Deployment (15 mins)
+- [ ] Deploy to production: `trellis deploy production`
+- [ ] Verify deployment created correct directory structure
+- [ ] Check symlinks are correct
+
+### Data Migration (45-60 mins)
+
+**Option A: Manual Migration (Workflow A)**
+- [ ] Import database via WP-CLI or MySQL
+- [ ] Update domain URLs with search-replace
+- [ ] rsync/scp uploads directory
+- [ ] Set correct permissions on uploads
+- [ ] Run path conversion search-replace commands
+
+**Option B: Automated with Playbooks (Workflow B - Recommended)**
+- [ ] Import database and uploads to local development
+- [ ] Test locally at `https://example.test`
+- [ ] Run `ansible-playbook database-push.yml`
+- [ ] Run `ansible-playbook files-push.yml`
+- [ ] Verify on production
+
+### Path Conversion (15 mins)
+- [ ] Run search-replace for `/wp-content/themes/` → `/app/themes/`
+- [ ] Run search-replace for `/wp-content/uploads/` → `/app/uploads/`
+- [ ] Run search-replace for `/wp-content/plugins/` → `/app/plugins/`
+- [ ] Verify no remaining `wp-content` references
+- [ ] Flush cache and permalinks
+
+### Testing (30 mins)
+- [ ] Verify homepage loads correctly
+- [ ] Check all images display properly
+- [ ] Test navigation menus
+- [ ] Verify forms work
+- [ ] Test admin panel access
+- [ ] Check plugin functionality
+- [ ] Test media upload
+- [ ] Verify SSL certificate
+- [ ] Check browser console for errors
+
+### Go-Live (15 mins)
+- [ ] Lower DNS TTL 24 hours before
+- [ ] Update DNS A record to new server IP
+- [ ] Monitor DNS propagation
+- [ ] Test site from multiple locations
+- [ ] Keep old server running 24-48 hours
+
+### Post-Migration (15 mins)
+- [ ] Set up automated backups
+- [ ] Enable Redis caching
+- [ ] Configure monitoring
+- [ ] Document any issues encountered
+- [ ] Update team documentation
+
+**Total Time Estimates:**
+- **First site:** 4-6 hours (includes learning curve and server setup)
+- **Second site:** 2.5-3.5 hours (server already provisioned)
+- **Third site:** 2-3 hours (process is familiar)
+
+**For three sites: 8-12 hours total**
 
 ## Step-by-Step Migration Process
 
@@ -403,13 +548,23 @@ git push -u origin main
 
 Now deploy your Bedrock site to the provisioned server. This creates the directory structure and symlinks.
 
+**Important for Multiple Sites:** If you're adding a second or third site to an already-provisioned server, you must **re-provision first** to create the new site's infrastructure (database, Nginx configuration, SSL certificate, and directory structure):
+
 ```bash
 # From trellis directory
 cd trellis
 
-# Deploy to production
+# FIRST: Re-provision if adding a new site to existing server
+# This creates database, Nginx config, SSL cert for the new site
+trellis provision production
+
+# THEN: Deploy the site
 trellis deploy production
 ```
+
+**For the first site only** (server not yet provisioned), you can skip directly to deploy since you already provisioned in Step 2.
+
+**What deployment does:**
 
 This will:
 - Clone your Git repository to `/srv/www/example.com/releases/TIMESTAMP/`
@@ -554,6 +709,81 @@ ls -la /srv/www/example.com/current/web/app/uploads
 # Test a sample file is accessible
 ls -la /srv/www/example.com/shared/uploads/2024/
 ```
+
+### Alternative: Using Automated Backup Playbooks (Workflow B)
+
+If you're following **Workflow B** (Local-First Migration) and have set up your local development environment with the database and files already imported, you can use the automated backup playbooks instead of manual Steps 6-7.
+
+#### Prerequisites for Using Backup Playbooks
+
+1. Local development environment is running (`trellis vm start`)
+2. Database and uploads are already in your local Bedrock installation
+3. Production server is provisioned and deployed
+4. Backup playbooks are available in this repository at `../backup/trellis/`
+
+#### Push Database Using Playbook (Alternative to Step 6)
+
+```bash
+# From trellis directory
+cd trellis
+
+# Push database from development to production
+ansible-playbook ../backup/trellis/database-push.yml -e site=example.com -e env=production
+```
+
+**What this playbook does automatically:**
+- Exports database from local development environment
+- Creates backup of production database (saved to `site/database_backup/`)
+- Imports development database to production
+- Performs search-replace for domain URLs (old domain → new domain)
+- Performs search-replace for path conversions (wp-content → app) if needed
+- Cleans up temporary files
+- Provides detailed progress output
+
+#### Push Files Using Playbook (Alternative to Step 7)
+
+```bash
+# From trellis directory
+cd trellis
+
+# Push uploads from development to production
+ansible-playbook ../backup/trellis/files-push.yml -e site=example.com -e env=production
+```
+
+**What this playbook does automatically:**
+- Syncs uploads directory from local to production
+- Preserves file permissions and ownership
+- Shows progress during transfer
+- Includes confirmation prompt before overwriting
+- Handles symlinks correctly
+- Sets correct permissions on destination
+
+#### When to Use the Backup Playbooks
+
+**✅ Use backup playbooks when:**
+- You have local development environment running
+- Files and database are already in local Bedrock structure
+- You want automated, repeatable process
+- Migrating multiple sites (consistency is key)
+- You need to test migrations before going live
+- You want built-in safety features (backups, confirmations)
+
+**❌ Don't use backup playbooks when:**
+- Migrating directly from old server to production (use manual rsync/wp db import)
+- Local development environment is not set up
+- You need to customize the migration process significantly
+- Source files are not yet in Bedrock structure locally
+
+#### Benefits of Using Backup Playbooks for Migration
+
+1. **Automated Path Conversion**: The database-push playbook can handle path conversions automatically
+2. **Built-in Backups**: Production database is backed up before import
+3. **Repeatable**: Easy to re-run if something goes wrong
+4. **Consistent**: Same process for all three sites
+5. **Time-Saving**: Faster than manual operations for multiple sites
+6. **Error Handling**: Better error messages and rollback capabilities
+
+For detailed documentation on the backup playbooks, see [backup/README.md](../backup/README.md).
 
 ### 8. Choose Your Path Migration Strategy
 
@@ -771,6 +1001,241 @@ When ready to go live:
    tail -f /var/log/nginx/error.log
    ```
 
+## Time-Saving Tips for Multiple Sites
+
+When migrating three sites to a single Trellis server, use these strategies to minimize time and maximize efficiency.
+
+### 1. Batch Preparation Phase
+
+Before starting any migrations, prepare all three sites at once:
+
+**Checklist for all sites:**
+- [ ] Download all databases from old hosting (export as `.sql` or `.sql.gz`)
+- [ ] Download all file backups (themes, plugins, uploads) to organized local folders
+- [ ] Document all active plugins for each site in a spreadsheet
+- [ ] Generate all WordPress salts at once (visit https://roots.io/salts.html three times, save to text files)
+- [ ] Create all three Git repositories on GitHub/GitLab
+- [ ] Document any special configurations from old `wp-config.php` files
+
+**Organize your downloads:**
+```bash
+# Create organized backup structure
+mkdir -p ~/migrations/site1/{database,files}
+mkdir -p ~/migrations/site2/{database,files}
+mkdir -p ~/migrations/site3/{database,files}
+
+# This organization saves time when you're ready to migrate each site
+```
+
+### 2. Use Descriptive Directory Names from Start
+
+Instead of using generic `site/` directory, use descriptive names immediately to avoid confusion:
+
+```bash
+# For first site
+trellis new example.com
+cd example.com
+mv site site-example
+
+# Update trellis/group_vars/*/wordpress_sites.yml
+# Change: local_path: ../site
+# To:     local_path: ../site-example
+
+# Then add second and third sites
+composer create-project roots/bedrock site-clienttwo
+composer create-project roots/bedrock site-clientthree
+```
+
+**Benefits:**
+- No confusion about which site is which
+- Easier to reference in commands
+- Clear Git history
+- Better for team collaboration
+
+### 3. Configure All Sites Before First Provision
+
+Add all three sites to `wordpress_sites.yml` before provisioning. This way:
+
+- **Single provisioning run** sets up all three databases
+- **All SSL certificates** created at once with Let's Encrypt
+- **Nginx configured** for all sites simultaneously
+- **Saves ~30 minutes** vs. provisioning three times
+
+**Example `trellis/group_vars/production/wordpress_sites.yml`:**
+```yaml
+wordpress_sites:
+  example.com:
+    site_hosts:
+      - canonical: example.com
+    local_path: ../site-example
+    repo: git@github.com:yourusername/trellis-multi.git
+    repo_subtree_path: site-example
+    # ... rest of config ...
+
+  clienttwo.com:
+    site_hosts:
+      - canonical: clienttwo.com
+    local_path: ../site-clienttwo
+    repo: git@github.com:yourusername/trellis-multi.git
+    repo_subtree_path: site-clienttwo
+    # ... rest of config ...
+
+  clientthree.com:
+    site_hosts:
+      - canonical: clientthree.com
+    local_path: ../site-clientthree
+    repo: git@github.com:yourusername/trellis-multi.git
+    repo_subtree_path: site-clientthree
+    # ... rest of config ...
+```
+
+Then run once:
+```bash
+trellis provision production
+```
+
+### 4. Parallel Operations
+
+Take advantage of independent operations that can run simultaneously:
+
+**While database is importing on Site 1:**
+```bash
+# In one terminal: Import database for site 1
+ssh admin@server "cd /srv/www/example.com/current && wp db import /tmp/backup1.sql"
+
+# In another terminal: Upload files for site 2
+rsync -avz ~/migrations/site2/files/uploads/ admin@server:/srv/www/clienttwo.com/shared/uploads/
+
+# In another terminal: Work on site 3 locally
+cd ~/code/trellis-project/site-clientthree
+# Copy theme and plugins
+```
+
+**While running search-replace on one site:**
+- Deploy the next site
+- Prepare the third site's uploads for transfer
+- Run tests on a completed site
+
+### 5. Create Reusable Scripts
+
+Save time by scripting repetitive tasks:
+
+**Script: `migrate-uploads.sh`**
+```bash
+#!/bin/bash
+# Usage: ./migrate-uploads.sh site1 example.com
+
+SITE_NAME=$1
+DOMAIN=$2
+LOCAL_UPLOADS=~/migrations/$SITE_NAME/files/uploads
+SERVER_PATH=/srv/www/$DOMAIN/shared/uploads
+
+echo "Migrating uploads for $DOMAIN..."
+rsync -avz --progress $LOCAL_UPLOADS/ admin@your.server.ip:$SERVER_PATH/
+
+echo "Setting permissions..."
+ssh admin@your.server.ip "sudo chown -R web:www-data $SERVER_PATH && sudo chmod -R 775 $SERVER_PATH"
+
+echo "Done!"
+```
+
+**Script: `import-database.sh`**
+```bash
+#!/bin/bash
+# Usage: ./import-database.sh site1 example.com
+
+SITE_NAME=$1
+DOMAIN=$2
+LOCAL_DB=~/migrations/$SITE_NAME/database/backup.sql
+
+echo "Uploading database for $DOMAIN..."
+scp $LOCAL_DB admin@your.server.ip:/tmp/backup-$SITE_NAME.sql
+
+echo "Importing database..."
+ssh admin@your.server.ip "cd /srv/www/$DOMAIN/current && wp db import /tmp/backup-$SITE_NAME.sql && rm /tmp/backup-$SITE_NAME.sql"
+
+echo "Done!"
+```
+
+### 6. Use Workflow B for Maximum Efficiency
+
+For three sites, **Workflow B** (Local-First Migration) with backup playbooks is most efficient:
+
+**Advantages for multiple sites:**
+1. Test each migration locally before production
+2. Use automated playbooks for consistency
+3. Easy to repeat if something goes wrong
+4. Can work on next site while previous deploys
+
+**Timeline for three sites using Workflow B:**
+- **Day 1 (4-5 hours):** Site 1 - Full setup, local test, push to production
+- **Day 2 (3 hours):** Site 2 - Faster since server/process established
+- **Day 3 (2.5 hours):** Site 3 - Fastest, everything is familiar
+
+**Total: 9-10.5 hours** vs. 12-15 hours with direct migration
+
+### 7. Maintain a Migration Checklist
+
+Track progress across all sites with a simple checklist:
+
+```markdown
+## Migration Progress Tracker
+
+### Site 1: example.com
+- [x] Backups downloaded
+- [x] Bedrock created (site-example)
+- [x] Theme/plugins copied
+- [x] Deployed to production
+- [x] Database migrated
+- [x] Uploads synced
+- [x] Paths converted
+- [x] Tested
+- [x] DNS updated
+
+### Site 2: clienttwo.com
+- [x] Backups downloaded
+- [x] Bedrock created (site-clienttwo)
+- [ ] Theme/plugins copied
+- [ ] Deployed to production
+...
+```
+
+### 8. Common Configuration Across Sites
+
+If all three sites share similar requirements, create templates:
+
+**Template: Search-replace commands**
+```bash
+# Save as search-replace-template.sh
+# Update domain for each site
+
+DOMAIN=$1
+wp search-replace '/wp-content/themes/' '/app/themes/' --all-tables
+wp search-replace '/wp-content/plugins/' '/app/plugins/' --all-tables
+wp search-replace "https://$DOMAIN/wp-content/uploads/" "https://$DOMAIN/app/uploads/" --all-tables --precise
+wp search-replace "http://$DOMAIN/wp-content/uploads/" "https://$DOMAIN/app/uploads/" --all-tables --precise
+wp cache flush
+wp rewrite flush
+```
+
+**Usage:**
+```bash
+# Run on each site
+ssh admin@server "cd /srv/www/example.com/current && bash" < search-replace-template.sh example.com
+```
+
+### Summary: Optimal Multi-Site Migration Strategy
+
+1. ✅ **Batch prepare** all three sites upfront (1 hour)
+2. ✅ **Configure all sites** in Trellis before provisioning (30 mins)
+3. ✅ **Provision once** for all three sites (15 mins)
+4. ✅ **Use Workflow B** with backup playbooks (most efficient)
+5. ✅ **Run operations in parallel** where possible
+6. ✅ **Create reusable scripts** for repetitive tasks
+7. ✅ **Track progress** with checklist
+
+**Expected timeline for three sites: 8-10 hours total** (vs. 12-15 hours without optimization)
+
 ## Managing Multiple Sites on One Server
 
 One of Trellis's strengths is the ability to host **multiple WordPress sites on a single server**. This is common for agencies or when consolidating multiple client sites.
@@ -960,24 +1425,38 @@ git commit -m "Add jasperfrumau.com site"
 git push origin main
 ```
 
-#### Step 4: Re-Provision Server (If Needed)
+#### Step 4: Re-Provision Server (REQUIRED for New Sites)
 
-If this is a **brand new site** on an **existing server**, you typically only need to re-provision to update Nginx configurations:
+**IMPORTANT:** When adding a new site to an existing server, you **MUST re-provision** to create the necessary infrastructure for the new site:
 
 ```bash
 cd trellis
 
-# Re-provision production (updates Nginx, creates new database, etc.)
+# Re-provision production to create infrastructure for new site
 trellis provision production
+```
 
-# Or just update Nginx configuration
+**What this does for the new site:**
+- ✅ Creates new MySQL database (`jasperfrumau_production`)
+- ✅ Creates new database user with credentials from vault
+- ✅ Generates Nginx virtual host configuration (`/etc/nginx/sites-available/jasperfrumau.com.conf`)
+- ✅ Requests and installs Let's Encrypt SSL certificate for new domain
+- ✅ Creates base directory structure (`/srv/www/jasperfrumau.com/`)
+- ✅ Updates firewall rules if needed
+
+**Without re-provisioning:**
+- ❌ Database won't exist → deployment fails
+- ❌ No Nginx config → site shows 502 Bad Gateway
+- ❌ No SSL certificate → HTTPS won't work
+- ❌ No directory structure → deployment fails
+
+**Alternative (Advanced):** If you only changed Nginx-related settings and know the database already exists:
+```bash
+# Only update Nginx configuration (faster, but less safe)
 ansible-playbook server.yml -e env=production --tags nginx
 ```
 
-**Note**: If the server is already provisioned and you just need to add the new site:
-- Trellis will create the new database
-- Configure new Nginx server blocks
-- Set up SSL certificates for the new domain
+**Best practice:** Always use full `trellis provision production` when adding a new site. It's safer and ensures everything is configured correctly.
 
 #### Step 5: Deploy the New Site
 
@@ -1109,6 +1588,300 @@ Consider separate servers if:
 - Different PHP version requirements
 - Regulatory/security isolation requirements
 - One site is mission-critical and needs dedicated resources
+
+## Common Pitfalls When Migrating Multiple Sites
+
+Avoid these common mistakes when migrating multiple WordPress sites to a single Trellis server.
+
+### 1. Forgetting to Update `local_path` for Each Site
+
+**Problem:** All sites point to `../site` instead of unique paths like `../site-example`, `../site-clienttwo`.
+
+**Symptom:** Deployments fail or deploy the wrong site's code.
+
+**Solution:** Always verify unique paths in `wordpress_sites.yml`:
+
+```yaml
+wordpress_sites:
+  example.com:
+    local_path: ../site-example  # ✅ Unique path
+    # ...
+
+  clienttwo.com:
+    local_path: ../site-clienttwo  # ✅ Unique path
+    # ...
+```
+
+**How to check:**
+```bash
+# From trellis directory
+grep -A 5 "local_path" group_vars/production/wordpress_sites.yml
+```
+
+### 2. Reusing Database Passwords Across Sites
+
+**Problem:** Copy-pasting vault configuration without changing passwords for each site.
+
+**Security Risk:** If one site is compromised, all sites are at risk.
+
+**Solution:** Generate unique passwords for each site:
+
+```bash
+# Generate secure password for each site
+openssl rand -base64 32
+
+# Edit vault and paste unique password for each site
+trellis vault edit production
+```
+
+**Vault structure should look like:**
+```yaml
+vault_wordpress_sites:
+  example.com:
+    env:
+      db_password: "unique_password_1_here"  # Different!
+      # ...
+
+  clienttwo.com:
+    env:
+      db_password: "unique_password_2_here"  # Different!
+      # ...
+```
+
+### 3. Not Testing Path Conversions Thoroughly
+
+**Problem:** Assuming search-replace worked without verification.
+
+**Symptom:** Some images or assets still have old paths, causing 404 errors.
+
+**Solution:** Always verify after running search-replace:
+
+```bash
+# SSH into server
+cd /srv/www/example.com/current
+
+# Check for any remaining wp-content references
+wp db search 'wp-content/uploads' --all-tables
+wp db search 'wp-content/themes' --all-tables
+wp db search 'wp-content/plugins' --all-tables
+
+# Should return no results if conversion was successful
+```
+
+**If you find remaining references:**
+```bash
+# Run additional search-replace for specific cases
+wp search-replace '//example.com/wp-content/' '//example.com/app/' --all-tables --precise
+```
+
+### 4. Skipping DNS Propagation Time
+
+**Problem:** Going live immediately after DNS change, causing confusion when some users see old site and others see new site.
+
+**Impact:** Mixed analytics, confused users, potential lost transactions.
+
+**Solution:**
+
+```bash
+# 24-48 hours BEFORE migration:
+# Lower TTL on DNS records (via your DNS provider)
+# Change from 3600 (1 hour) to 300 (5 minutes)
+
+# After DNS update:
+# Check DNS propagation
+dig example.com +short
+
+# Check from multiple global locations
+# Use: https://www.whatsmydns.net/
+
+# Keep old server running for 24-48 hours as fallback
+```
+
+### 5. Incorrect File Permissions on Uploads
+
+**Problem:** Uploads directory has wrong owner or permissions after transfer.
+
+**Symptom:** Can't upload new media, or existing images don't display.
+
+**Solution:** Always set correct permissions after file transfer:
+
+```bash
+# After rsync/scp of uploads
+ssh admin@server
+
+# Set ownership (web:www-data is the Trellis default)
+sudo chown -R web:www-data /srv/www/example.com/shared/uploads
+
+# Set permissions (775 allows web server to write)
+sudo chmod -R 775 /srv/www/example.com/shared/uploads
+
+# Verify
+ls -la /srv/www/example.com/shared/uploads
+```
+
+### 6. Not Updating All Environment Files
+
+**Problem:** Updating `production/wordpress_sites.yml` but forgetting `development/wordpress_sites.yml`.
+
+**Symptom:** Local development breaks or uses wrong configuration.
+
+**Solution:** Always update both environments:
+
+```bash
+# Update both files when adding a new site
+trellis/group_vars/development/wordpress_sites.yml
+trellis/group_vars/production/wordpress_sites.yml
+
+# And both vault files
+trellis vault edit development
+trellis vault edit production
+```
+
+### 7. Mixing Up `repo_subtree_path` Values
+
+**Problem:** Multiple sites pointing to same subtree path in Git repo.
+
+**Symptom:** Deployment pulls wrong code for a site.
+
+**Solution:** Ensure each site has unique `repo_subtree_path`:
+
+```yaml
+wordpress_sites:
+  example.com:
+    repo: git@github.com:user/trellis-multi.git
+    repo_subtree_path: site-example  # ✅ Unique
+
+  clienttwo.com:
+    repo: git@github.com:user/trellis-multi.git
+    repo_subtree_path: site-clienttwo  # ✅ Unique
+```
+
+### 8. Forgetting to Re-Provision After Adding New Site
+
+**Problem:** Adding second or third site to config but not re-provisioning server before deployment.
+
+**Symptom:**
+- Deployment fails with database connection errors
+- Site shows 502 Bad Gateway (no Nginx config)
+- SSL certificate missing or invalid
+- Directory structure `/srv/www/newsitedomain.com/` doesn't exist
+
+**Why this happens:** When you add a new site to `wordpress_sites.yml`, Trellis doesn't automatically create the infrastructure. You must re-provision to:
+- Create MySQL database for the new site
+- Generate Nginx virtual host configuration
+- Request and install Let's Encrypt SSL certificate
+- Create base directory structure
+
+**Solution:** Always re-provision after adding sites to configuration:
+
+```bash
+cd trellis
+
+# STEP 1: Add new site to wordpress_sites.yml
+# STEP 2: Re-provision to create all infrastructure
+trellis provision production
+
+# STEP 3: Now you can deploy the new site
+trellis deploy production example.com
+
+# Alternative: Just update Nginx if that's all that changed
+# (Use this only if you know the database and other components exist)
+ansible-playbook server.yml -e env=production --tags nginx
+```
+
+**Best Practice for Multiple Sites:**
+Configure all three sites in `wordpress_sites.yml` BEFORE the first provision. This way you provision once and create infrastructure for all sites simultaneously.
+
+### 9. Using Same WordPress Salts Across Sites
+
+**Problem:** Copy-pasting salts from first site to second and third sites.
+
+**Security Risk:** Reduces security isolation between sites.
+
+**Solution:** Generate unique salts for each site:
+
+```bash
+# Visit https://roots.io/salts.html three times
+# Save each set of salts separately
+# Paste unique salts into vault for each site
+
+trellis vault edit production
+```
+
+### 10. Not Testing Locally First (When Using Workflow B)
+
+**Problem:** Pushing directly to production without local testing.
+
+**Risk:** Database issues, path problems, or plugin conflicts discovered only in production.
+
+**Solution:** Always test in local development first:
+
+```bash
+# Start local VM
+trellis vm start
+
+# Import database locally
+cd ~/code/trellis-project/site-example
+wp db import ~/migrations/site1/database/backup.sql
+
+# Test at https://example.test
+# Fix any issues locally before pushing to production
+```
+
+### 11. Incorrect Branch Names in Configuration
+
+**Problem:** Configuration uses `branch: main` but Git repo uses `master` (or vice versa).
+
+**Symptom:** Deployment fails with "branch not found" error.
+
+**Solution:** Verify branch name matches your Git repository:
+
+```bash
+# Check what branch your repo uses
+cd ~/code/trellis-project
+git branch
+
+# Update wordpress_sites.yml to match
+wordpress_sites:
+  example.com:
+    branch: main  # or 'master' - must match your repo!
+```
+
+### 12. Overwriting Production Database Accidentally
+
+**Problem:** Running database-push playbook and forgetting it will overwrite production.
+
+**Risk:** Loss of production data (orders, users, posts created since migration).
+
+**Solution:** Always use the backup features:
+
+```bash
+# The database-push playbook includes automatic backup
+# But verify backup exists before running:
+
+# Manual backup before push
+ssh admin@server "cd /srv/www/example.com/current && wp db export /tmp/pre-push-backup.sql"
+
+# Then run push
+ansible-playbook database-push.yml -e site=example.com -e env=production
+
+# Playbook will create backup automatically in site/database_backup/
+```
+
+### Prevention Checklist
+
+Before migrating sites 2 and 3, verify these for each site:
+
+- [ ] Unique `local_path` in `wordpress_sites.yml`
+- [ ] Unique database password in vault
+- [ ] Unique WordPress salts in vault
+- [ ] Unique `repo_subtree_path` (if using same Git repo)
+- [ ] Correct branch name (`main` vs `master`)
+- [ ] Both development and production configs updated
+- [ ] File permissions set correctly after upload
+- [ ] Path conversions verified with `wp db search`
+- [ ] DNS TTL lowered 24 hours before switching
+- [ ] Local testing completed (if using Workflow B)
 
 ## Troubleshooting
 
