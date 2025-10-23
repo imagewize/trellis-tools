@@ -101,12 +101,17 @@ Documentation and commands for managing WordPress migrations, especially when us
 
 #### Features
 
+- Complete guide for migrating from traditional WordPress to Trellis/Bedrock
 - Domain migration guides for single-site and multisite installations
 - Path conversion from standard WordPress to Bedrock structure
+- Multiple migration strategies (full adoption vs. compatibility mode)
 - Best practices for search-replace operations
-- Troubleshooting common migration issues
+- Comprehensive troubleshooting guide
 
-For detailed usage instructions and examples, please refer to the [WordPress Migration Guide](migration/README.md).
+#### Migration Guides
+
+- **[Regular WordPress to Trellis/Bedrock](migration/REGULAR-TO-TRELLIS.md)** - Complete step-by-step guide for migrating from shared hosting, Plesk, or cPanel environments to a modern Trellis/Bedrock stack. Includes modern Trellis CLI setup workflow.
+- **[WordPress Migration Commands](migration/README.md)** - Quick reference for domain migrations and path conversions
 
 ### 5. Backup Tools
 
