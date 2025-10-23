@@ -5,6 +5,14 @@ This guide documents various commands and techniques for migrating WordPress sit
 1. Migrating from local development to production environments
 2. Setting up and fixing multisite installations
 3. Converting regular WordPress image URLs to Bedrock-compatible paths
+4. Migrating from traditional WordPress hosting to Trellis/Bedrock
+
+## Migration Scenarios
+
+This directory contains guides for different migration scenarios:
+
+- **[Regular WordPress to Trellis/Bedrock Migration](REGULAR-TO-TRELLIS.md)** - Complete guide for migrating from traditional WordPress hosting (shared hosting, Plesk, cPanel) to Trellis with Bedrock. Includes modern Trellis CLI workflow, strategies for handling path changes, database migration, and maintaining compatibility with non-Sage themes.
+- **Current Document** - Commands and techniques for domain migrations and path conversions
 
 ## Domain Migration Commands
 
