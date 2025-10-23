@@ -11,7 +11,13 @@ This guide documents various commands and techniques for migrating WordPress sit
 
 This directory contains guides for different migration scenarios:
 
-- **[Regular WordPress to Trellis/Bedrock Migration](REGULAR-TO-TRELLIS.md)** - Complete guide for migrating from traditional WordPress hosting (shared hosting, Plesk, cPanel) to Trellis with Bedrock. Includes modern Trellis CLI workflow, strategies for handling path changes, database migration, and maintaining compatibility with non-Sage themes.
+### Single-Site Migration
+- **[Regular WordPress to Trellis/Bedrock Migration](REGULAR-TO-TRELLIS.md)** - Complete step-by-step guide for migrating a single WordPress site from traditional hosting (shared hosting, Plesk, cPanel) to Trellis with Bedrock. Includes modern Trellis CLI workflow, `/etc/hosts` testing before DNS cutover, database migration, uploads transfer, and strategies for handling Bedrock path changes while maintaining compatibility with non-Sage themes.
+
+### Multi-Site Migration
+- **[Multi-Site Migration Guide](MULTI-SITE-MIGRATION.md)** - Strategies and best practices for migrating **multiple WordPress sites** to a single Trellis server. Covers time-saving tips, batch operations, parallel processing, managing multiple Bedrock installations, and common pitfalls to avoid when consolidating sites.
+
+### Quick Reference
 - **Current Document** - Commands and techniques for domain migrations and path conversions
 
 ## Domain Migration Commands
