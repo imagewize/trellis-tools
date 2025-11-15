@@ -4,6 +4,7 @@ This guide covers how to optimize images for your Trellis-managed WordPress site
 
 ## Table of Contents
 - [Nginx Configuration for WebP and AVIF](#nginx-configuration-for-webp-and-avif)
+- [Image Resizing and Cropping](#image-resizing-and-cropping)
 - [Converting Images to WebP](#converting-images-to-webp)
 - [Converting Images to AVIF](#converting-images-to-avif)
 - [Automating Image Conversion](#automating-image-conversion)
@@ -48,6 +49,43 @@ trellis provision staging
 trellis provision development
 ```
 
+## Image Resizing and Cropping
+
+Before converting images to WebP or AVIF, you may need to resize or crop them to the appropriate dimensions. ImageMagick is a powerful tool for this purpose.
+
+### Installing ImageMagick
+
+```bash
+# macOS (using Homebrew)
+brew install imagemagick
+
+# Ubuntu/Debian
+sudo apt-get install imagemagick
+```
+
+For detailed instructions on resizing, cropping, and preparing images for conversion, see the [Image Resizing and Conversion Guide](RESIZE-AND-CONVERSION.md).
+
+### Quick Example
+
+```bash
+# Resize and crop to 400x400, then convert to WebP
+magick input.jpg \
+  -resize 500x500^ \
+  -gravity center \
+  -crop 400x400+0+0 \
+  -quality 90 \
+  output.jpg
+
+cwebp -q 85 output.jpg -o output.webp
+```
+
+See [RESIZE-AND-CONVERSION.md](RESIZE-AND-CONVERSION.md) for more examples, including:
+- Creating thumbnails and avatars
+- Batch processing multiple images
+- Responsive image workflows
+- Custom crop offsets
+- Quality settings recommendations
+
 ## Converting Images to WebP
 
 ### Using cwebp (Command Line)
@@ -87,7 +125,8 @@ find . -type f -name "*.png" -exec cwebp -q 80 {} -o {}.webp \;
 ### Quality Settings
 
 - `-q 0` to `-q 100`: Lower values = smaller files but lower quality
-- Recommended range: 70-85 for good balance
+- Recommended: 75-85 for photos, 85-95 for images with text
+- See [RESIZE-AND-CONVERSION.md](RESIZE-AND-CONVERSION.md) for detailed quality comparisons
 
 ## Converting Images to AVIF
 
@@ -125,6 +164,8 @@ find . -type f -name "*.jpg" -exec cavif --quality 80 {} \;
 ```
 
 ## Automating Image Conversion
+
+For comprehensive automation examples including resizing and cropping, see [RESIZE-AND-CONVERSION.md](RESIZE-AND-CONVERSION.md#complete-workflow-examples).
 
 ### Using a Shell Script
 
