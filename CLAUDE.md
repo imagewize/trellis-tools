@@ -1,0 +1,221 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Project Overview
+
+This is a collection of tools, scripts, and documentation to enhance the [Roots Trellis](https://roots.io/trellis/) workflow for managing WordPress sites. The repository contains Ansible playbooks, shell scripts, Nginx configurations, and comprehensive documentation for WordPress/Trellis operations.
+
+## Repository Structure
+
+- **backup/** - Ansible playbooks and shell scripts for database/files backup operations
+  - `backup/trellis/*.yml` - Ansible playbooks for backup, pull, and push operations
+  - `backup/scripts/*.sh` - Standalone shell scripts for backups
+- **browser-caching/** - Nginx configuration for browser caching of static assets
+- **content-creation/** - Documentation for WP-CLI content creation and block patterns
+- **image-optimization/** - Nginx WebP/AVIF configuration and image conversion guides
+- **migration/** - WordPress migration documentation (regular to Trellis/Bedrock, multi-site)
+- **provision/** - Trellis provisioning command reference
+- **updater/** - Shell script for safely updating Trellis installations
+- **create-pr.sh** - AI-powered GitHub PR creation script with Claude CLI integration
+- **rsync-theme.sh** - Theme synchronization script template
+
+## Key Technologies
+
+- **Trellis**: WordPress server provisioning and deployment framework (Ansible-based)
+- **Bedrock**: Modern WordPress boilerplate with Composer dependency management
+- **Ansible**: Automation tool used by Trellis
+- **WP-CLI**: WordPress command-line interface
+- **Nginx**: Web server with custom configuration includes
+- **Shell scripting**: Bash scripts for automation
+
+## Common Commands
+
+### Trellis Provisioning
+
+Commands assume you're in a Trellis directory when working with Ansible playbooks:
+
+```bash
+# Provision with specific tags
+trellis provision --tags php,nginx,composer production
+
+# Deploy to environment
+ansible-playbook deploy.yml -e env=staging
+ansible-playbook deploy.yml -e env=production
+
+# PHP version upgrade (requires specific tags)
+trellis provision --tags php,nginx,wordpress-setup,users,memcached production
+```
+
+### Backup Operations
+
+Ansible playbooks require `-e site=example.com -e env=<environment>` parameters:
+
+```bash
+# Database backup
+ansible-playbook backup/trellis/database-backup.yml -e site=example.com -e env=production
+
+# Database pull (from remote to development)
+ansible-playbook backup/trellis/database-pull.yml -e site=example.com -e env=production
+
+# Database push (from development to remote)
+ansible-playbook backup/trellis/database-push.yml -e site=example.com -e env=staging
+
+# Files (uploads) operations
+ansible-playbook backup/trellis/files-backup.yml -e site=example.com -e env=production
+ansible-playbook backup/trellis/files-pull.yml -e site=example.com -e env=production
+ansible-playbook backup/trellis/files-push.yml -e site=example.com -e env=staging
+```
+
+### WP-CLI Operations
+
+Common WordPress operations via command line:
+
+```bash
+# Local development (from Bedrock site directory)
+wp post list --post_type=page --path=web/wp
+wp post update 100 --post_content="$CONTENT" --path=web/wp
+
+# Remote via Trellis
+trellis vm shell --workdir /srv/www/example.com/current -- wp post list --path=web/wp
+```
+
+### Image Optimization
+
+```bash
+# Convert to WebP
+cwebp -q 80 image.jpg -o image.jpg.webp
+
+# Convert to AVIF
+cavif --quality 80 image.jpg
+
+# Batch conversion
+find . -type f -name "*.jpg" -exec cwebp -q 80 {} -o {}.webp \;
+```
+
+### GitHub PR Creation
+
+The create-pr.sh script uses Claude CLI to generate AI-powered PR descriptions:
+
+```bash
+# Interactive mode with AI description
+./create-pr.sh
+
+# Non-interactive with arguments
+./create-pr.sh main "Add feature name"
+
+# Skip AI generation (0 tokens)
+./create-pr.sh --no-ai
+
+# Update existing PR
+./create-pr.sh --update
+```
+
+## Architecture and Patterns
+
+### Ansible Playbook Structure
+
+All Trellis integration playbooks follow this pattern:
+
+1. **Variable validation** - Import `variable-check.yml` to validate required `site` and `env` parameters
+2. **Host targeting** - Target specific environment: `hosts: web:&{{ env }}`
+3. **Remote user** - Use web_user defined in Trellis: `remote_user: "{{ web_user }}"`
+4. **Local delegation** - Tasks for development environment use `delegate_to: localhost` and `become: no`
+5. **Backup before destructive operations** - Pull/push playbooks create backups automatically
+6. **Cleanup** - Temporary files removed after operations
+
+### File Naming Conventions
+
+Backup files use timestamped naming:
+
+- **Database backups**: `{site}_{env}_{YYYY_MM_DD}_{HH_MM_SS}.sql.gz`
+- **Files backups**: `{site}_{env}_uploads_{YYYY_MM_DD}_{HH_MM_SS}.tar.gz`
+
+### Compression Strategy
+
+- **Database backups**: Use `.sql.gz` (gzip) for single SQL files with direct piping for performance
+- **Files backups**: Use `.tar.gz` for directory archives to preserve structure
+
+### URL Management in Database Operations
+
+Pull/push playbooks automatically handle URL replacement using WP-CLI search-replace:
+
+- Development URLs determined from `local_path` configuration
+- Remote URLs extracted from `canonical` hostname in site configuration
+- Replacement happens during database import with `wp search-replace`
+
+## Important Considerations
+
+### Trellis Configuration
+
+- Site names in Ansible commands must match keys in `group_vars/*/wordpress_sites.yml`
+- The `local_path` variable defines where the Bedrock site is located
+- Environment-specific vault files contain sensitive credentials
+
+### PHP Version Upgrades
+
+When upgrading PHP in Trellis, **must** include these tags:
+- `php` - Installs new version
+- `nginx` - Updates PHP-FPM socket configuration
+- `wordpress-setup` - Creates PHP version-specific pool configuration
+- `users` - **Critical**: Updates sudoers for PHP-FPM reload (deployments fail without this)
+- `memcached` - Installs version-specific memcached extension
+
+### WordPress Block Patterns
+
+Content created with WP-CLI uses WordPress block markup format:
+
+```html
+<!-- wp:pattern {"slug":"theme-name/pattern-slug"} /-->
+```
+
+When updating post content via WP-CLI:
+- Use heredocs with quoted delimiters: `<< 'EOF'`
+- For complex content, use Python escaping method
+- Always test locally before updating production
+
+### Nginx Configuration
+
+Custom Nginx includes (browser caching, image optimization) must be:
+1. Copied to Trellis `nginx-includes/` directory
+2. Referenced in `wordpress_sites.*.nginx_includes` configuration
+3. Applied via `trellis provision <environment>`
+
+## Development Workflow
+
+### Creating a PR with AI Description
+
+The create-pr.sh script is optimized for Claude CLI integration:
+
+1. Runs locally, analyzes git history
+2. Sends structured prompt to Claude (500-1,500 tokens vs 2,000-10,000 for manual)
+3. Generates professional description with grouped sections
+4. Creates clickable file links to GitHub
+5. Automatically detects change categories
+
+Use `--no-ai` flag for simple PRs to avoid token usage.
+
+### Testing Backup Operations
+
+Before running backup operations on production:
+
+1. Test on development environment first
+2. Verify backup file creation and location
+3. For pull/push operations, verify URL replacement is correct
+4. Always check disk space before creating backups
+
+### Image Optimization Workflow
+
+1. Resize/crop images with ImageMagick if needed
+2. Convert to WebP/AVIF formats
+3. Deploy Nginx configuration to serve optimized formats automatically
+4. Original images serve as fallback for unsupported browsers
+
+## Notes for AI Assistants
+
+- When suggesting Ansible playbook modifications, maintain the existing error handling and backup patterns
+- Database operations should always use WP-CLI through `wp` commands, not direct MySQL
+- Shell scripts should follow the existing pattern of configuration variables at the top
+- Nginx configuration files use Jinja2 templating (`.conf.j2` extension)
+- All backup/pull/push operations require both `site` and `env` parameters
+- The repository contains documentation-only tools; they're copied into Trellis projects for actual use
