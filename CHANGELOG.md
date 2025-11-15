@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.0] - 2025-11-15
+
+### Added
+- Content creation guide with WordPress block patterns and WP-CLI commands
+- Image resizing and conversion guide (RESIZE-AND-CONVERSION.md) with comprehensive ImageMagick examples
+- Detailed workflows for creating optimized avatars and thumbnails
+- Batch processing examples for image conversion
+- Quality settings recommendations for JPEG, WebP, and AVIF formats
+- Responsive image workflow examples
+- File size comparison data for different image formats
+
+### Changed
+- Enhanced image optimization documentation with better structure and cross-references
+- Updated README to reference new image resizing guide
+- Improved quality settings guidance across all image formats
+- Added ImageMagick installation instructions to main image optimization README
+
 ## [1.4.0] - 2025-10-23
 
 ### Added
@@ -120,16 +137,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Trellis updater script for safe Trellis updates
 - Automated backup and update workflow
 - Git integration for tracking changes
-
-[Unreleased]: https://github.com/imagewize/trellis-tools/compare/v1.3.0...HEAD
-[1.4.0]: https://github.com/imagewize/trellis-tools/compare/v1.3.0...v1.4.0
-[1.3.0]: https://github.com/imagewize/trellis-tools/compare/v1.2.0...v1.3.0
-[1.2.0]: https://github.com/imagewize/trellis-tools/compare/v1.1.0...v1.2.0
-[1.1.0]: https://github.com/imagewize/trellis-tools/compare/v1.0.0...v1.1.0
-[1.0.0]: https://github.com/imagewize/trellis-tools/compare/v1.0.0-beta.4...v1.0.0
-[1.0.0-beta.4]: https://github.com/imagewize/trellis-tools/compare/v1.0.0-beta.3...v1.0.0-beta.4
-[1.0.0-beta.3]: https://github.com/imagewize/trellis-tools/compare/v1.0.0-beta.2...v1.0.0-beta.3
-[1.0.0-beta.2]: https://github.com/imagewize/trellis-tools/compare/v1.0.0-beta.1...v1.0.0-beta.2
-[1.0.0-beta.1]: https://github.com/imagewize/trellis-tools/compare/v1.0.0-alpha.2...v1.0.0-beta.1
-[1.0.0-alpha.2]: https://github.com/imagewize/trellis-tools/compare/v1.0.0-alpha.1...v1.0.0-alpha.2
-[1.0.0-alpha.1]: https://github.com/imagewize/trellis-tools/releases/tag/v1.0.0-alpha.1
