@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.1] - 2025-11-15
+
+### Added
+- CLAUDE.md file with comprehensive guidance for Claude Code AI assistant
+- Architecture documentation for Ansible playbook structure and patterns
+- File naming conventions and compression strategies documentation
+- URL management patterns for database operations
+- Development workflow guidance for PR creation and backup testing
+
+### Changed
+- Updated README with Content Creation Tools section (tool #6)
+- Updated README with GitHub PR Creation Script section (tool #7)
+- Renumbered Theme Sync Script to #8 and Provisioning Documentation to #9
+- Enhanced Requirements section with tool-specific dependencies
+- Improved documentation organization and cross-references
+
 ## [1.5.0] - 2025-11-15
 
 ### Added
