@@ -10,8 +10,10 @@ A collection of tools to enhance your [Roots Trellis](https://roots.io/trellis/)
   - [3. Browser Caching Configuration](#3-browser-caching-configuration)
   - [4. WordPress Migration Tools](#4-wordpress-migration-tools)
   - [5. Backup Tools](#5-backup-tools)
-  - [6. Theme Sync Script](#6-theme-sync-script)
-  - [7. Provisioning Documentation](#7-provisioning-documentation)
+  - [6. Content Creation Tools](#6-content-creation-tools)
+  - [7. GitHub PR Creation Script](#7-github-pr-creation-script)
+  - [8. Theme Sync Script](#8-theme-sync-script)
+  - [9. Provisioning Documentation](#9-provisioning-documentation)
 - [Requirements](#requirements)
 - [License](#license)
 - [Author](#author)
@@ -160,7 +162,88 @@ ansible-playbook backup/trellis/files-push.yml -e site=example.com -e env=stagin
 
 For detailed instructions, configuration options, and best practices, please refer to the [Backup Documentation](backup/README.md).
 
-### 6. Theme Sync Script
+### 6. Content Creation Tools
+
+Comprehensive documentation and techniques for creating and managing WordPress content using WP-CLI, block patterns, and shell scripting.
+
+#### Features
+
+- **WP-CLI Content Management** - Create, update, and manage WordPress pages and posts from the command line
+- **Block Pattern Integration** - Use WordPress block patterns in automated content creation
+- **Remote Content Operations** - Update content on remote servers via Trellis
+- **Batch Content Updates** - Scripts for updating multiple pages at once
+- **Pattern Categories Reference** - Organized catalog of block pattern types and use cases
+- **Complete Workflow Examples** - Real-world examples for common content operations
+
+#### Usage
+
+The content creation tools are particularly useful for:
+
+- Automating page creation with pre-designed block patterns
+- Bulk updating content across multiple pages
+- Deploying standardized page layouts
+- Managing content in Bedrock/Trellis environments
+
+**Basic WP-CLI Operations:**
+```bash
+# Create a new page
+wp post create --post_type=page --post_title="My Page" --post_status=publish --path=web/wp
+
+# Update page content with block patterns
+wp post update 100 --post_content="$(cat page-content.html)" --path=web/wp
+
+# Remote operations via Trellis
+trellis vm shell --workdir /srv/www/example.com/current -- wp post list --path=web/wp
+```
+
+For detailed instructions, block pattern examples, and automation workflows, please refer to the [Content Creation Guide](content-creation/README.md).
+
+### 7. GitHub PR Creation Script
+
+An intelligent script that creates GitHub pull requests with professional, AI-powered descriptions similar to GitHub Copilot.
+
+#### Features
+
+- **AI-Powered Descriptions** - Uses Claude CLI to analyze git diffs and generate intelligent PR summaries
+- **Professional Formatting** - Creates descriptions with grouped sections, bold headings, and detailed bullet points
+- **Clickable File Links** - Each changed file links directly to GitHub for quick review
+- **Smart Categorization** - Automatically detects change types (dependencies, documentation, styling, etc.)
+- **Token Efficient** - Uses 70-85% fewer tokens compared to manual PR creation with Claude
+- **Fallback Mode** - Works without AI when using `--no-ai` flag (zero token usage)
+- **Update Existing PRs** - Can regenerate descriptions for existing pull requests
+
+#### Usage
+
+The [create-pr.sh](create-pr.sh) script integrates with Claude CLI and GitHub CLI to automate PR creation:
+
+**Interactive Mode:**
+```bash
+# Interactive prompts for base branch, title, and AI usage
+./create-pr.sh
+```
+
+**Non-Interactive Mode:**
+```bash
+# Specify all parameters
+./create-pr.sh main "Add new feature"
+
+# Skip all prompts, use defaults
+./create-pr.sh --no-interactive
+
+# Skip AI generation (0 tokens, basic description)
+./create-pr.sh --no-ai
+
+# Update existing PR description
+./create-pr.sh --update
+```
+
+**Prerequisites:**
+- GitHub CLI (`gh`) - Required for PR creation
+- Claude CLI - Optional, for AI-powered descriptions (automatically available if using Claude Code in VS Code)
+
+For detailed usage, token comparison, and customization options, please refer to the [PR Creation Script Documentation](CREATE-PR.md).
+
+### 8. Theme Sync Script
 
 A simple rsync script to synchronize theme files from your Trellis project to a standalone theme repository, useful for theme development workflows.
 
@@ -191,7 +274,7 @@ The [rsync-theme.sh](rsync-theme.sh) script needs to be customized with your spe
 
 The script uses `rsync` with the `--delete` flag, which means files deleted from the source will also be deleted from the destination.
 
-### 7. Provisioning Documentation
+### 9. Provisioning Documentation
 
 Quick reference guide for common Trellis provisioning commands and workflows.
 
@@ -206,9 +289,16 @@ For detailed provisioning commands and workflows, please refer to the [Provision
 
 ## Requirements
 
+### Core Requirements
 - Git
 - Bash
 - rsync
+
+### Tool-Specific Requirements
+- **Backup Tools**: Ansible, WP-CLI, Trellis
+- **Image Optimization**: ImageMagick, cwebp, cavif
+- **Content Creation**: WP-CLI, Trellis (for remote operations)
+- **PR Creation**: GitHub CLI (`gh`), Claude CLI (optional, for AI descriptions)
 
 ## License
 
