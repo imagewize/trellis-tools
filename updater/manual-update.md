@@ -42,6 +42,7 @@ Copy all new files to your existing Trellis setup, while carefully excluding you
 ```bash
 rsync -av \
   --exclude=".vault_pass" \
+  --exclude="ansible.cfg" \
   --exclude=".trellis/" \
   --exclude=".git/" \
   --exclude=".github/" \
