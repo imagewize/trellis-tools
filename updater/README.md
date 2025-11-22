@@ -18,20 +18,47 @@ A Bash script to safely update your [Roots Trellis](https://roots.io/trellis/) i
 ## What This Script Preserves
 
 The updater script specifically preserves the following files/directories:
+
+### Secrets & Credentials
 - `.vault_pass`
-- `.trellis/`
-- `.git/`
-- `.github/`
 - `group_vars/all/vault.yml`
 - `group_vars/development/vault.yml`
-- `group_vars/development/wordpress_sites.yml`
 - `group_vars/production/vault.yml`
-- `group_vars/production/wordpress_sites.yml`
 - `group_vars/staging/vault.yml`
+
+### Git & CI/CD
+- `.git/`
+- `.github/`
+- `.trellis/`
+
+### Site-Specific Configurations
+- `group_vars/development/wordpress_sites.yml`
+- `group_vars/production/wordpress_sites.yml`
 - `group_vars/staging/wordpress_sites.yml`
 - `group_vars/all/users.yml`
-- `trellis.cli.yml`
 - `hosts/` directory
+- `trellis.cli.yml`
+
+### Custom PHP/Server Settings
+- `group_vars/all/main.yml` - PHP memory limits, timezone, etc.
+- `group_vars/production/main.yml` - PHP-FPM pool settings, MariaDB config
+- `group_vars/staging/main.yml` - Environment-specific overrides
+- `group_vars/development/main.yml` - Development settings
+
+### Custom Deploy Hooks
+- `deploy-hooks/` - Custom deployment scripts (e.g., memory limits for wp acorn)
+
+## Post-Upgrade Manual Review
+
+After upgrading, you should manually review and potentially merge changes from the new Trellis version:
+
+1. **Role template changes** - Check if upstream changed any templates you've customized:
+   - `roles/mariadb/templates/` - If you added custom MariaDB settings
+   - `roles/wordpress-setup/templates/` - If you modified PHP-FPM pool templates
+
+2. **New variables** - Check upstream `main.yml` files for new useful variables you may want to adopt
+
+3. **Galaxy roles** - Run `ansible-galaxy install -r galaxy.yml` to update dependencies
 
 ## Usage
 

@@ -29,6 +29,13 @@ diff -rq $TEMP_DIR/trellis/ $TRELLIS_DIR/ > $DIFF_DIR/changes.txt
 rm -rf $TEMP_DIR/trellis/.git
 
 # Step 6: Update Trellis files using rsync with explicit excludes
+# Note: Excludes are organized by category:
+#   - Secrets & credentials (vault files, .vault_pass)
+#   - Git & CI/CD (.git, .github)
+#   - Site-specific configs (wordpress_sites.yml, hosts/)
+#   - Custom PHP/server settings (main.yml files with php_memory_limit, PHP-FPM settings)
+#   - Custom deploy hooks (build-before.yml, build-after.yml with memory limits)
+#   - CLI config (trellis.cli.yml)
 rsync -av --delete \
   --exclude=".vault_pass" \
   --exclude=".trellis/" \
@@ -42,6 +49,11 @@ rsync -av --delete \
   --exclude="group_vars/staging/vault.yml" \
   --exclude="group_vars/staging/wordpress_sites.yml" \
   --exclude="group_vars/all/users.yml" \
+  --exclude="group_vars/all/main.yml" \
+  --exclude="group_vars/production/main.yml" \
+  --exclude="group_vars/staging/main.yml" \
+  --exclude="group_vars/development/main.yml" \
+  --exclude="deploy-hooks/" \
   --exclude="trellis.cli.yml" \
   --exclude="hosts/" \
   $TEMP_DIR/trellis/ $TRELLIS_DIR/
