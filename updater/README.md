@@ -20,7 +20,8 @@ A Bash script to safely update your [Roots Trellis](https://roots.io/trellis/) i
 The updater script specifically preserves the following files/directories:
 
 ### Secrets & Credentials
-- `.vault_pass`
+- `.vault_pass` - Vault password file
+- `ansible.cfg` - Contains `vault_password_file` setting (CRITICAL!)
 - `group_vars/all/vault.yml`
 - `group_vars/development/vault.yml`
 - `group_vars/production/vault.yml`
@@ -119,6 +120,32 @@ Look specifically for:
 - New roles (e.g., `roles/redis/` in v1.26.0+)
 - Changed defaults in `roles/*/defaults/main.yml`
 - Template changes that might conflict with your customizations
+
+### Vault Password / Provision Failures
+If you see "Attempting to decrypt but no vault secrets found" when running `trellis provision`:
+
+1. **Check `.vault_pass` exists:**
+   ```bash
+   ls -la ~/code/yoursite.com/trellis/.vault_pass
+   ```
+
+2. **Check `ansible.cfg` has vault setting:**
+   ```bash
+   grep vault_password_file ~/code/yoursite.com/trellis/ansible.cfg
+   ```
+   Should show: `vault_password_file = .vault_pass`
+
+3. **Check vault.yml files exist:**
+   ```bash
+   ls -la ~/code/yoursite.com/trellis/group_vars/*/vault.yml
+   ```
+
+4. **Restore from backup if missing:**
+   ```bash
+   cp ~/trellis-backup/.vault_pass ~/code/yoursite.com/trellis/
+   cp ~/trellis-backup/ansible.cfg ~/code/yoursite.com/trellis/
+   cp ~/trellis-backup/group_vars/*/vault.yml ~/code/yoursite.com/trellis/group_vars/*/
+   ```
 
 ## Requirements
 

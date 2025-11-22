@@ -38,6 +38,7 @@ rm -rf $TEMP_DIR/trellis/.git
 #   - CLI config (trellis.cli.yml)
 rsync -av --delete \
   --exclude=".vault_pass" \
+  --exclude="ansible.cfg" \
   --exclude=".trellis/" \
   --exclude=".git/" \
   --exclude=".github/" \
@@ -57,6 +58,25 @@ rsync -av --delete \
   --exclude="trellis.cli.yml" \
   --exclude="hosts/" \
   $TEMP_DIR/trellis/ $TRELLIS_DIR/
+
+# Step 6b: Verify critical files were preserved
+echo ""
+echo "=== Verifying critical files ==="
+if [ ! -f "$TRELLIS_DIR/.vault_pass" ]; then
+  echo "WARNING: .vault_pass is missing! Restore from backup:"
+  echo "  cp $BACKUP_DIR/.vault_pass $TRELLIS_DIR/"
+fi
+if ! grep -q "vault_password_file" "$TRELLIS_DIR/ansible.cfg" 2>/dev/null; then
+  echo "WARNING: ansible.cfg missing vault_password_file! Restore from backup:"
+  echo "  cp $BACKUP_DIR/ansible.cfg $TRELLIS_DIR/"
+fi
+for env in all development production staging; do
+  if [ ! -f "$TRELLIS_DIR/group_vars/$env/vault.yml" ]; then
+    echo "WARNING: group_vars/$env/vault.yml is missing! Restore from backup:"
+    echo "  cp $BACKUP_DIR/group_vars/$env/vault.yml $TRELLIS_DIR/group_vars/$env/"
+  fi
+done
+echo "=== Verification complete ==="
 
 # Step 7: Clean up temporary directory
 # rm -rf $TEMP_DIR
