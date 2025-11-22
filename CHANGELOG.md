@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.3] - 2025-11-22
+
+### Added
+- Critical file verification step in trellis-updater.sh that checks for `.vault_pass`, `ansible.cfg`, and vault.yml files after update
+- Vault password troubleshooting section in updater README with step-by-step recovery instructions
+- `ansible.cfg` to rsync exclusion list to preserve vault_password_file setting
+
+### Changed
+- Updated preservation list in README to note `ansible.cfg` as CRITICAL for vault operations
+
 ## [1.5.2] - 2025-11-22
 
 ### Added
