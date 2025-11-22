@@ -80,6 +80,46 @@ chmod +x updates/trellis-updater.sh
 
 4. Review the changes in your Git repository before pushing them.
 
+## Troubleshooting & Tips
+
+### Backup Directory Issues
+The script uses `~/trellis-backup/` by default. If you get errors like `mkdir: : No such file or directory`, ensure you're using absolute paths in the script variables.
+
+### MariaDB Template Customizations
+The rsync command will overwrite role templates. If you have customizations in:
+- `roles/mariadb/templates/50-server.cnf.j2` (e.g., `max_allowed_packet`, `max_connections`)
+- `roles/wordpress-setup/templates/php-fpm-pool-wordpress.conf.j2`
+
+You'll need to re-apply them after the upgrade. Check with:
+```bash
+git diff trellis/roles/mariadb/templates/50-server.cnf.j2
+```
+
+### Testing Without Full Provision
+Instead of running `trellis provision development` (which takes time), you can verify the upgrade works with quick VM checks:
+```bash
+# If VM is already running
+trellis vm shell --workdir /srv/www/yoursite.com/current -- wp --version --path=web/wp
+trellis vm shell --workdir /srv/www/yoursite.com/current -- wp db check --path=web/wp
+```
+
+### Galaxy Roles
+Always use `--force` flag when updating Galaxy roles after an upgrade:
+```bash
+ansible-galaxy install -r galaxy.yml --force
+```
+
+### Diff Review Tips
+The generated diff at `~/trellis-diff/changes.txt` shows file-level changes. For detailed line-by-line review:
+```bash
+git diff trellis/
+```
+
+Look specifically for:
+- New roles (e.g., `roles/redis/` in v1.26.0+)
+- Changed defaults in `roles/*/defaults/main.yml`
+- Template changes that might conflict with your customizations
+
 ## Requirements
 
 - Git
