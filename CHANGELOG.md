@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.2] - 2025-11-22
+
+### Added
+- Post-upgrade manual review section in updater README with guidance for role templates, new variables, and Galaxy roles
+- Organized preservation list by category (Secrets, Git/CI, Site Config, PHP/Server Settings, Deploy Hooks)
+
+### Changed
+- Updated trellis-updater.sh to exclude custom PHP/server settings (`main.yml` files) and deploy hooks
+- Updated manual-update.md rsync command with additional exclusions for `main.yml` files and `deploy-hooks/`
+- Added explanatory comments in updater script for rsync exclude categories
+
 ## [1.5.1] - 2025-11-15
 
 ### Added
