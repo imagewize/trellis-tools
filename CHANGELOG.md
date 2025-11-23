@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.0] - 2025-11-23
+
+### Added
+- New troubleshooting section with comprehensive server diagnostics guides
+- PHP-FPM troubleshooting guide covering pool exhaustion, memory management, worker configuration, and the low-traffic recycling problem
+- MariaDB troubleshooting guide covering startup failures, compression plugin issues, and connection problems
+- Quick diagnostic commands reference for system health checks
+
 ## [1.5.3] - 2025-11-22
 
 ### Added
