@@ -14,6 +14,7 @@ A collection of tools to enhance your [Roots Trellis](https://roots.io/trellis/)
   - [7. GitHub PR Creation Script](#7-github-pr-creation-script)
   - [8. Theme Sync Script](#8-theme-sync-script)
   - [9. Provisioning Documentation](#9-provisioning-documentation)
+  - [10. Troubleshooting Guides](#10-troubleshooting-guides)
 - [Requirements](#requirements)
 - [License](#license)
 - [Author](#author)
@@ -74,6 +75,16 @@ Simple rsync script ([rsync-theme.sh](rsync-theme.sh)) to synchronize theme file
 Quick reference guide for common Trellis provisioning commands, deployment workflows, server re-provisioning with tags, and PHP version upgrades.
 
 See the [Provisioning Guide](provision/README.md) for detailed commands and workflows.
+
+### 10. Troubleshooting Guides
+
+Comprehensive guides for diagnosing and resolving common issues with Trellis-managed servers. Includes quick diagnostic commands and detailed troubleshooting workflows.
+
+**Guides:**
+- [PHP-FPM Troubleshooting](troubleshooting/PHP-FPM.md) - Pool exhaustion, memory management, worker configuration
+- [MariaDB Troubleshooting](troubleshooting/MariaDB.md) - Startup failures, plugin issues, connection problems
+
+See the [Troubleshooting Overview](troubleshooting/README.md) for quick diagnostic commands and all guides.
 
 ## Requirements
 
