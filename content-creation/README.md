@@ -10,6 +10,9 @@ This guide covers techniques for creating and managing WordPress content using W
 - [Complete Workflow Examples](#complete-workflow-examples)
 - [Pattern Categories Reference](#pattern-categories-reference)
 - [Tips and Best Practices](#tips-and-best-practices)
+- [Troubleshooting](#troubleshooting)
+- [Additional Resources](#additional-resources)
+- [Related Guides](#related-guides)
 
 ## Prerequisites
 
@@ -468,5 +471,6 @@ wp post get 100 --field=post_content --path=web/wp | head -50
 
 ## Related Guides
 
+- [Page Creation Guide](PAGE-CREATION.md) - Complete step-by-step guide for creating WordPress pages locally and in production
 - [Image Optimization](../image-optimization/README.md) - Optimize images used in your patterns
 - [Migration Guide](../migration/README.md) - Migrating content between environments
