@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.8.0] - 2025-11-25
+
+### Added
+- Comprehensive WordPress page creation guide (PAGE-CREATION.md) with step-by-step instructions for Trellis/Bedrock
+- Local development workflow using Trellis VM and WP-CLI for page creation
+- Production deployment strategies (recreate, export/import, WXR)
+- Content preparation guidelines for Gutenberg blocks and patterns
+- Common issues and solutions for page creation workflows
+- Best practices for development, security, performance, and SEO optimization
+- Complete example workflows with full command sequences
+- Quick reference guide with essential paths and commands
+
+### Changed
+- Enhanced content-creation README with Page Creation Guide reference
+- Updated Related Guides section in content-creation README
+- Added troubleshooting and additional resources sections to content-creation README
+
 ## [1.7.0] - 2025-11-25
 
 ### Added
