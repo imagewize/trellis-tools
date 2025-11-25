@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.7.0] - 2025-11-25
+
+### Added
+- Out of Memory (OOM) troubleshooting guide with comprehensive WP-Cron memory leak diagnosis
+- Mail configuration troubleshooting guide for SMTP issues after Trellis upgrades
+- OOM guide includes PHP CLI memory limit analysis, WP-Cron investigation, and Action Scheduler debugging
+- Mail guide includes symptoms, diagnosis steps, and prevention best practices
+- Mail configuration verification step in trellis-updater.sh that checks for SMTP settings (Brevo/Sendgrid) after update
+- `mail.yml` to rsync exclusion list in both trellis-updater.sh and manual-update.md
+- Detailed mail.yml restoration instructions in updater script warnings
+
+### Changed
+- Updated troubleshooting README to include OOM and MAIL guides in guides table
+- Enhanced trellis-updater.sh with mail.yml preservation and verification
+- Enhanced manual-update.md with mail.yml exclusion and preservation notes
+- Updated updater rsync comments to include SMTP settings preservation category
+- Improved file verification warnings with specific restoration commands for mail.yml
+
 ## [1.6.0] - 2025-11-23
 
 ### Added

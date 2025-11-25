@@ -34,6 +34,7 @@ rm -rf $TEMP_DIR/trellis/.git
 #   - Git & CI/CD (.git, .github)
 #   - Site-specific configs (wordpress_sites.yml, hosts/)
 #   - Custom PHP/server settings (main.yml files with php_memory_limit, PHP-FPM settings)
+#   - Custom SMTP settings (mail.yml with Brevo/Sendgrid credentials)
 #   - Custom deploy hooks (build-before.yml, build-after.yml with memory limits)
 #   - CLI config (trellis.cli.yml)
 rsync -av --delete \
@@ -51,6 +52,7 @@ rsync -av --delete \
   --exclude="group_vars/staging/wordpress_sites.yml" \
   --exclude="group_vars/all/users.yml" \
   --exclude="group_vars/all/main.yml" \
+  --exclude="group_vars/all/mail.yml" \
   --exclude="group_vars/production/main.yml" \
   --exclude="group_vars/staging/main.yml" \
   --exclude="group_vars/development/main.yml" \
@@ -69,6 +71,11 @@ fi
 if ! grep -q "vault_password_file" "$TRELLIS_DIR/ansible.cfg" 2>/dev/null; then
   echo "WARNING: ansible.cfg missing vault_password_file! Restore from backup:"
   echo "  cp $BACKUP_DIR/ansible.cfg $TRELLIS_DIR/"
+fi
+if ! grep -q "smtp-relay.brevo.com\|smtp.sendgrid.net" "$TRELLIS_DIR/group_vars/all/mail.yml" 2>/dev/null; then
+  echo "WARNING: mail.yml may have been overwritten with example values! Restore from backup:"
+  echo "  cp $BACKUP_DIR/group_vars/all/mail.yml $TRELLIS_DIR/group_vars/all/"
+  echo "  Or manually update mail_smtp_server, mail_user, mail_admin, mail_hostname"
 fi
 for env in all development production staging; do
   if [ ! -f "$TRELLIS_DIR/group_vars/$env/vault.yml" ]; then

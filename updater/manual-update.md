@@ -55,6 +55,7 @@ rsync -av \
   --exclude="group_vars/staging/wordpress_sites.yml" \
   --exclude="group_vars/all/users.yml" \
   --exclude="group_vars/all/main.yml" \
+  --exclude="group_vars/all/mail.yml" \
   --exclude="group_vars/production/main.yml" \
   --exclude="group_vars/staging/main.yml" \
   --exclude="group_vars/development/main.yml" \
@@ -64,7 +65,11 @@ rsync -av \
   ~/trellis-temp/trellis/ ~/code/website.com/trellis/
 ```
 
-**Note:** The `main.yml` files contain custom PHP/server settings (memory limits, PHP-FPM pool config, MariaDB settings) and `deploy-hooks/` contains custom deployment scripts. These are excluded to preserve your customizations.
+**Note:** The excluded files contain your custom configurations:
+- `main.yml` files: PHP/server settings (memory limits, PHP-FPM pool config, MariaDB settings)
+- `mail.yml`: SMTP server configuration (Brevo/Sendgrid credentials)
+- `deploy-hooks/`: Custom deployment scripts
+These are excluded to preserve your customizations.
 
 # Step 7: Clean up temporary directory
 Remove the temporary directory as it's no longer needed:

@@ -8,6 +8,8 @@ This section contains guides for diagnosing and resolving common issues with Tre
 |-------|-------------|
 | [PHP-FPM.md](PHP-FPM.md) | Pool exhaustion, memory management, worker configuration |
 | [MariaDB.md](MariaDB.md) | Startup failures, plugin issues, connection problems |
+| [OOM.md](OOM.md) | Out of memory issues, WP-Cron memory leaks, PHP CLI limits |
+| [MAIL.md](MAIL.md) | SMTP configuration issues after Trellis upgrades |
 
 ## Quick Diagnostic Commands
 
