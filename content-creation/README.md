@@ -2,7 +2,15 @@
 
 This guide covers techniques for creating and managing WordPress content using WP-CLI, block patterns, and shell scripting. These tools are particularly useful for Trellis/Bedrock deployments where you need to automate content creation or bulk-update pages.
 
+## Files in This Directory
+
+- **[PAGE-CREATION.md](PAGE-CREATION.md)** - Complete step-by-step guide for creating WordPress pages in local development and production
+- **[page-creation.sh](page-creation.sh)** - Automated script for deploying pages to production servers
+- **[example-page-content.html](example-page-content.html)** - Example HTML file with WordPress Gutenberg block markup
+- **README.md** (this file) - General content creation techniques and WP-CLI workflows
+
 ## Table of Contents
+- [Quick Start](#quick-start)
 - [Prerequisites](#prerequisites)
 - [Understanding WordPress Block Patterns](#understanding-wordpress-block-patterns)
 - [Creating Content with WP-CLI](#creating-content-with-wp-cli)
@@ -13,6 +21,23 @@ This guide covers techniques for creating and managing WordPress content using W
 - [Troubleshooting](#troubleshooting)
 - [Additional Resources](#additional-resources)
 - [Related Guides](#related-guides)
+
+## Quick Start
+
+**Creating a new page in production:**
+```bash
+# 1. Copy and customize the example content file
+cp example-page-content.html my-page-content.html
+nano my-page-content.html
+
+# 2. Edit the script configuration (first time only)
+nano page-creation.sh  # Update SERVER_USER, SERVER_HOST, etc.
+
+# 3. Run the automated deployment script
+./page-creation.sh my-page-content.html "My Page Title" "my-page-slug"
+```
+
+For detailed instructions, see [PAGE-CREATION.md](PAGE-CREATION.md).
 
 ## Prerequisites
 
