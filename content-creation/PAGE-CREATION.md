@@ -14,8 +14,10 @@ Complete guide for creating WordPress pages on Trellis VM (local development) an
 2. [Local Development (Trellis VM)](#local-development-trellis-vm)
 3. [Production Deployment](#production-deployment)
 4. [Content Preparation](#content-preparation)
-5. [Common Issues & Solutions](#common-issues--solutions)
-6. [Best Practices](#best-practices)
+5. [Automated Script Details](#automated-script-details)
+6. [Common Issues & Solutions](#common-issues--solutions)
+7. [Best Practices](#best-practices)
+8. [Examples](#examples)
 
 ---
 
@@ -52,9 +54,11 @@ Complete guide for creating WordPress pages on Trellis VM (local development) an
 Create an HTML file with Gutenberg block markup:
 
 ```bash
-# Location: Can be anywhere, will be copied to site directory
-nano ~/code/seo-strategy/about-page-content.html
+# Create your content file (can be anywhere, will be copied to site directory)
+nano about-page-content.html
 ```
+
+**Tip:** See [example-page-content.html](example-page-content.html) in this directory for a complete example using WordPress Gutenberg blocks.
 
 **Content Structure:**
 - Use WordPress Gutenberg block comments (`<!-- wp:block-name -->`)
@@ -104,8 +108,7 @@ The Trellis VM can access files in the synced project directory:
 
 ```bash
 # Copy content to site directory (accessible by VM at /srv/www/example.com/current/)
-cp ~/path/to/your/about-page-content.html \
-   ~/code/example.com/site/about-page-content.html
+cp about-page-content.html ~/code/example.com/site/about-page-content.html
 ```
 
 **Why this step?**
@@ -193,13 +196,69 @@ rm ~/code/example.com/site/about-page-content.html
 
 ## Production Deployment
 
-### Option 1: Recreate Page on Production
+### Option 1: Automated Script (Recommended)
+
+Use the provided [page-creation.sh](page-creation.sh) script for automated deployment:
+
+**Features:**
+- Automated file transfer via SCP
+- Conflict detection and resolution
+- Interactive prompts for safety
+- Automatic cleanup
+- Comprehensive verification
+
+**Usage:**
+```bash
+# Basic usage
+./page-creation.sh about-page-content.html "About" "about"
+
+# The script will:
+# 1. Copy the HTML file to production server
+# 2. Check for existing pages/attachments with the same slug
+# 3. Prompt for deletion if conflicts exist
+# 4. Create the page with WP-CLI
+# 5. Verify creation and display page URL
+# 6. Clean up temporary files
+```
+
+**Script Configuration:**
+Edit these variables in the script to match your server:
+```bash
+SERVER_USER="web"
+SERVER_HOST="imagewize.com"
+SERVER_PATH="/srv/www/imagewize.com/current"
+WP_PATH="web/wp"
+```
+
+**Example Output:**
+```
+[INFO] Starting page creation process for: About (slug: about)
+[INFO] Step 1: Copying content file to production server...
+[INFO] ✓ File copied successfully to /tmp/about-page-content.html
+[INFO] Step 2: Checking for existing content with slug 'about'...
+[INFO] ✓ No conflicting content found
+[INFO] Step 3: Creating page 'About'...
+[INFO] ✓ Page created successfully with ID: 12345
+[INFO] Step 4: Verifying page creation...
+[INFO] ✓ Page verification successful
+[INFO] Step 5: Cleaning up temporary files...
+[INFO] ✓ Cleanup complete
+
+================================================
+Page created successfully!
+Page ID: 12345
+URL: https://imagewize.com/about/
+Admin URL: https://imagewize.com/wp/wp-admin/post.php?post=12345&action=edit
+================================================
+```
+
+### Option 2: Manual Production Deployment
 
 **Step 1: Prepare Content**
 ```bash
 # Copy content file to server-accessible location
 # Replace web@example.com with your actual server user and domain
-scp ~/path/to/your/about-page-content.html web@example.com:/tmp/
+scp about-page-content.html web@example.com:/tmp/
 ```
 
 **Step 2: Create Page**
@@ -352,6 +411,74 @@ style="padding-top:60px"
 - Maintain proper hierarchy
 
 ---
+
+## Automated Script Details
+
+The [page-creation.sh](page-creation.sh) script provides a streamlined workflow with built-in safety checks.
+
+### Script Workflow
+
+1. **Argument Validation**
+   - Requires exactly 3 arguments: content file, page title, page slug
+   - Validates content file exists locally
+   - Provides usage examples if arguments are missing
+
+2. **File Transfer**
+   - Uses SCP to copy HTML content to `/tmp/` on production server
+   - Verifies successful transfer before proceeding
+   - Exits with error if transfer fails
+
+3. **Conflict Detection**
+   - Checks for existing posts/pages/attachments with the same slug
+   - Displays details of conflicting content in table format
+   - Prompts for confirmation before deletion
+   - Supports deleting multiple conflicting items
+
+4. **Page Creation**
+   - Reads content file on remote server
+   - Creates page with specified title, slug, and published status
+   - Returns page ID for verification
+   - Handles errors gracefully
+
+5. **Verification**
+   - Retrieves page details via WP-CLI
+   - Displays JSON formatted page information
+   - Shows page URL and admin edit URL
+
+6. **Cleanup**
+   - Removes temporary content file from server
+   - Runs regardless of success/failure (when reached)
+
+### Script Customization
+
+**Server Configuration:**
+```bash
+SERVER_USER="web"          # SSH user for production server
+SERVER_HOST="imagewize.com"  # Production server hostname
+SERVER_PATH="/srv/www/imagewize.com/current"  # Bedrock root path
+WP_PATH="web/wp"           # WordPress installation path (Bedrock structure)
+```
+
+**Color Output:**
+- Green `[INFO]` - Successful operations
+- Yellow `[WARN]` - Warnings (conflicts found, etc.)
+- Red `[ERROR]` - Errors requiring attention
+
+### Security Considerations
+
+- Script uses `set -e` to exit immediately on any command failure
+- Requires explicit "yes" confirmation for destructive operations
+- Uses `--force` flag when deleting to permanently remove content
+- Cleans up temporary files even on failure
+- Content files stored in `/tmp/` with unique names
+
+### Requirements
+
+- **SSH access** to production server with key-based authentication
+- **SCP** enabled on production server
+- **WP-CLI** installed on production server
+- **Python 3** for JSON formatting (verification step)
+- **Bash** shell (tested with bash 4.0+)
 
 ## Common Issues & Solutions
 
@@ -522,7 +649,22 @@ bash -c "CONTENT=$(cat file.html) && wp post create --post_content=\"$CONTENT\""
 
 ---
 
-## Example: Complete About Page Creation
+## Examples
+
+### Example 1: Using Automated Script (Production)
+
+```bash
+# 1. Prepare your content file (use example-page-content.html as a template)
+nano about-page-content.html
+
+# 2. Run the automated script
+./page-creation.sh about-page-content.html "About" "about"
+
+# 3. Follow prompts if conflicts exist
+# The script handles everything else automatically!
+```
+
+### Example 2: Complete Local Development Workflow
 
 ### Full Command Sequence
 
@@ -540,8 +682,7 @@ trellis vm shell --workdir /srv/www/example.com/current -- \
   wp post delete 2366 1366 --force --path=web/wp
 
 # 4. Copy content file
-cp ~/path/to/your/about-page-content.html \
-   ~/code/example.com/site/about-page-content.html
+cp about-page-content.html ~/code/example.com/site/about-page-content.html
 
 # 5. Create page
 trellis vm shell --workdir /srv/www/example.com/current -- bash -c '

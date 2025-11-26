@@ -56,7 +56,12 @@ See the [Backup Documentation](backup/README.md) for commands, configuration, an
 
 ### 6. Content Creation Tools
 
-Documentation and techniques for creating and managing WordPress content using WP-CLI and block patterns. Includes workflows for automated page creation, batch updates, and remote content operations.
+Automated page creation script and comprehensive documentation for creating and managing WordPress content using WP-CLI and block patterns. Includes an automated production deployment script, example content templates, and workflows for page creation, batch updates, and remote content operations.
+
+**Features:**
+- **Automated Script** ([page-creation.sh](content-creation/page-creation.sh)) - Deploy pages to production with conflict detection, interactive prompts, and verification
+- **Example Template** ([example-page-content.html](content-creation/example-page-content.html)) - Ready-to-use Gutenberg block markup example
+- **Complete Guide** ([PAGE-CREATION.md](content-creation/PAGE-CREATION.md)) - Step-by-step instructions for local and production workflows
 
 See the [Content Creation Guide](content-creation/README.md) for WP-CLI commands, block pattern examples, and automation workflows.
 
@@ -96,7 +101,7 @@ See the [Troubleshooting Overview](troubleshooting/README.md) for quick diagnost
 ### Tool-Specific Requirements
 - **Backup Tools**: Ansible, WP-CLI, Trellis
 - **Image Optimization**: ImageMagick, cwebp, cavif
-- **Content Creation**: WP-CLI, Trellis (for remote operations)
+- **Content Creation**: WP-CLI, Trellis (for remote operations), SSH/SCP (for automated script), Python 3 (for script verification)
 - **PR Creation**: GitHub CLI (`gh`), Claude CLI (optional, for AI descriptions)
 
 ## License

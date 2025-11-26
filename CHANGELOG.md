@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.9.0] - 2025-11-26
+
+### Added
+- Automated page creation script (page-creation.sh) for deploying WordPress pages to production
+- Example WordPress page content file (example-page-content.html) with Gutenberg block markup
+- Script features: automated SCP file transfer, conflict detection/resolution, interactive prompts, verification, and cleanup
+- Comprehensive automated script documentation section in PAGE-CREATION.md
+- Quick Start section in content-creation README with script usage examples
+- Files in This Directory section in content-creation README
+
+### Changed
+- Updated PAGE-CREATION.md to feature automated script as recommended Option 1 for production deployment
+- Enhanced PAGE-CREATION.md with detailed script workflow, customization, security considerations, and requirements
+- Reorganized PAGE-CREATION.md Table of Contents to include Automated Script Details and Examples sections
+- Removed all references to external `seo-strategy` directory for self-contained documentation
+- Updated all code examples to use generic paths and the included example-page-content.html file
+- Enhanced content-creation README with script and example file references
+
 ## [1.8.0] - 2025-11-25
 
 ### Added
