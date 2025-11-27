@@ -46,6 +46,9 @@ The updater script specifically preserves the following files/directories:
 - `group_vars/staging/main.yml` - Environment-specific overrides
 - `group_vars/development/main.yml` - Development settings
 
+### Custom SMTP Settings
+- `group_vars/all/mail.yml` - SMTP server configuration (Brevo/Sendgrid credentials)
+
 ### Custom Deploy Hooks
 - `deploy-hooks/` - Custom deployment scripts (e.g., memory limits for wp acorn)
 
