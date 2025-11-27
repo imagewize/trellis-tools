@@ -98,7 +98,16 @@ magick input.jpg -resize 800x output.jpg
 
 # Resize with maximum dimensions (will fit within 1200x800)
 magick input.jpg -resize 1200x800 output.jpg
+
+# Resize screenshot with dimensions 1200 x 900 for theme
+magick "~/Desktop/screenshot-taken.png" \
+  -resize "1200x900^" \
+  -gravity center \
+  -extent 1200x900 \
+  "~/Desktop/screenshot.png"
 ```
+
+
 
 ### Note on ImageMagick Versions
 
