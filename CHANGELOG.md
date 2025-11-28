@@ -21,6 +21,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated migration guide Table of Contents to include WordPress Cron section
 - Enhanced provision documentation with cron reference and link to CRON.md
 
+## [1.9.1] - 2025-11-27
+
+### Added
+- Theme screenshot example demonstrating proper screenshot formatting and dimensions
+
 ## [1.9.0] - 2025-11-26
 
 - This update adds a new ImageMagick command to the RESIZE-AND-CONVERSION.md documentation, specifically for resizing screenshots to fit theme requirements (1200x900 pixels). The command ensures the screenshot is centered and cropped to the exact dimensions, which is useful for maintaining consistency in theme-related visuals.
