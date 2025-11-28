@@ -25,6 +25,7 @@ This guide covers the complete process of migrating a **single WordPress site** 
   - [8. Choose Your Path Migration Strategy](#8-choose-your-path-migration-strategy)
   - [9. Test and Verify](#9-test-and-verify)
   - [10. Test with /etc/hosts Before DNS Cutover](#10-test-with-etchosts-before-dns-cutover)
+  - [WordPress Cron: System Cron vs WP-Cron](#wordpress-cron-system-cron-vs-wp-cron)
   - [11. DNS and Go-Live](#11-dns-and-go-live)
 - [Troubleshooting](#troubleshooting)
 - [Post-Migration Optimization](#post-migration-optimization)
@@ -1221,6 +1222,73 @@ https://example.com  # Should show valid certificate, no warnings
 **Check SSL grade:**
 - Visit: https://www.ssllabs.com/ssltest/
 - Should achieve A+ rating with Trellis's default SSL configuration
+
+### WordPress Cron: System Cron vs WP-Cron
+
+**IMPORTANT**: Trellis automatically disables WordPress's built-in WP-Cron and uses **system cron** instead for more reliable scheduled task execution.
+
+#### What Changed After Migration
+
+**Before (Traditional WordPress):**
+- WP-Cron runs when someone visits your site
+- Unreliable on low-traffic sites
+- Can cause performance overhead
+
+**After (Trellis):**
+- System cron runs every 15 minutes via `/etc/cron.d/wordpress-{site}`
+- Reliable, predictable execution
+- No dependency on site traffic
+
+#### Verification After Migration
+
+```bash
+# SSH into your Trellis server
+ssh admin@your.server.ip
+
+# 1. Verify WP-Cron is disabled
+cd /srv/www/example.com/current
+grep DISABLE_WP_CRON .env
+# Should show: DISABLE_WP_CRON=true
+
+# 2. Check system cron job exists
+cat /etc/cron.d/wordpress-example_com
+# Should show:
+# #Ansible: example.com WordPress cron
+# */15 * * * * web cd /srv/www/example.com/current && wp cron event run --due-now > /dev/null 2>&1
+
+# 3. List WordPress scheduled events (these are preserved from your database)
+wp cron event list
+
+# 4. Manually test cron execution
+sudo -u web bash -c "cd /srv/www/example.com/current && wp cron event run --due-now"
+```
+
+#### What You Need to Know
+
+1. **Scheduled posts still work** - Your scheduled posts will publish on time via system cron
+2. **Plugin schedules are preserved** - All scheduled tasks (backups, cache clearing, etc.) are stored in the database and migrate with your data
+3. **More reliable** - Tasks run every 15 minutes regardless of site traffic
+4. **No action needed** - Trellis configures this automatically during provisioning
+
+#### Troubleshooting Cron Issues
+
+If scheduled tasks aren't running after migration:
+
+```bash
+# Check if events are scheduled
+wp cron event list
+
+# Manually trigger overdue events
+wp cron event run --due-now
+
+# Check system cron logs
+sudo grep -i cron /var/log/syslog | tail -20
+
+# Verify cron service is running
+sudo systemctl status cron
+```
+
+For detailed cron documentation, customization, and troubleshooting, see [provision/CRON.md](../provision/CRON.md).
 
 ### 11. DNS and Go-Live
 

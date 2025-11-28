@@ -52,3 +52,15 @@ trellis provision --tags php,nginx,wordpress-setup,users,memcached production
 - `memcached` - Installs PHP version-specific memcached extension (e.g., `php8.3-memcached`)
 
 **Note:** Without the `users` tag, deployments will fail when trying to reload PHP-FPM because the sudoers configuration still references the old PHP version.
+
+## WordPress Cron
+
+Trellis automatically configures system cron instead of WordPress's built-in WP-Cron for more reliable scheduled task execution.
+
+For complete documentation on how WordPress cron works with Trellis, including:
+- How system cron replaces WP-Cron
+- Verification and troubleshooting
+- Customization options
+- Migration considerations
+
+See [CRON.md](CRON.md).
