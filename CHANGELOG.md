@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Comprehensive WordPress cron documentation (provision/CRON.md) covering system cron vs WP-Cron
+- WordPress Cron section in migration guide explaining the transition from WP-Cron to system cron
+- Multisite cron configuration documentation with real examples
+- Cron verification commands and log examples from production systems
+- Log filtering commands for monitoring specific sites on multi-site servers
+- WordPress Cron section in provision/README.md with reference to detailed guide
+
+### Changed
+- Updated migration guide Table of Contents to include WordPress Cron section
+- Enhanced provision documentation with cron reference and link to CRON.md
+
 ## [1.9.1] - 2025-11-27
 
 ## [1.9.0] - 2025-11-26
