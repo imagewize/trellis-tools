@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.11.0] - 2025-11-29
+
+### Added
+- Comprehensive monitoring tools for Nginx log analysis (monitoring/)
+- Traffic analysis script (traffic-monitor.sh) with bot filtering, page views, unique visitors, and bandwidth tracking
+- Security monitoring script (security-monitor.sh) for detecting bad actors, brute force attempts, SQL injection, and scanners
+- Ansible playbooks for automated monitoring: quick-status.yml, traffic-report.yml, security-scan.yml, setup-monitoring.yml
+- Automated monitoring setup with cron jobs for daily traffic reports and security scans
+- updown.io webhook integration (updown-webhook-handler.sh and updown-webhook-receiver.php) for automatic log analysis on downtime
+- Quick reference guide (QUICK-REFERENCE.md) with common monitoring commands and one-liners
+- Comprehensive monitoring documentation covering traffic analysis, security monitoring, and updown.io integration
+- IP blocking recommendations and fail2ban integration guidance
+- GoAccess and AWStats tool integration examples
+- Real-time monitoring commands and performance tracking
+
+### Changed
+- Updated main README.md to include Monitoring tools section
+
 ## [1.10.0] - 2025-11-28
 
 ### Added
