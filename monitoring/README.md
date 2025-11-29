@@ -16,8 +16,21 @@ This directory contains scripts and Ansible playbooks for:
 - Trellis-managed WordPress site with Nginx
 - SSH access to server (root user recommended for log access)
 - SSH key-based authentication configured (password authentication should be disabled)
-- Logs located at `/var/log/nginx/access.log` and `/var/log/nginx/error.log`
 - For Ansible playbooks: Trellis environment configured
+
+### Log File Locations
+
+Trellis can be configured to store Nginx logs in two ways:
+
+**Per-site logs (Trellis default):**
+- Access log: `/srv/www/example.com/logs/access.log`
+- Error log: `/srv/www/example.com/logs/error.log`
+
+**Global logs (alternative configuration):**
+- Access log: `/var/log/nginx/access.log`
+- Error log: `/var/log/nginx/error.log`
+
+The Ansible playbooks in this repository **default to per-site logs** but can be overridden with `-e log_file=/path/to/log`. The shell scripts accept the log path as the first argument.
 
 ## Quick Start
 
@@ -27,17 +40,23 @@ This directory contains scripts and Ansible playbooks for:
 # SSH to server as root
 ssh root@example.com
 
+# For per-site logs (Trellis default):
+LOG="/srv/www/example.com/logs/access.log"
+
+# OR for global logs:
+# LOG="/var/log/nginx/access.log"
+
 # View recent successful requests (excluding known bots)
-grep 'HTTP/1.[01]" 200' /var/log/nginx/access.log | grep -vE 'updown.io|bot|spider|crawl|Geedo|Semrush|DuckDuckBot'
+grep 'HTTP/1.[01]" 200' "$LOG" | grep -vE 'updown.io|bot|spider|crawl|Geedo|Semrush|DuckDuckBot'
 
 # View recent 404 errors
-grep 'HTTP/1.[01]" 404' /var/log/nginx/access.log
+grep 'HTTP/1.[01]" 404' "$LOG"
 
 # View recent 50x server errors
-grep 'HTTP/1.[01]" 5[0-9][0-9]' /var/log/nginx/access.log
+grep 'HTTP/1.[01]" 5[0-9][0-9]' "$LOG"
 ```
 
-**Note on Root Access:** These commands require root privileges to read `/var/log/nginx/access.log`. Using the root user with SSH key authentication is the recommended approach. **Root password authentication should always be disabled** for security. If you prefer not to use root SSH access, see the "Alternative Access Methods" section below.
+**Note on Root Access:** These commands require root privileges to read log files. Using the root user with SSH key authentication is the recommended approach. **Root password authentication should always be disabled** for security. If you prefer not to use root SSH access, see the "Alternative Access Methods" section below.
 
 ### Using Monitoring Scripts
 
@@ -51,8 +70,14 @@ scp monitoring/scripts/*.sh root@example.com:/root/
 ssh root@example.com
 cd /root
 chmod +x *.sh
-./traffic-monitor.sh
-./security-monitor.sh
+
+# For per-site logs (default):
+./traffic-monitor.sh /srv/www/example.com/logs/access.log
+./security-monitor.sh /srv/www/example.com/logs/access.log
+
+# OR for global logs:
+# ./traffic-monitor.sh /var/log/nginx/access.log
+# ./security-monitor.sh /var/log/nginx/access.log
 ```
 
 ### Using Ansible Playbooks
@@ -60,7 +85,7 @@ chmod +x *.sh
 Run from your Trellis directory:
 
 ```bash
-# Run traffic analysis report
+# Run traffic analysis report (uses per-site logs by default)
 ansible-playbook monitoring/trellis/traffic-report.yml -e site=example.com -e env=production
 
 # Run security scan
@@ -68,7 +93,12 @@ ansible-playbook monitoring/trellis/security-scan.yml -e site=example.com -e env
 
 # Setup automated monitoring (cron jobs)
 ansible-playbook monitoring/trellis/setup-monitoring.yml -e site=example.com -e env=production
+
+# Override to use global logs:
+# ansible-playbook monitoring/trellis/traffic-report.yml -e site=example.com -e env=production -e log_file=/var/log/nginx/access.log
 ```
+
+**Note:** The playbooks default to per-site logs at `/srv/www/{{ site }}/logs/access.log`. Override with `-e log_file=/path/to/log` if your Trellis uses global logs.
 
 ## Alternative Access Methods
 

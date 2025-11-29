@@ -10,7 +10,8 @@
   vars:
     project: "{{ wordpress_sites[site] }}"
     project_root: "{{ www_root }}/{{ site }}"
-    log_file: "/var/log/nginx/access.log"
+    # Log file path - defaults to per-site logs, can be overridden with -e log_file=/path/to/log
+    log_file: "{{ log_path | default(project_root + '/logs/access.log') }}"
 
   pre_tasks:
     - name: Ensure site is valid
