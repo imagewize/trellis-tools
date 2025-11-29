@@ -1,0 +1,68 @@
+---
+- import_playbook: variable-check.yml
+  vars:
+    playbook: security-scan.yml
+
+- name: Run security scan for {{ site }} {{ env }}
+  hosts: web:&{{ env }}
+  remote_user: "{{ web_user }}"
+
+  vars:
+    project: "{{ wordpress_sites[site] }}"
+    project_root: "{{ www_root }}/{{ site }}"
+    scan_hours: "{{ hours | default('24') }}"
+    alert_threshold: "{{ threshold | default('100') }}"
+    log_file: "/var/log/nginx/access.log"
+
+  pre_tasks:
+    - name: Ensure site is valid
+      delegate_to: localhost
+      fail:
+        msg: "Site `{{ site | default('') }}` is not valid. Available sites: {{ wordpress_sites.keys() | join(', ') }}"
+      when: wordpress_sites[site | default('')] is not defined
+
+  tasks:
+    - name: Check if security-monitor.sh exists on remote
+      stat:
+        path: "/home/{{ web_user }}/security-monitor.sh"
+      register: script_stat
+
+    - name: Copy security-monitor.sh to remote server
+      copy:
+        src: "../scripts/security-monitor.sh"
+        dest: "/home/{{ web_user }}/security-monitor.sh"
+        mode: '0755'
+      when: not script_stat.stat.exists
+
+    - name: Run security scan
+      shell: "/home/{{ web_user }}/security-monitor.sh {{ log_file }} {{ scan_hours }} {{ alert_threshold }}"
+      register: security_report
+
+    - name: Display security report
+      debug:
+        msg: "{{ security_report.stdout_lines }}"
+
+    - name: Save report to local file
+      delegate_to: localhost
+      copy:
+        content: "{{ security_report.stdout }}"
+        dest: "{{ playbook_dir }}/security-report-{{ site }}-{{ env }}-{{ ansible_date_time.iso8601_basic_short }}.txt"
+      become: no
+      when: save_report is defined and save_report | bool
+
+    - name: Check for critical alerts
+      set_fact:
+        has_alerts: "{{ security_report.stdout | regex_search('\\[ALERT\\]') is not none }}"
+
+    - name: Send email alert if configured
+      mail:
+        host: localhost
+        port: 25
+        subject: "[SECURITY ALERT] {{ site }} {{ env }} - {{ ansible_date_time.date }}"
+        body: "{{ security_report.stdout }}"
+        to: "{{ alert_email }}"
+        from: "monitoring@{{ site }}"
+      when:
+        - alert_email is defined
+        - has_alerts
+      ignore_errors: yes

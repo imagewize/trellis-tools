@@ -14,6 +14,7 @@ A collection of tools to enhance your [Roots Trellis](https://roots.io/trellis/)
 | **Browser Caching** | Nginx configuration for optimal static asset caching | [→ Guide](browser-caching/README.md) |
 | **Provisioning Reference** | Common Trellis provisioning commands and workflows | [→ Guide](provision/README.md) |
 | **Troubleshooting** | Diagnose and resolve PHP-FPM, MariaDB, and server issues | [→ Guide](troubleshooting/README.md) |
+| **Monitoring** | Nginx log monitoring for traffic analysis and security threat detection | [→ Guide](monitoring/README.md) |
 | **PR Creation Script** | AI-powered GitHub PR descriptions with Claude CLI | [→ Guide](CREATE-PR.md) |
 | **Theme Sync** | Rsync script for theme synchronization | [→ Script](rsync-theme.sh) |
 

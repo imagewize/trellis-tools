@@ -1,0 +1,87 @@
+---
+- import_playbook: variable-check.yml
+  vars:
+    playbook: quick-status.yml
+
+- name: Quick status check for {{ site }} {{ env }}
+  hosts: web:&{{ env }}
+  remote_user: "{{ web_user }}"
+
+  vars:
+    project: "{{ wordpress_sites[site] }}"
+    project_root: "{{ www_root }}/{{ site }}"
+    log_file: "/var/log/nginx/access.log"
+
+  pre_tasks:
+    - name: Ensure site is valid
+      delegate_to: localhost
+      fail:
+        msg: "Site `{{ site | default('') }}` is not valid. Available sites: {{ wordpress_sites.keys() | join(', ') }}"
+      when: wordpress_sites[site | default('')] is not defined
+
+  tasks:
+    - name: Get last 100 requests summary
+      shell: |
+        tail -100 {{ log_file }} | awk '{print $9}' | sort | uniq -c | sort -rn
+      register: status_codes
+
+    - name: Get recent 5xx errors
+      shell: |
+        grep 'HTTP/1.[01]" 5[0-9][0-9]' {{ log_file }} | tail -10 || echo "No 5xx errors found"
+      register: server_errors
+
+    - name: Get recent 4xx errors
+      shell: |
+        grep 'HTTP/1.[01]" 4[0-9][0-9]' {{ log_file }} | tail -10 || echo "No 4xx errors found"
+      register: client_errors
+
+    - name: Get active connections
+      shell: |
+        ss -tn | grep :80 | wc -l
+      register: active_connections
+
+    - name: Get Nginx status
+      shell: |
+        systemctl status nginx --no-pager | head -10
+      become: yes
+      register: nginx_status
+
+    - name: Get PHP-FPM status
+      shell: |
+        systemctl status php*-fpm --no-pager | head -10
+      become: yes
+      register: php_status
+
+    - name: Get recent suspicious activity
+      shell: |
+        grep -iE 'wp-login\.php|xmlrpc\.php' {{ log_file }} | tail -20 || echo "No suspicious login attempts"
+      register: suspicious_activity
+
+    - name: Display quick status
+      debug:
+        msg:
+          - "================================================================================"
+          - "Quick Status: {{ site }} ({{ env }})"
+          - "================================================================================"
+          - ""
+          - "Last 100 Requests - Status Code Distribution:"
+          - "{{ status_codes.stdout_lines | join('\n') }}"
+          - ""
+          - "Active HTTP Connections: {{ active_connections.stdout }}"
+          - ""
+          - "Recent Server Errors (5xx):"
+          - "{{ server_errors.stdout_lines | join('\n') }}"
+          - ""
+          - "Recent Client Errors (4xx):"
+          - "{{ client_errors.stdout_lines[:5] | join('\n') }}"
+          - ""
+          - "Nginx Status:"
+          - "{{ nginx_status.stdout_lines[:3] | join('\n') }}"
+          - ""
+          - "PHP-FPM Status:"
+          - "{{ php_status.stdout_lines[:3] | join('\n') }}"
+          - ""
+          - "Recent Login/Attack Attempts:"
+          - "{{ suspicious_activity.stdout_lines[:5] | join('\n') }}"
+          - ""
+          - "================================================================================"
