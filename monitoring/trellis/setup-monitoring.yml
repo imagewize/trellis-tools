@@ -1,0 +1,149 @@
+---
+- import_playbook: variable-check.yml
+  vars:
+    playbook: setup-monitoring.yml
+
+- name: Setup automated monitoring for {{ site }} {{ env }}
+  hosts: web:&{{ env }}
+  remote_user: "{{ web_user }}"
+  become: yes
+
+  vars:
+    project: "{{ wordpress_sites[site] }}"
+    project_root: "{{ www_root }}/{{ site }}"
+    monitoring_dir: "/home/{{ web_user }}/monitoring"
+    alert_email: "{{ email | default('') }}"
+
+  pre_tasks:
+    - name: Ensure site is valid
+      delegate_to: localhost
+      fail:
+        msg: "Site `{{ site | default('') }}` is not valid. Available sites: {{ wordpress_sites.keys() | join(', ') }}"
+      when: wordpress_sites[site | default('')] is not defined
+      become: no
+
+  tasks:
+    - name: Create monitoring directory
+      file:
+        path: "{{ monitoring_dir }}"
+        state: directory
+        owner: "{{ web_user }}"
+        group: "{{ web_user }}"
+        mode: '0755'
+
+    - name: Create logs directory for monitoring reports
+      file:
+        path: "{{ monitoring_dir }}/logs"
+        state: directory
+        owner: "{{ web_user }}"
+        group: "{{ web_user }}"
+        mode: '0755'
+
+    - name: Copy traffic monitoring script
+      copy:
+        src: "../scripts/traffic-monitor.sh"
+        dest: "{{ monitoring_dir }}/traffic-monitor.sh"
+        owner: "{{ web_user }}"
+        group: "{{ web_user }}"
+        mode: '0755'
+
+    - name: Copy security monitoring script
+      copy:
+        src: "../scripts/security-monitor.sh"
+        dest: "{{ monitoring_dir }}/security-monitor.sh"
+        owner: "{{ web_user }}"
+        group: "{{ web_user }}"
+        mode: '0755'
+
+    - name: Create wrapper script for daily traffic report
+      copy:
+        content: |
+          #!/bin/bash
+          # Daily traffic report for {{ site }}
+          REPORT_FILE="{{ monitoring_dir }}/logs/traffic-$(date +%Y-%m-%d).txt"
+          {{ monitoring_dir }}/traffic-monitor.sh /var/log/nginx/access.log 24 > "$REPORT_FILE" 2>&1
+
+          {% if alert_email %}
+          # Send email if configured
+          if command -v mail &> /dev/null; then
+            mail -s "[TRAFFIC REPORT] {{ site }} - $(date +%Y-%m-%d)" {{ alert_email }} < "$REPORT_FILE"
+          fi
+          {% endif %}
+
+          # Clean up old reports (keep last 30 days)
+          find {{ monitoring_dir }}/logs -name "traffic-*.txt" -mtime +30 -delete
+        dest: "{{ monitoring_dir }}/daily-traffic-report.sh"
+        owner: "{{ web_user }}"
+        group: "{{ web_user }}"
+        mode: '0755'
+
+    - name: Create wrapper script for security monitoring
+      copy:
+        content: |
+          #!/bin/bash
+          # Security monitoring for {{ site }}
+          REPORT_FILE="{{ monitoring_dir }}/logs/security-$(date +%Y-%m-%d-%H%M).txt"
+          {{ monitoring_dir }}/security-monitor.sh /var/log/nginx/access.log 6 100 > "$REPORT_FILE" 2>&1
+
+          {% if alert_email %}
+          # Send email only if alerts found
+          if grep -q "\[ALERT\]" "$REPORT_FILE"; then
+            if command -v mail &> /dev/null; then
+              mail -s "[SECURITY ALERT] {{ site }} - $(date +%Y-%m-%d %H:%M)" {{ alert_email }} < "$REPORT_FILE"
+            fi
+          fi
+          {% endif %}
+
+          # Clean up old reports (keep last 7 days)
+          find {{ monitoring_dir }}/logs -name "security-*.txt" -mtime +7 -delete
+        dest: "{{ monitoring_dir }}/security-check.sh"
+        owner: "{{ web_user }}"
+        group: "{{ web_user }}"
+        mode: '0755'
+
+    - name: Setup cron job for daily traffic report
+      cron:
+        name: "Daily traffic report for {{ site }}"
+        minute: "0"
+        hour: "8"
+        job: "{{ monitoring_dir }}/daily-traffic-report.sh"
+        user: "{{ web_user }}"
+        state: present
+
+    - name: Setup cron job for security monitoring (every 6 hours)
+      cron:
+        name: "Security monitoring for {{ site }}"
+        minute: "0"
+        hour: "*/6"
+        job: "{{ monitoring_dir }}/security-check.sh"
+        user: "{{ web_user }}"
+        state: present
+
+    - name: Setup cron job for weekly summary
+      cron:
+        name: "Weekly traffic summary for {{ site }}"
+        minute: "0"
+        hour: "9"
+        weekday: "1"
+        job: "{{ monitoring_dir }}/traffic-monitor.sh /var/log/nginx/access.log 168 > {{ monitoring_dir }}/logs/weekly-summary-$(date +%Y-%m-%d).txt 2>&1"
+        user: "{{ web_user }}"
+        state: present
+
+    - name: Display setup summary
+      debug:
+        msg:
+          - "Monitoring setup complete for {{ site }} ({{ env }})"
+          - ""
+          - "Scripts installed in: {{ monitoring_dir }}"
+          - "Logs directory: {{ monitoring_dir }}/logs"
+          - ""
+          - "Scheduled tasks:"
+          - "  - Daily traffic report: 8:00 AM"
+          - "  - Security scan: Every 6 hours"
+          - "  - Weekly summary: Monday 9:00 AM"
+          - ""
+          - "{% if alert_email %}Email alerts will be sent to: {{ alert_email }}{% else %}No email alerts configured (use -e email=your@email.com){% endif %}"
+          - ""
+          - "Manual execution:"
+          - "  Traffic: {{ monitoring_dir }}/traffic-monitor.sh"
+          - "  Security: {{ monitoring_dir }}/security-monitor.sh"

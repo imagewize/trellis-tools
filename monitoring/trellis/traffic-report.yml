@@ -1,0 +1,50 @@
+---
+- import_playbook: variable-check.yml
+  vars:
+    playbook: traffic-report.yml
+
+- name: Generate traffic report for {{ site }} {{ env }}
+  hosts: web:&{{ env }}
+  remote_user: "{{ web_user }}"
+
+  vars:
+    project: "{{ wordpress_sites[site] }}"
+    project_root: "{{ www_root }}/{{ site }}"
+    report_hours: "{{ hours | default('24') }}"
+    log_file: "/var/log/nginx/access.log"
+
+  pre_tasks:
+    - name: Ensure site is valid
+      delegate_to: localhost
+      fail:
+        msg: "Site `{{ site | default('') }}` is not valid. Available sites: {{ wordpress_sites.keys() | join(', ') }}"
+      when: wordpress_sites[site | default('')] is not defined
+
+  tasks:
+    - name: Check if traffic-monitor.sh exists on remote
+      stat:
+        path: "/home/{{ web_user }}/traffic-monitor.sh"
+      register: script_stat
+
+    - name: Copy traffic-monitor.sh to remote server
+      copy:
+        src: "../scripts/traffic-monitor.sh"
+        dest: "/home/{{ web_user }}/traffic-monitor.sh"
+        mode: '0755'
+      when: not script_stat.stat.exists
+
+    - name: Run traffic analysis
+      shell: "/home/{{ web_user }}/traffic-monitor.sh {{ log_file }} {{ report_hours }}"
+      register: traffic_report
+
+    - name: Display traffic report
+      debug:
+        msg: "{{ traffic_report.stdout_lines }}"
+
+    - name: Save report to local file
+      delegate_to: localhost
+      copy:
+        content: "{{ traffic_report.stdout }}"
+        dest: "{{ playbook_dir }}/traffic-report-{{ site }}-{{ env }}-{{ ansible_date_time.iso8601_basic_short }}.txt"
+      become: no
+      when: save_report is defined and save_report | bool
