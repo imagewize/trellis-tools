@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.11.1] - 2025-11-29
+
+### Changed
+- Updated monitoring documentation to recommend root SSH access with key-based authentication
+- Changed all monitoring examples from `web@example.com` to `root@example.com`
+- Added "Alternative Access Methods" section with three options: sudo, adm group, and passwordless sudo
+- Added security considerations emphasizing root password authentication must be disabled
+- Updated QUICK-REFERENCE.md with root user examples and prerequisites note
+- Clarified that root SSH access with keys is secure and practical for system administration tasks
+
 ## [1.11.0] - 2025-11-29
 
 ### Added

@@ -2,24 +2,28 @@
 
 Quick command reference for common monitoring tasks.
 
+**Prerequisites:** Root SSH access with key-based authentication (password auth disabled). See main [README.md](README.md) for alternative access methods.
+
 ## Shell Scripts (Direct Server Access)
 
 ```bash
-# SSH to server
-ssh web@example.com
+# SSH to server as root
+ssh root@example.com
 
 # Run traffic analysis (last 24 hours)
-./monitoring/traffic-monitor.sh
+./traffic-monitor.sh
 
 # Run traffic analysis (last 6 hours)
-./monitoring/traffic-monitor.sh /var/log/nginx/access.log 6
+./traffic-monitor.sh /var/log/nginx/access.log 6
 
 # Run security scan (last 24 hours)
-./monitoring/security-monitor.sh
+./security-monitor.sh
 
 # Run security scan (last 1 hour, alert threshold 50)
-./monitoring/security-monitor.sh /var/log/nginx/access.log 1 50
+./security-monitor.sh /var/log/nginx/access.log 1 50
 ```
+
+**Alternative:** If not using root, run with `sudo` or add user to `adm` group (see [README.md](README.md#alternative-access-methods)).
 
 ## Ansible Playbooks (From Trellis Directory)
 
@@ -47,6 +51,8 @@ ansible-playbook monitoring/trellis/setup-monitoring.yml -e site=example.com -e 
 ```
 
 ## One-Liner Commands
+
+**Note:** Run these commands as root or with `sudo` prefix if using another user.
 
 ### Traffic Analysis
 

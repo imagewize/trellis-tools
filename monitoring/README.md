@@ -14,7 +14,8 @@ This directory contains scripts and Ansible playbooks for:
 ## Prerequisites
 
 - Trellis-managed WordPress site with Nginx
-- SSH access to server
+- SSH access to server (root user recommended for log access)
+- SSH key-based authentication configured (password authentication should be disabled)
 - Logs located at `/var/log/nginx/access.log` and `/var/log/nginx/error.log`
 - For Ansible playbooks: Trellis environment configured
 
@@ -23,8 +24,8 @@ This directory contains scripts and Ansible playbooks for:
 ### Manual Log Analysis
 
 ```bash
-# SSH to server
-ssh web@example.com
+# SSH to server as root
+ssh root@example.com
 
 # View recent successful requests (excluding known bots)
 grep 'HTTP/1.[01]" 200' /var/log/nginx/access.log | grep -vE 'updown.io|bot|spider|crawl|Geedo|Semrush|DuckDuckBot'
@@ -36,16 +37,19 @@ grep 'HTTP/1.[01]" 404' /var/log/nginx/access.log
 grep 'HTTP/1.[01]" 5[0-9][0-9]' /var/log/nginx/access.log
 ```
 
+**Note on Root Access:** These commands require root privileges to read `/var/log/nginx/access.log`. Using the root user with SSH key authentication is the recommended approach. **Root password authentication should always be disabled** for security. If you prefer not to use root SSH access, see the "Alternative Access Methods" section below.
+
 ### Using Monitoring Scripts
 
-Copy scripts to your server:
+Copy scripts to your server and run them:
 
 ```bash
-# From Trellis directory
-scp monitoring/scripts/*.sh web@example.com:/home/web/
+# Copy scripts to server
+scp monitoring/scripts/*.sh root@example.com:/root/
 
 # SSH and run
-ssh web@example.com
+ssh root@example.com
+cd /root
 chmod +x *.sh
 ./traffic-monitor.sh
 ./security-monitor.sh
@@ -65,6 +69,63 @@ ansible-playbook monitoring/trellis/security-scan.yml -e site=example.com -e env
 # Setup automated monitoring (cron jobs)
 ansible-playbook monitoring/trellis/setup-monitoring.yml -e site=example.com -e env=production
 ```
+
+## Alternative Access Methods
+
+While we recommend using root SSH access with key-based authentication, you can use alternative approaches if you prefer:
+
+### Option 1: Use sudo with existing user
+
+```bash
+# SSH as web user and use sudo
+ssh web@example.com
+sudo ./traffic-monitor.sh
+sudo ./security-monitor.sh
+```
+
+This requires entering the password each time unless you configure passwordless sudo (see below).
+
+### Option 2: Add web user to adm group
+
+The `adm` group has read access to log files. This is the cleanest non-root solution:
+
+```bash
+# As root, add web user to adm group
+sudo usermod -aG adm web
+
+# Log out and back in for group membership to take effect
+exit
+ssh web@example.com
+
+# Now scripts can read logs without sudo
+./traffic-monitor.sh
+./security-monitor.sh
+```
+
+### Option 3: Configure passwordless sudo (not recommended)
+
+You can grant specific sudo permissions without requiring a password. This requires server configuration changes:
+
+```bash
+# Create sudoers file for web user
+sudo visudo -f /etc/sudoers.d/web-monitoring
+
+# Add these lines:
+# web ALL=(ALL) NOPASSWD: /usr/bin/awk * /var/log/nginx/access.log*
+# web ALL=(ALL) NOPASSWD: /usr/bin/grep * /var/log/nginx/access.log*
+# web ALL=(ALL) NOPASSWD: /bin/cat /var/log/nginx/access.log*
+```
+
+**Note:** This approach is complex and error-prone. The `adm` group method (Option 2) is cleaner.
+
+### Security Considerations
+
+- **Root password authentication:** Must always be disabled (`PermitRootLogin without-password` or `PermitRootLogin prohibit-password` in `/etc/ssh/sshd_config`)
+- **SSH key-based authentication:** Required for all users with SSH access
+- **Root SSH access:** Safe when using SSH keys; common practice for system administration
+- **Regular user with sudo:** More granular but requires additional configuration
+
+For production servers using SSH key authentication, root access is the most straightforward approach for system monitoring tasks.
 
 ## Traffic Analysis
 
