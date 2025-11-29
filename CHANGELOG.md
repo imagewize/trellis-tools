@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.11.2] - 2025-11-29
+
+### Fixed
+- **Critical:** Fixed monitoring playbooks to use per-site log paths instead of global Nginx logs
+- Updated all Ansible playbooks to default to `/srv/www/{{ site }}/logs/access.log` (Trellis standard)
+- Updated traffic-report.yml, security-scan.yml, quick-status.yml to use `{{ project_root }}/logs/access.log`
+- Updated setup-monitoring.yml wrapper scripts to use per-site logs in cron jobs
+- Updated updown-webhook-handler.sh to default to per-site logs with environment variable override
+- Updated shell scripts (traffic-monitor.sh, security-monitor.sh) to default to imagewize.com per-site logs
+
+### Changed
+- Added log path configuration documentation explaining per-site vs global logs
+- Updated README.md with "Log File Locations" section and configuration override examples
+- Updated QUICK-REFERENCE.md to show proper log path usage with `$LOG` variable
+- All playbooks now support `-e log_file=/path/to/log` override for flexibility
+- Modified all one-liner command examples to use configurable `$LOG` variable
+- Shell scripts now default to `/srv/www/imagewize.com/logs/access.log` with examples for demo.imagewize.com and global logs
+
+### Added
+- Documentation explaining when to use per-site logs (default) vs global logs
+- Examples showing how to override default log paths in Ansible playbooks
+- Clear prerequisites about Trellis log configuration in both README and QUICK-REFERENCE
+- Inline comments in shell scripts showing all available log path options
+
 ## [1.11.1] - 2025-11-29
 
 ### Changed

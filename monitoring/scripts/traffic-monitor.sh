@@ -6,8 +6,9 @@
 #   ./traffic-monitor.sh [log_file] [hours]
 #
 # Examples:
-#   ./traffic-monitor.sh                          # Default: analyze last 24h
-#   ./traffic-monitor.sh /var/log/nginx/access.log 6    # Last 6 hours
+#   ./traffic-monitor.sh                                           # Default: imagewize.com, last 24h
+#   ./traffic-monitor.sh /srv/www/demo.imagewize.com/logs/access.log 6  # Demo site, last 6 hours
+#   ./traffic-monitor.sh /var/log/nginx/access.log 24             # Global logs, last 24 hours
 #
 
 set -e
@@ -16,7 +17,13 @@ set -e
 # Configuration
 # ============================================================================
 
-LOG_FILE="${1:-/var/log/nginx/access.log}"
+# Default log file - adjust to your site:
+# Per-site logs (Trellis default):
+#   /srv/www/imagewize.com/logs/access.log
+#   /srv/www/demo.imagewize.com/logs/access.log
+# Global logs (if configured):
+#   /var/log/nginx/access.log
+LOG_FILE="${1:-/srv/www/imagewize.com/logs/access.log}"
 HOURS="${2:-24}"
 
 # Bot patterns to exclude from traffic analysis

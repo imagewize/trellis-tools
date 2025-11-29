@@ -13,6 +13,8 @@
     project_root: "{{ www_root }}/{{ site }}"
     monitoring_dir: "/home/{{ web_user }}/monitoring"
     alert_email: "{{ email | default('') }}"
+    # Log file path - defaults to per-site logs, can be overridden with -e log_file=/path/to/log
+    log_file: "{{ log_path | default(project_root + '/logs/access.log') }}"
 
   pre_tasks:
     - name: Ensure site is valid
@@ -61,7 +63,7 @@
           #!/bin/bash
           # Daily traffic report for {{ site }}
           REPORT_FILE="{{ monitoring_dir }}/logs/traffic-$(date +%Y-%m-%d).txt"
-          {{ monitoring_dir }}/traffic-monitor.sh /var/log/nginx/access.log 24 > "$REPORT_FILE" 2>&1
+          {{ monitoring_dir }}/traffic-monitor.sh {{ log_file }} 24 > "$REPORT_FILE" 2>&1
 
           {% if alert_email %}
           # Send email if configured
@@ -83,7 +85,7 @@
           #!/bin/bash
           # Security monitoring for {{ site }}
           REPORT_FILE="{{ monitoring_dir }}/logs/security-$(date +%Y-%m-%d-%H%M).txt"
-          {{ monitoring_dir }}/security-monitor.sh /var/log/nginx/access.log 6 100 > "$REPORT_FILE" 2>&1
+          {{ monitoring_dir }}/security-monitor.sh {{ log_file }} 6 100 > "$REPORT_FILE" 2>&1
 
           {% if alert_email %}
           # Send email only if alerts found
@@ -125,7 +127,7 @@
         minute: "0"
         hour: "9"
         weekday: "1"
-        job: "{{ monitoring_dir }}/traffic-monitor.sh /var/log/nginx/access.log 168 > {{ monitoring_dir }}/logs/weekly-summary-$(date +%Y-%m-%d).txt 2>&1"
+        job: "{{ monitoring_dir }}/traffic-monitor.sh {{ log_file }} 168 > {{ monitoring_dir }}/logs/weekly-summary-$(date +%Y-%m-%d).txt 2>&1"
         user: "{{ web_user }}"
         state: present
 

@@ -4,23 +4,28 @@ Quick command reference for common monitoring tasks.
 
 **Prerequisites:** Root SSH access with key-based authentication (password auth disabled). See main [README.md](README.md) for alternative access methods.
 
+**Log Paths:** Trellis defaults to per-site logs (`/srv/www/site/logs/`). Adjust paths below if using global logs (`/var/log/nginx/`).
+
 ## Shell Scripts (Direct Server Access)
 
 ```bash
 # SSH to server as root
 ssh root@example.com
 
+# Define your log path (per-site is Trellis default)
+LOG="/srv/www/example.com/logs/access.log"
+
 # Run traffic analysis (last 24 hours)
-./traffic-monitor.sh
+./traffic-monitor.sh "$LOG"
 
 # Run traffic analysis (last 6 hours)
-./traffic-monitor.sh /var/log/nginx/access.log 6
+./traffic-monitor.sh "$LOG" 6
 
 # Run security scan (last 24 hours)
-./security-monitor.sh
+./security-monitor.sh "$LOG"
 
 # Run security scan (last 1 hour, alert threshold 50)
-./security-monitor.sh /var/log/nginx/access.log 1 50
+./security-monitor.sh "$LOG" 1 50
 ```
 
 **Alternative:** If not using root, run with `sudo` or add user to `adm` group (see [README.md](README.md#alternative-access-methods)).
@@ -52,56 +57,62 @@ ansible-playbook monitoring/trellis/setup-monitoring.yml -e site=example.com -e 
 
 ## One-Liner Commands
 
-**Note:** Run these commands as root or with `sudo` prefix if using another user.
+**Note:** Run these commands as root or with `sudo` prefix if using another user. Set `LOG` variable to your log path first.
+
+```bash
+# Set log path (per-site or global)
+LOG="/srv/www/example.com/logs/access.log"
+```
 
 ### Traffic Analysis
 
 ```bash
 # Real traffic (excluding bots) last hour
-grep 'HTTP/1.[01]" 200' /var/log/nginx/access.log | grep -vE 'updown.io|bot|spider|crawl|Geedo|Semrush|DuckDuckBot' | tail -100
+grep 'HTTP/1.[01]" 200' "$LOG" | grep -vE 'updown.io|bot|spider|crawl|Geedo|Semrush|DuckDuckBot' | tail -100
 
 # Top 10 pages today
-grep "$(date +%d/%b/%Y)" /var/log/nginx/access.log | awk '{print $7}' | sort | uniq -c | sort -rn | head -10
+grep "$(date +%d/%b/%Y)" "$LOG" | awk '{print $7}' | sort | uniq -c | sort -rn | head -10
 
 # Unique visitors today
-grep "$(date +%d/%b/%Y)" /var/log/nginx/access.log | awk '{print $1}' | sort -u | wc -l
+grep "$(date +%d/%b/%Y)" "$LOG" | awk '{print $1}' | sort -u | wc -l
 
 # Traffic by hour
-awk '{print $4}' /var/log/nginx/access.log | cut -c 14-15 | sort | uniq -c
+awk '{print $4}' "$LOG" | cut -c 14-15 | sort | uniq -c
 ```
 
 ### Security Monitoring
 
 ```bash
 # Top IPs by request count
-awk '{print $1}' /var/log/nginx/access.log | sort | uniq -c | sort -rn | head -20
+awk '{print $1}' "$LOG" | sort | uniq -c | sort -rn | head -20
 
 # wp-login.php attempts
-grep 'wp-login.php' /var/log/nginx/access.log | awk '{print $1}' | sort | uniq -c | sort -rn
+grep 'wp-login.php' "$LOG" | awk '{print $1}' | sort | uniq -c | sort -rn
 
 # 404 errors (potential scanners)
-grep 'HTTP/1.[01]" 404' /var/log/nginx/access.log | awk '{print $1, $7}' | tail -20
+grep 'HTTP/1.[01]" 404' "$LOG" | awk '{print $1, $7}' | tail -20
 
 # SQL injection attempts
-grep -iE "union.*select|concat\(|script>" /var/log/nginx/access.log
+grep -iE "union.*select|concat\(|script>" "$LOG"
 
 # Suspicious user agents
-awk -F'"' '$6 ~ /sqlmap|nikto|nmap/ {print $0}' /var/log/nginx/access.log
+awk -F'"' '$6 ~ /sqlmap|nikto|nmap/ {print $0}' "$LOG"
 ```
 
 ### Error Analysis
 
 ```bash
 # Recent 5xx errors
-grep 'HTTP/1.[01]" 5[0-9][0-9]' /var/log/nginx/access.log | tail -20
+grep 'HTTP/1.[01]" 5[0-9][0-9]' "$LOG" | tail -20
 
 # Recent 4xx errors
-grep 'HTTP/1.[01]" 4[0-9][0-9]' /var/log/nginx/access.log | tail -20
+grep 'HTTP/1.[01]" 4[0-9][0-9]' "$LOG" | tail -20
 
-# Nginx error log
-tail -50 /var/log/nginx/error.log
+# Nginx error log (per-site)
+ERROR_LOG="/srv/www/example.com/logs/error.log"
+tail -50 "$ERROR_LOG"
 
-# PHP-FPM slow log
+# PHP-FPM slow log (check your PHP version)
 tail -50 /var/log/php8.2-fpm-slow.log
 ```
 

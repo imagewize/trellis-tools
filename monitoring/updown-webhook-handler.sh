@@ -25,8 +25,13 @@ set -e
 
 SITE="${1:-example.com}"
 EVENT="${2:-down}"
-LOG_FILE="/var/log/nginx/access.log"
-ERROR_LOG="/var/log/nginx/error.log"
+
+# Log file paths - set these according to your Trellis configuration:
+# For per-site logs: LOG_FILE="/srv/www/${SITE}/logs/access.log"
+# For global logs: LOG_FILE="/var/log/nginx/access.log"
+LOG_FILE="${LOG_FILE:-/srv/www/${SITE}/logs/access.log}"
+ERROR_LOG="${ERROR_LOG:-/srv/www/${SITE}/logs/error.log}"
+
 MONITORING_DIR="/home/web/monitoring"
 REPORTS_DIR="/home/web/monitoring/updown-alerts"
 ALERT_EMAIL="${ALERT_EMAIL:-}"
