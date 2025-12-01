@@ -86,36 +86,17 @@ check_log_file() {
     fi
 }
 
-get_time_filter() {
-    # Get timestamp from N hours ago for filtering
-    if command -v date &> /dev/null; then
-        if date --version 2>&1 | grep -q "GNU"; then
-            # GNU date (Linux)
-            date -d "$HOURS hours ago" "+%d/%b/%Y:%H:%M:%S"
-        else
-            # BSD date (macOS)
-            date -v-"${HOURS}"H "+%d/%b/%Y:%H:%M:%S"
-        fi
-    else
-        echo ""
-    fi
-}
-
 filter_recent_logs() {
-    local time_filter
-    time_filter=$(get_time_filter)
+    # Simple approach: estimate lines based on hours
+    # Average website gets ~500-1000 requests/hour
+    # For accuracy, we'll scan more than needed and rely on the report time grouping
+    local estimated_lines=$((HOURS * 1000))
 
-    if [[ -n "$time_filter" ]]; then
-        # Filter by timestamp
-        awk -v tf="$time_filter" '{
-            split($4, a, "[\\[:]");
-            log_time = a[2] "/" a[3] "/" a[4] ":" a[5] ":" a[6] ":" a[7];
-            if (log_time >= tf) print $0
-        }' "$LOG_FILE"
-    else
-        # No time filtering available, use entire log
-        cat "$LOG_FILE"
-    fi
+    # Limit to reasonable max
+    [[ $estimated_lines -gt 50000 ]] && estimated_lines=50000
+
+    # Use tail to get recent lines (much faster than filtering entire log)
+    tail -n "$estimated_lines" "$LOG_FILE"
 }
 
 # ============================================================================

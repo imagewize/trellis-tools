@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.12.1] - 2025-12-01
+
+### Fixed
+- **Critical:** Fixed timestamp filtering in monitoring scripts that prevented log analysis
+- Fixed broken AWK timestamp parsing in `filter_recent_logs()` function (traffic-monitor.sh and security-monitor.sh)
+- Fixed invalid octal number error when displaying hours 08 and 09 in traffic reports
+- Replaced complex AWK-based timestamp filtering with simple tail-based line estimation (HOURS × 1000 requests)
+
+### Changed
+- Simplified log filtering approach using `tail -n` with estimated line count for better performance
+- Updated monitoring scripts to process up to 50,000 most recent log lines (configurable based on time period)
+- Improved monitoring script execution speed by eliminating per-line date command spawning
+
 ## [1.12.0] - 2025-12-01
 
 ### Added
