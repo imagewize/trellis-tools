@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.12.0] - 2025-12-01
+
+### Added
+- Comprehensive Nginx redirect configuration documentation and examples (redirects/)
+- SEO redirect examples for fixing 404 errors and URL structure changes
+- Generic redirect templates for common WordPress permalink migrations
+- SSL/HTTPS redirect patterns for secure page enforcement
+- Site-specific redirect example (imagewize.com/seo-redirects.conf.j2)
+- Documentation covering Trellis nginx-includes deployment workflow
+- Redirect best practices including exact path matching, regex patterns, and query string preservation
+- Testing strategies for manual and automated redirect verification
+- Performance considerations and optimization tips for large redirect sets
+- Troubleshooting guide for common redirect issues (404s, loops, deployment problems)
+- Methods for finding URLs to redirect using Google Search Console, server logs, and SEO tools
+
+### Changed
+- Updated main README.md to include Redirects tool in tools table
+
 ## [1.11.2] - 2025-11-29
 
 ### Fixed
