@@ -5,6 +5,7 @@
 # Example: ./create-pr.sh main "Add new feature"
 #
 # Options:
+#   --ai=claude|codex Choose AI backend (default: claude)
 #   --no-ai          Skip AI-powered description generation (faster but less detailed)
 #   --no-interactive Skip all prompts, use defaults/arguments
 #   --update         Update existing PR description for current branch
@@ -15,19 +16,51 @@ set -e
 USE_AI=""
 INTERACTIVE=true
 UPDATE_MODE=false
+AI_TOOL="claude"
+AI_TOOL_SPECIFIED=false
 ARGS=()
-for arg in "$@"; do
-    if [ "$arg" == "--no-ai" ]; then
+while [ $# -gt 0 ]; do
+    case "$1" in
+    --no-ai)
         USE_AI=false
-    elif [ "$arg" == "--no-interactive" ]; then
+        ;;
+    --no-interactive)
         INTERACTIVE=false
-    elif [ "$arg" == "--update" ]; then
+        ;;
+    --update)
         UPDATE_MODE=true
-    else
-        ARGS+=("$arg")
-    fi
+        ;;
+    --ai=*)
+        AI_TOOL="${1#--ai=}"
+        AI_TOOL_SPECIFIED=true
+        ;;
+    --ai)
+        if [ -n "${2:-}" ]; then
+            AI_TOOL="$2"
+            AI_TOOL_SPECIFIED=true
+            shift
+        else
+            echo "Error: --ai requires a value (claude or codex)."
+            exit 1
+        fi
+        ;;
+    *)
+        ARGS+=("$1")
+        ;;
+    esac
+    shift
 done
 set -- "${ARGS[@]}"
+
+AI_TOOL=$(echo "$AI_TOOL" | tr '[:upper:]' '[:lower:]')
+if [ "$AI_TOOL" != "claude" ] && [ "$AI_TOOL" != "codex" ]; then
+    echo "Error: Unsupported AI tool '$AI_TOOL'. Use 'claude' or 'codex'."
+    exit 1
+fi
+
+# CLI command names can be overridden via environment if needed
+CLAUDE_COMMAND=${CLAUDE_COMMAND:-claude}
+CODEX_COMMAND=${CODEX_COMMAND:-codex}
 
 # Check if we're in a git repository
 if ! git rev-parse --is-inside-work-tree > /dev/null 2>&1; then
@@ -76,18 +109,35 @@ if [ "$INTERACTIVE" = true ]; then
     # Prompt for AI mode if not already specified
     if [ -z "$USE_AI" ]; then
         echo ""
-        # Check if Claude CLI is available
-        if command -v claude &> /dev/null; then
+
+        AVAILABLE_AI_TOOLS=()
+        command -v "$CLAUDE_COMMAND" &> /dev/null && AVAILABLE_AI_TOOLS+=("claude")
+        command -v "$CODEX_COMMAND" &> /dev/null && AVAILABLE_AI_TOOLS+=("codex")
+
+        if [ ${#AVAILABLE_AI_TOOLS[@]} -eq 0 ]; then
+            echo "⚠️  No AI CLI found (checked for '$CLAUDE_COMMAND' and '$CODEX_COMMAND'). AI mode not available."
+            USE_AI=false
+        else
             echo "AI-powered description generation is available."
             read -p "Use AI to generate description? (Y/n): " use_ai_input
             if [[ "$use_ai_input" =~ ^[Nn] ]]; then
                 USE_AI=false
             else
                 USE_AI=true
+                if [ "$AI_TOOL_SPECIFIED" = false ] && [ ${#AVAILABLE_AI_TOOLS[@]} -gt 1 ]; then
+                    echo ""
+                    echo "Available AI tools: ${AVAILABLE_AI_TOOLS[*]}"
+                    read -p "Choose AI tool [default: $AI_TOOL]: " chosen_ai_tool
+                    if [ -n "$chosen_ai_tool" ]; then
+                        chosen_ai_tool=$(echo "$chosen_ai_tool" | tr '[:upper:]' '[:lower:]')
+                        if [[ " ${AVAILABLE_AI_TOOLS[*]} " =~ " ${chosen_ai_tool} " ]]; then
+                            AI_TOOL="$chosen_ai_tool"
+                        else
+                            echo "⚠️  '$chosen_ai_tool' not available. Using '$AI_TOOL'."
+                        fi
+                    fi
+                fi
             fi
-        else
-            echo "⚠️  Claude CLI not found. AI mode not available."
-            USE_AI=false
         fi
     fi
 
@@ -107,7 +157,15 @@ else
 
     # Set AI mode default if not specified
     if [ -z "$USE_AI" ]; then
-        if command -v claude &> /dev/null; then
+        if [ "$AI_TOOL" = "codex" ] && command -v "$CODEX_COMMAND" &> /dev/null; then
+            USE_AI=true
+        elif [ "$AI_TOOL" = "claude" ] && command -v "$CLAUDE_COMMAND" &> /dev/null; then
+            USE_AI=true
+        elif command -v "$CLAUDE_COMMAND" &> /dev/null; then
+            AI_TOOL="claude"
+            USE_AI=true
+        elif command -v "$CODEX_COMMAND" &> /dev/null; then
+            AI_TOOL="codex"
             USE_AI=true
         else
             USE_AI=false
@@ -395,16 +453,69 @@ LOCK FILES UPDATED: $(echo "$LOCK_FILES" | awk '{print $2}' | xargs basename -a 
 
 Now provide ONLY the description content (no meta-commentary). Start directly with the summary paragraph."
 
-    # Call Claude CLI with --print flag for non-interactive output
-    local ai_description=$(echo "$prompt" | claude --print 2>/dev/null)
-    local exit_code=$?
+    local ai_command ai_args=()
+    local tmp_error
+    tmp_error=$(mktemp)
+
+    if [ "$AI_TOOL" = "codex" ]; then
+        ai_command="$CODEX_COMMAND"
+        if [ -n "${CODEX_CLI_ARGS:-}" ]; then
+            # shellcheck disable=SC2206
+            ai_args=($CODEX_CLI_ARGS)
+        fi
+    else
+        ai_command="$CLAUDE_COMMAND"
+        if [ -n "${CLAUDE_CLI_ARGS:-}" ]; then
+            # shellcheck disable=SC2206
+            ai_args=($CLAUDE_CLI_ARGS)
+        else
+            ai_args=(--print)
+        fi
+    fi
+
+    if ! command -v "$ai_command" > /dev/null 2>&1; then
+        echo "" >&2
+        echo "⚠️  AI tool '$ai_command' not found. Skipping AI description." >&2
+        echo "" >&2
+        echo ""
+        rm -f "$tmp_error"
+        return
+    fi
+
+    local ai_description=""
+    local exit_code=0
+
+    # Call selected AI CLI (Codex requires exec for non-interactive output)
+    set +e
+    if [ "$AI_TOOL" = "codex" ]; then
+        local tmp_output
+        tmp_output=$(mktemp)
+        echo "$prompt" | "$ai_command" "${ai_args[@]}" exec --skip-git-repo-check --output-last-message "$tmp_output" - >"$tmp_error" 2>&1
+        exit_code=$?
+        if [ $exit_code -eq 0 ]; then
+            ai_description=$(cat "$tmp_output")
+        fi
+        rm -f "$tmp_output"
+    else
+        ai_description=$(echo "$prompt" | "$ai_command" "${ai_args[@]}" 2>"$tmp_error")
+        exit_code=$?
+    fi
+    set -e
+
+    local error_output
+    error_output=$(cat "$tmp_error")
+    rm -f "$tmp_error"
 
     if [ $exit_code -eq 0 ] && [ -n "$ai_description" ]; then
         echo "$ai_description"
     else
         echo "" >&2
-        echo "⚠️  AI description generation failed. Using basic description." >&2
-        echo "   Make sure you're authenticated with Claude CLI." >&2
+        echo "⚠️  AI description generation failed ($AI_TOOL). Using basic description." >&2
+        if [ -n "$error_output" ]; then
+            echo "$error_output" >&2
+        else
+            echo "   Make sure you're authenticated with the selected AI CLI ($AI_TOOL)." >&2
+        fi
         echo "" >&2
         echo ""
     fi
