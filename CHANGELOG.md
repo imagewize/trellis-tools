@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.12.2] - 2025-12-14
+
+### Added
+- New section "Adding Patterns to Existing Pages" to PAGE-CREATION.md with comprehensive examples
+- Method 1: Update page via Trellis VM with heredoc pattern insertion
+- Method 2: Batch add patterns by category for showcase pages
+- Method 3: Finding pattern slugs from theme files
+- Real-world Elayne theme pattern showcase examples (Heroes page and Patterns page)
+- Tips for creating pattern showcase pages with consistent spacing and formatting
+- Troubleshooting section for pattern rendering and content update issues
+- VM-based content file creation examples using `/tmp` directory
+
+### Changed
+- Updated PAGE-CREATION.md Table of Contents to include section 9
+- Enhanced PAGE-CREATION.md with VM heredoc examples for multisite pattern updates
+- Improved document version to 1.1 with updated timestamp (December 14, 2025)
+
 ## [1.12.1] - 2025-12-01
 
 ### Fixed
