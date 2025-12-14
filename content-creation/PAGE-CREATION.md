@@ -18,6 +18,7 @@ Complete guide for creating WordPress pages on Trellis VM (local development) an
 6. [Common Issues & Solutions](#common-issues--solutions)
 7. [Best Practices](#best-practices)
 8. [Examples](#examples)
+9. [Adding Patterns to Existing Pages](#adding-patterns-to-existing-pages)
 
 ---
 
@@ -765,7 +766,250 @@ wp cache flush --path=web/wp
 
 ---
 
-**Document Version:** 1.0
-**Created:** November 25, 2025
+## Adding Patterns to Existing Pages
+
+This section covers how to update existing pages with block patterns, useful for pattern showcase pages or major content updates.
+
+### Method 1: Update Page via Trellis VM (Local)
+
+**Use case:** Adding all theme patterns to a showcase page on local development site.
+
+#### Step 1: Find the Page ID
+
+```bash
+# List pages to find the ID
+trellis vm shell --workdir /srv/www/demo.imagewize.com/current -- \
+  wp post list --post_type=page --url=https://demo.imagewize.test/ \
+  --fields=ID,post_title,post_name --path=web/wp
+```
+
+Example output:
+```
+ID    post_title                post_name
+100   89+ Professional Patterns  patterns
+1848  Heroes                     heroes
+```
+
+#### Step 2: Create Content File in VM
+
+Create the HTML content file directly in the Trellis VM's `/tmp` directory:
+
+```bash
+trellis vm shell --workdir /srv/www/demo.imagewize.com/current -- bash << 'VMEOF'
+cat > /tmp/page-content.html << 'EOF'
+<!-- wp:heading {"textAlign":"center","fontSize":"xxx-large"} -->
+<h2 class="wp-block-heading has-text-align-center has-xxx-large-font-size">Hero Patterns</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph {"align":"center","fontSize":"medium"} -->
+<p class="has-text-align-center has-medium-font-size">Explore all hero patterns available in the theme.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:spacer {"height":"60px"} -->
+<div style="height:60px" aria-hidden="true" class="wp-block-spacer"></div>
+<!-- /wp:spacer -->
+
+<!-- wp:pattern {"slug":"elayne/hero-modern-dark"} /-->
+
+<!-- wp:spacer {"height":"40px"} -->
+<div style="height:40px" aria-hidden="true" class="wp-block-spacer"></div>
+<!-- /wp:spacer -->
+
+<!-- wp:pattern {"slug":"elayne/hero-modern-light"} /-->
+EOF
+
+# Update the page with content
+CONTENT=$(cat /tmp/page-content.html)
+wp post update 1848 --post_content="$CONTENT" --url=https://demo.imagewize.test/ --path=web/wp
+
+# Verify the update
+wp post get 1848 --url=https://demo.imagewize.test/ --fields=ID,post_title,post_status --path=web/wp
+VMEOF
+```
+
+**Important Notes:**
+- Use heredoc with quoted delimiters (`'EOF'`) to prevent variable expansion
+- The content file is created in VM's `/tmp` directory (not host machine)
+- Pattern slugs must match your theme's registered patterns (e.g., `elayne/hero-modern-dark`)
+- For multisite, always include `--url=https://yoursite.test/` parameter
+
+#### Step 3: Verify in Browser
+
+Visit the updated page to confirm patterns are displaying correctly:
+```
+https://demo.imagewize.test/heroes/
+```
+
+### Method 2: Batch Add Patterns by Category
+
+**Use case:** Creating a comprehensive patterns page organized by category.
+
+```bash
+trellis vm shell --workdir /srv/www/demo.imagewize.com/current -- bash << 'VMEOF'
+cat > /tmp/patterns-showcase.html << 'EOF'
+<!-- wp:heading {"textAlign":"center","fontSize":"xxx-large"} -->
+<h2 class="wp-block-heading has-text-align-center has-xxx-large-font-size">89+ Professional Patterns</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph {"align":"center","fontSize":"medium"} -->
+<p class="has-text-align-center has-medium-font-size">Explore all professionally designed patterns organized by category.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:spacer {"height":"60px"} -->
+<div style="height:60px" aria-hidden="true" class="wp-block-spacer"></div>
+<!-- /wp:spacer -->
+
+<!-- wp:heading {"level":2,"fontSize":"xx-large"} -->
+<h2 class="wp-block-heading has-xx-large-font-size">Hero Sections (4)</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph {"fontSize":"base"} -->
+<p class="has-base-font-size">Powerful first impressions with full-width hero patterns.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:spacer {"height":"40px"} -->
+<div style="height:40px" aria-hidden="true" class="wp-block-spacer"></div>
+<!-- /wp:spacer -->
+
+<!-- wp:pattern {"slug":"elayne/hero-modern-dark"} /-->
+<!-- wp:pattern {"slug":"elayne/hero-modern-light"} /-->
+<!-- wp:pattern {"slug":"elayne/hero-two-tone"} /-->
+<!-- wp:pattern {"slug":"elayne/hero-with-cta"} /-->
+
+<!-- Add more categories and patterns... -->
+EOF
+
+CONTENT=$(cat /tmp/patterns-showcase.html)
+wp post update 100 --post_content="$CONTENT" --url=https://demo.imagewize.test/ --path=web/wp
+VMEOF
+```
+
+### Method 3: Finding Pattern Slugs
+
+To discover available patterns in your theme:
+
+```bash
+# Find all pattern files
+find /path/to/theme/patterns -name "*.php" -type f ! -name "template-*" | sort
+
+# Extract pattern slugs from PHP files
+grep -h "Slug:" /path/to/theme/patterns/*.php | awk '{print $3}'
+
+# For Elayne theme example:
+find ~/code/imagewize.com/demo/web/app/themes/elayne/patterns \
+  -name "*.php" -type f ! -name "template-*" ! -name "header-*" ! -name "footer-*" \
+  -exec basename {} .php \;
+```
+
+### Real-World Example: Elayne Theme Pattern Showcase
+
+Complete example updating two pages on Elayne demo site:
+
+**1. Heroes page (ID: 1848) - Show all hero patterns:**
+```bash
+trellis vm shell --workdir /srv/www/demo.imagewize.com/current -- bash << 'VMEOF'
+cat > /tmp/heroes-content.html << 'EOF'
+<!-- wp:heading {"textAlign":"center","fontSize":"xxx-large"} -->
+<h2 class="wp-block-heading has-text-align-center has-xxx-large-font-size">Hero Patterns</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph {"align":"center","fontSize":"medium"} -->
+<p class="has-text-align-center has-medium-font-size">Explore all hero patterns available in the Elayne theme. Each pattern is designed to make a strong first impression.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:spacer {"height":"60px"} -->
+<div style="height:60px" aria-hidden="true" class="wp-block-spacer"></div>
+<!-- /wp:spacer -->
+
+<!-- wp:pattern {"slug":"elayne/hero-modern-dark"} /-->
+<!-- wp:spacer {"height":"40px"} -->
+<div style="height:40px" aria-hidden="true" class="wp-block-spacer"></div>
+<!-- /wp:spacer -->
+
+<!-- wp:pattern {"slug":"elayne/hero-modern-light"} /-->
+<!-- wp:spacer {"height":"40px"} -->
+<div style="height:40px" aria-hidden="true" class="wp-block-spacer"></div>
+<!-- /wp:spacer -->
+
+<!-- wp:pattern {"slug":"elayne/hero-two-tone"} /-->
+<!-- wp:spacer {"height":"40px"} -->
+<div style="height:40px" aria-hidden="true" class="wp-block-spacer"></div>
+<!-- /wp:spacer -->
+
+<!-- wp:pattern {"slug":"elayne/hero-with-cta"} /-->
+EOF
+
+CONTENT=$(cat /tmp/heroes-content.html)
+wp post update 1848 --post_content="$CONTENT" --url=https://demo.imagewize.test/ --path=web/wp
+VMEOF
+```
+
+**2. Patterns page (ID: 100) - Show all patterns by category:**
+```bash
+# See full example in trellis-tools/content-creation/examples/elayne-patterns-showcase.html
+# This would include all 24+ patterns organized into categories:
+# - Hero Sections (4)
+# - Features & Services (3)
+# - Testimonials (3)
+# - Statistics (2)
+# - Call-to-Action (1)
+# - Contact (2)
+# - Team (1)
+# - Blog & Posts (5)
+# - Support & Information (2)
+# - Pricing (1)
+```
+
+### Tips for Pattern Pages
+
+1. **Use consistent spacing:**
+   - 60-80px spacers between sections
+   - 40px spacers between patterns in same category
+
+2. **Add descriptive headings:**
+   - Category heading (H2, xx-large font)
+   - Category description (paragraph, base font)
+
+3. **Pattern slugs must be exact:**
+   - Format: `theme-name/pattern-slug` (e.g., `elayne/hero-modern-dark`)
+   - Check theme's patterns directory for correct slugs
+   - Case-sensitive!
+
+4. **Test on mobile:**
+   - Patterns should be responsive by default
+   - Verify spacing and layout on different screen sizes
+
+### Troubleshooting Pattern Updates
+
+**Problem:** Pattern not rendering
+```bash
+# Verify pattern slug exists
+grep -r "Slug: elayne/hero-modern-dark" ~/code/imagewize.com/demo/web/app/themes/elayne/patterns/
+
+# Check pattern is registered (from VM)
+trellis vm shell --workdir /srv/www/demo.imagewize.com/current -- \
+  wp block-pattern list --url=https://demo.imagewize.test/ --path=web/wp
+```
+
+**Problem:** Content not updating
+```bash
+# Flush WordPress cache
+trellis vm shell --workdir /srv/www/demo.imagewize.com/current -- \
+  wp cache flush --url=https://demo.imagewize.test/ --path=web/wp
+
+# For multisite, flush network cache
+trellis vm shell --workdir /srv/www/demo.imagewize.com/current -- \
+  wp cache flush --network --path=web/wp
+```
+
+**Problem:** Page shows old content
+- Clear browser cache (Cmd+Shift+R)
+- Disable page caching plugin temporarily
+- Check WordPress development mode is enabled for theme work
+
+---
+
+**Document Version:** 1.1
+**Last Updated:** December 14, 2025
 **Author:** Claude Code Documentation
 **Status:** Production Ready
