@@ -18,11 +18,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Tips for creating pattern showcase pages with consistent spacing and formatting
 - Troubleshooting section for pattern rendering and content update issues
 - VM-based content file creation examples using `/tmp` directory
+- Multi-AI support in create-pr.sh with `--ai=claude|codex` option for flexible AI backend selection
+- Interactive AI tool selection when both Claude and Codex CLIs are available
+- Environment variable support for custom CLI command names (`CLAUDE_COMMAND`, `CODEX_COMMAND`)
+- Support for custom AI CLI arguments via `CLAUDE_CLI_ARGS` and `CODEX_CLI_ARGS` environment variables
 
 ### Changed
 - Updated PAGE-CREATION.md Table of Contents to include section 9
 - Enhanced PAGE-CREATION.md with VM heredoc examples for multisite pattern updates
 - Improved document version to 1.1 with updated timestamp (December 14, 2025)
+- Refactored create-pr.sh option parsing to use `case` statement for better maintainability
+- Enhanced AI CLI detection to check for both Claude and Codex availability
+- Improved error handling in AI description generation with detailed error messages
+- Updated CREATE-PR.md with multi-AI backend documentation and usage examples
 
 ## [1.12.1] - 2025-12-01
 

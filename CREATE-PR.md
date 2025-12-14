@@ -4,12 +4,14 @@ An intelligent script (`create-pr.sh`) that creates GitHub pull requests with pr
 
 ## Features
 
-- **AI-Powered Descriptions**: Uses Claude AI to analyze git diffs and generate intelligent summaries
+- **Multi-AI Backend Support**: Choose between Claude CLI or Codex CLI for AI-powered descriptions
+- **AI-Powered Descriptions**: Uses AI to analyze git diffs and generate intelligent summaries
 - **Professional Formatting**: Creates descriptions with grouped sections, bold headings, and detailed bullet points
 - **Clickable File Links**: Each file links directly to the changed version on GitHub for quick access
 - **Smart Categorization**: Automatically detects change types (dependencies, documentation, styling, etc.)
 - **Automatic PR Creation**: Uses GitHub CLI to create the actual pull request
 - **Fallback Mode**: Works without AI when API key is not available
+- **Interactive AI Selection**: Choose your preferred AI tool when both are available
 
 ## Token Usage Comparison
 
@@ -72,13 +74,20 @@ Understanding the cost/benefit of using AI vs no-AI mode:
    gh auth login
    ```
 
-2. **Claude CLI** (optional, for AI descriptions)
+2. **AI CLI** (optional, for AI descriptions)
 
-   If you're using Claude Code in VS Code, you already have this installed!
+   Choose one or both:
 
-   Otherwise, download from: https://claude.ai/download
+   **Claude CLI** (recommended)
+   - If you're using Claude Code in VS Code, you already have this installed!
+   - Otherwise, download from: https://claude.ai/download
+   - The script will automatically use your existing Claude authentication
 
-   The script will automatically use your existing Claude authentication.
+   **Codex CLI** (alternative)
+   - Install via npm: `npm install -g @anthropic-ai/codex-cli`
+   - Or download from your AI provider
+
+   The script automatically detects which AI tools are available and lets you choose interactively.
 
 ## Installation
 
@@ -140,6 +149,10 @@ Provide arguments to skip prompts:
 ### Options
 
 ```bash
+# Choose AI backend (claude or codex)
+./create-pr.sh --ai=claude
+./create-pr.sh --ai=codex
+
 # Skip AI generation (0 tokens, basic description)
 ./create-pr.sh --no-ai
 
@@ -147,7 +160,12 @@ Provide arguments to skip prompts:
 ./create-pr.sh --no-interactive
 
 # Combine options
+./create-pr.sh main "Feature update" --ai=codex --no-interactive
 ./create-pr.sh main "Feature update" --no-ai --no-interactive
+
+# Update existing PR with fresh AI-generated description
+./create-pr.sh --update
+./create-pr.sh --update --ai=codex
 ```
 
 ## Example Output Comparison
@@ -243,10 +261,10 @@ This pull request introduces changes from the `feature/auth` branch into `main`.
 
 ## AI Description Generation
 
-When Claude CLI is available, the script:
+When an AI CLI is available (Claude or Codex), the script:
 
 1. Analyzes commit messages, changed files, and categories
-2. Sends a structured prompt to Claude using your existing authentication
+2. Sends a structured prompt to your chosen AI tool using your existing authentication
 3. Receives a professional description with:
    - Concise introductory paragraph
    - Grouped sections with bold headings
@@ -255,22 +273,74 @@ When Claude CLI is available, the script:
 
 The AI is instructed to write like a senior developer - no emoticons, professional tone, focusing on what changed and why.
 
-**Note**: If you're using Claude Code in VS Code, this works automatically with no additional setup!
+### Choosing Your AI Backend
+
+The script supports multiple AI backends:
+
+**Automatic Detection**: If you don't specify `--ai=`, the script will:
+1. Check for both Claude and Codex CLIs
+2. If both are available, ask you to choose
+3. If only one is available, use that automatically
+4. If none are available, offer no-AI mode
+
+**Manual Selection**: Use `--ai=claude` or `--ai=codex` to force a specific backend
+
+**Interactive Selection**: When both are available and you're in interactive mode:
+```
+Available AI tools: claude codex
+Choose AI tool [default: claude]: codex
+```
+
+### Environment Variables
+
+For advanced users, you can customize the CLI commands and arguments:
+
+```bash
+# Use custom Claude command name
+export CLAUDE_COMMAND="claude-custom"
+
+# Use custom Codex command name
+export CODEX_COMMAND="my-codex"
+
+# Pass custom arguments to Claude CLI
+export CLAUDE_CLI_ARGS="--model=opus --timeout=30"
+
+# Pass custom arguments to Codex CLI
+export CODEX_CLI_ARGS="--verbose"
+
+./create-pr.sh
+```
+
+**Note**: If you're using Claude Code in VS Code, the Claude CLI works automatically with no additional setup!
 
 ## Troubleshooting
 
-### "Claude CLI is not installed"
+### "No AI CLI found"
 
-If you're using Claude Code in VS Code, make sure the `claude` command is in your PATH:
-```bash
-which claude
-# Should output: /Users/yourname/.volta/bin/claude
-```
+The script checks for both `claude` and `codex` commands. If neither is found:
 
-If not found, you can:
+**For Claude CLI:**
+- If you're using Claude Code in VS Code, make sure the `claude` command is in your PATH:
+  ```bash
+  which claude
+  # Should output: /Users/yourname/.volta/bin/claude
+  ```
 - Restart your terminal after installing Claude Code
 - Download Claude CLI from: https://claude.ai/download
-- Run with `--no-ai` flag to skip AI generation
+
+**For Codex CLI:**
+- Install via npm: `npm install -g @anthropic-ai/codex-cli`
+- Or check your AI provider's installation instructions
+
+**Workaround:**
+- Run with `--no-ai` flag to skip AI generation and use basic descriptions
+
+### "AI tool 'codex' not found"
+
+If you specified `--ai=codex` but don't have it installed:
+- Remove the `--ai=codex` flag to use Claude (if available)
+- Install Codex CLI
+- Or use `--no-ai` for basic descriptions
 
 ### "gh is not installed"
 

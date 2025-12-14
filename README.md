@@ -16,7 +16,7 @@ A collection of tools to enhance your [Roots Trellis](https://roots.io/trellis/)
 | **Troubleshooting** | Diagnose and resolve PHP-FPM, MariaDB, and server issues | [→ Guide](troubleshooting/README.md) |
 | **Monitoring** | Nginx log monitoring for traffic analysis and security threat detection | [→ Guide](monitoring/README.md) |
 | **Redirects** | Nginx redirect configuration for SEO and URL management | [→ Guide](redirects/README.md) |
-| **PR Creation Script** | AI-powered GitHub PR descriptions with Claude CLI | [→ Guide](CREATE-PR.md) |
+| **PR Creation Script** | AI-powered GitHub PR descriptions with multi-AI backend support (Claude/Codex) | [→ Guide](CREATE-PR.md) |
 | **Theme Sync** | Rsync script for theme synchronization | [→ Script](rsync-theme.sh) |
 
 ## Quick Start
