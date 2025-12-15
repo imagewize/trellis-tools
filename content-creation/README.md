@@ -5,6 +5,7 @@ This guide covers techniques for creating and managing WordPress content using W
 ## Files in This Directory
 
 - **[PAGE-CREATION.md](PAGE-CREATION.md)** - Complete step-by-step guide for creating WordPress pages in local development and production
+- **[PATTERN-REQUIREMENTS.md](PATTERN-REQUIREMENTS.md)** - WordPress block pattern requirements, best practices, and validation checklist
 - **[page-creation.sh](page-creation.sh)** - Automated script for deploying pages to production servers
 - **[example-page-content.html](example-page-content.html)** - Example HTML file with WordPress Gutenberg block markup
 - **README.md** (this file) - General content creation techniques and WP-CLI workflows
@@ -489,6 +490,7 @@ wp post get 100 --field=post_content --path=web/wp | head -50
 
 ## Additional Resources
 
+- [Pattern Requirements Guide](PATTERN-REQUIREMENTS.md) - Comprehensive checklist and best practices for WordPress block patterns
 - [WP-CLI Documentation](https://wp-cli.org/)
 - [WordPress Block Editor Handbook](https://developer.wordpress.org/block-editor/)
 - [Block Pattern Directory](https://wordpress.org/patterns/)
