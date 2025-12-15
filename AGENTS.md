@@ -24,6 +24,7 @@
 - Commits should be concise, imperative summaries (e.g., `Add monitoring tail script`, `Update backup docs`). Group related changes by tool.
 - PRs: include a short description of scope, commands run/outputs (or screenshots for doc-only visual changes), and linked issues if applicable. Note any risk areas (data migration, remote writes).
 - Update changelog entries when behavior changes materially; keep doc updates alongside the tool they describe.
+- Changelog updates: edit `CHANGELOG.md` using Keep a Changelog sections, bump the SemVer version (e.g., `1.13.0` for new features, `1.13.1` for fixes), and stamp the date `YYYY-MM-DD`.
 
 ## Security & Configuration Tips
 - Never commit secrets (vault files, SMTP creds, `.env`, private keys). Use redacted examples and `.example` templates.
