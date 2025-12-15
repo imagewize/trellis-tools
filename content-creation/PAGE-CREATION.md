@@ -59,7 +59,7 @@ Create an HTML file with Gutenberg block markup:
 nano about-page-content.html
 ```
 
-**Tip:** See [example-page-content.html](example-page-content.html) in this directory for a complete example using WordPress Gutenberg blocks.
+**Tip:** See [examples/example-page-content.html](examples/example-page-content.html) in this directory for a complete example using WordPress Gutenberg blocks.
 
 **Content Structure:**
 - Use WordPress Gutenberg block comments (`<!-- wp:block-name -->`)
@@ -655,7 +655,7 @@ bash -c "CONTENT=$(cat file.html) && wp post create --post_content=\"$CONTENT\""
 ### Example 1: Using Automated Script (Production)
 
 ```bash
-# 1. Prepare your content file (use example-page-content.html as a template)
+# 1. Prepare your content file (use examples/example-page-content.html as a template)
 nano about-page-content.html
 
 # 2. Run the automated script
