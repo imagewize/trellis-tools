@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.13.0] - 2025-12-15
+
+### Added
+- New `PATTERN-REQUIREMENTS.md` with comprehensive WordPress block pattern standards and validation checklist
+- `AGENTS.md` contributor guide summarizing project structure, commands, coding conventions, and PR expectations
+
+### Changed
+- Reworked `content-creation/README.md` into a concise landing page with clear navigation to page creation workflows, pattern requirements, and automation scripts
+- Moved the sample Gutenberg content file to `content-creation/examples/example-page-content.html` and updated references in `PAGE-CREATION.md`
+
 ## [1.12.2] - 2025-12-14
 
 ### Added
