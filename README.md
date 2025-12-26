@@ -13,6 +13,7 @@ A collection of tools to enhance your [Roots Trellis](https://roots.io/trellis/)
 | **Image Optimization** | Nginx WebP/AVIF configuration with automatic format serving | [→ Guide](image-optimization/README.md) |
 | **Browser Caching** | Nginx configuration for optimal static asset caching | [→ Guide](browser-caching/README.md) |
 | **Provisioning Reference** | Common Trellis provisioning commands and workflows | [→ Guide](provision/README.md) |
+| **Diagnostics** | WordPress diagnostic tools for transients, caching, and performance issues | [→ Guide](diagnostics/README.md) |
 | **Troubleshooting** | Diagnose and resolve PHP-FPM, MariaDB, and server issues | [→ Guide](troubleshooting/README.md) |
 | **Monitoring** | Nginx log monitoring for traffic analysis and security threat detection | [→ Guide](monitoring/README.md) |
 | **Redirects** | Nginx redirect configuration for SEO and URL management | [→ Guide](redirects/README.md) |
