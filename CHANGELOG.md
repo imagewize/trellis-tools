@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.14.0] - 2025-12-26
+
+### Added
+- New diagnostics directory with WordPress diagnostic tools for troubleshooting
+- CLI transient diagnostic script (`diagnostic-transients.php`) for WP-CLI-based transient testing
+- Browser-based transient debugger (`transient-debug-browser.php`) for web-accessible diagnostics
+- Comprehensive diagnostic documentation covering transient storage, caching, and performance issues
+- Security-conscious diagnostic tools with access controls and secret token protection
+- Support for diagnosing external object cache conflicts (Redis, Memcached, LiteSpeed)
+- Database performance metrics and wp_options table analysis
+- Business hours logic testing for time-based cache lifetimes
+
+### Changed
+- Updated main README.md to include Diagnostics tool in tools table
+
 ## [1.13.1] - 2025-12-15
 
 ### Changed
