@@ -155,7 +155,62 @@ wordpress_sites:
 
 ## Start and Provision Trellis VM
 
-### 1. Start Trellis VM
+### 1. Initialize Trellis
+
+**IMPORTANT:** Run this before starting the VM for the first time.
+
+```bash
+cd trellis
+trellis init
+```
+
+**What this does:**
+- Creates Python virtual environment (`.trellis/virtualenv/`)
+- Installs Ansible and dependencies
+- Prepares project for Trellis CLI management
+
+**First-time setup:** ~2-5 minutes (downloading and installing Python packages)
+
+**Expected output:**
+```
+Initializing project...
+
+[✓] Created virtualenv (/path/to/project/trellis/.trellis/virtualenv)
+[✓] Ensure pip is up to date
+[✓] Dependencies installed
+```
+
+**Note:** You may see verbose pip output if installation takes longer than expected. This is normal.
+
+### 2. Copy Vault Password
+
+**IMPORTANT:** Required for provisioning. The vault password decrypts sensitive configuration (database passwords, etc.).
+
+If you're setting up an existing project on a new machine, copy the `.vault_pass` file from your existing development machine:
+
+```bash
+# On your existing machine
+cat /path/to/project/trellis/.vault_pass
+
+# On your new machine
+cd /Users/j/code/imagewize.com/trellis
+echo "PASTE_PASSWORD_HERE" > .vault_pass
+chmod 600 .vault_pass
+```
+
+**Security notes:**
+- `.vault_pass` should be in `.gitignore` (never commit it!)
+- Each team member needs this file for provisioning
+- Share securely (1Password, encrypted message, etc.)
+
+**Alternative (new projects only):** If starting fresh, you can create a new vault password:
+```bash
+echo "$(openssl rand -base64 32)" > trellis/.vault_pass
+chmod 600 trellis/.vault_pass
+```
+Then you'll need to re-encrypt vault files with the new password.
+
+### 3. Start Trellis VM
 
 ```bash
 cd trellis
@@ -177,7 +232,7 @@ VM started successfully.
 VM IP: 192.168.56.5
 ```
 
-### 2. Verify /etc/hosts Entry
+### 4. Verify /etc/hosts Entry
 
 Trellis CLI automatically adds your site to `/etc/hosts`:
 
@@ -192,7 +247,7 @@ grep yourproject.test /etc/hosts
 sudo sh -c 'echo "192.168.56.5  yourproject.test" >> /etc/hosts'
 ```
 
-### 3. Provision Development Environment
+### 5. Provision Development Environment
 
 ```bash
 # In trellis directory
@@ -215,7 +270,7 @@ PLAY RECAP ***************************************************************
 192.168.56.5 : ok=XXX  changed=YYY  unreachable=0    failed=0    skipped=ZZZ
 ```
 
-### 4. Trust SSL Certificate
+### 6. Trust SSL Certificate
 
 Visit `https://yourproject.test` in your browser. You'll see a security warning (expected for self-signed certificates).
 
@@ -370,35 +425,84 @@ npm run build
 
 ### Add SSH Key to Production
 
-Your SSH public key needs to be added to production server.
+When setting up a new machine, you need to add your SSH key to the production server.
 
-**Option 1: Ask existing admin**
+#### Prerequisites
 
-Send your public key:
-```bash
-cat ~/.ssh/id_ed25519.pub
-```
-
-Admin adds it to `/home/web/.ssh/authorized_keys` on production server.
-
-**Option 2: Add via Trellis (if you have admin access)**
-
-1. Edit `trellis/group_vars/all/users.yml`
-2. Add your public key to `web_user` or `admin_user` keys list
-3. Re-provision production:
+1. **Add your SSH key to GitHub:**
    ```bash
-   trellis provision --tags users production
+   # Display your public key
+   cat ~/.ssh/id_ed25519.pub
+
+   # Add it to GitHub: https://github.com/settings/keys
    ```
 
-### Verify Production Access
+2. **Verify your key is in the Trellis users configuration:**
+
+   Check `trellis/group_vars/all/users.yml` includes your GitHub username:
+   ```yaml
+   users:
+     - name: "{{ web_user }}"
+       keys:
+         - https://github.com/YOUR_USERNAME.keys
+   ```
+
+#### Provision SSH Keys to Production
+
+**IMPORTANT:** This step requires someone with existing production access.
+
+From a machine that already has SSH access to production:
 
 ```bash
-# Test SSH connection
+cd /path/to/yourproject/trellis
+
+# Provision users (updates authorized_keys from GitHub)
+trellis provision --tags users production
+```
+
+**What this does:**
+- Fetches SSH keys from GitHub URLs configured in `users.yml`
+- Updates `/home/web/.ssh/authorized_keys` (for web user)
+- Updates `/home/warden/.ssh/authorized_keys` (for admin user)
+- **Does NOT update** `/root/.ssh/authorized_keys` (root SSH disabled for security)
+
+**Expected output:**
+```
+PLAY RECAP ***************************************************************
+yourproject.com : ok=XX  changed=X  unreachable=0  failed=0
+```
+
+**Time:** ~30 seconds to 2 minutes
+
+#### Verify Production Access
+
+From your new machine:
+
+```bash
+# Test SSH connection as web user
 ssh web@yourproject.com
 
 # Should get shell access
 # If successful: web@yourproject:~$
+
+# Test SSH connection as admin user
+ssh warden@yourproject.com
+
+# Should get shell access
+# If successful: warden@yourproject:~$
 ```
+
+**Note:** Root SSH access is disabled for security. Use `warden` (admin user) for sudo access.
+
+#### Troubleshooting
+
+**Problem:** `Permission denied (publickey)` after provisioning
+
+**Solutions:**
+1. Verify your key is on GitHub: `curl https://github.com/YOUR_USERNAME.keys`
+2. Wait 1-2 minutes for GitHub to update its cache
+3. Re-run provisioning: `trellis provision --tags users production`
+4. Check if key was added: `ssh warden@yourproject.com "cat /home/web/.ssh/authorized_keys"`
 
 ### Deploy to Production
 
@@ -565,6 +669,9 @@ After setup, verify everything works:
 ## Quick Reference
 
 ```bash
+# Initial Setup
+trellis init                          # Initialize Trellis (run once)
+
 # VM Management
 trellis vm start                      # Start VM
 trellis vm stop                       # Stop VM
