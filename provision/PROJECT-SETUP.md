@@ -155,7 +155,62 @@ wordpress_sites:
 
 ## Start and Provision Trellis VM
 
-### 1. Start Trellis VM
+### 1. Initialize Trellis
+
+**IMPORTANT:** Run this before starting the VM for the first time.
+
+```bash
+cd trellis
+trellis init
+```
+
+**What this does:**
+- Creates Python virtual environment (`.trellis/virtualenv/`)
+- Installs Ansible and dependencies
+- Prepares project for Trellis CLI management
+
+**First-time setup:** ~2-5 minutes (downloading and installing Python packages)
+
+**Expected output:**
+```
+Initializing project...
+
+[✓] Created virtualenv (/path/to/project/trellis/.trellis/virtualenv)
+[✓] Ensure pip is up to date
+[✓] Dependencies installed
+```
+
+**Note:** You may see verbose pip output if installation takes longer than expected. This is normal.
+
+### 2. Copy Vault Password
+
+**IMPORTANT:** Required for provisioning. The vault password decrypts sensitive configuration (database passwords, etc.).
+
+If you're setting up an existing project on a new machine, copy the `.vault_pass` file from your existing development machine:
+
+```bash
+# On your existing machine
+cat /path/to/project/trellis/.vault_pass
+
+# On your new machine
+cd /Users/j/code/imagewize.com/trellis
+echo "PASTE_PASSWORD_HERE" > .vault_pass
+chmod 600 .vault_pass
+```
+
+**Security notes:**
+- `.vault_pass` should be in `.gitignore` (never commit it!)
+- Each team member needs this file for provisioning
+- Share securely (1Password, encrypted message, etc.)
+
+**Alternative (new projects only):** If starting fresh, you can create a new vault password:
+```bash
+echo "$(openssl rand -base64 32)" > trellis/.vault_pass
+chmod 600 trellis/.vault_pass
+```
+Then you'll need to re-encrypt vault files with the new password.
+
+### 3. Start Trellis VM
 
 ```bash
 cd trellis
@@ -177,7 +232,7 @@ VM started successfully.
 VM IP: 192.168.56.5
 ```
 
-### 2. Verify /etc/hosts Entry
+### 4. Verify /etc/hosts Entry
 
 Trellis CLI automatically adds your site to `/etc/hosts`:
 
@@ -192,7 +247,7 @@ grep yourproject.test /etc/hosts
 sudo sh -c 'echo "192.168.56.5  yourproject.test" >> /etc/hosts'
 ```
 
-### 3. Provision Development Environment
+### 5. Provision Development Environment
 
 ```bash
 # In trellis directory
@@ -215,7 +270,7 @@ PLAY RECAP ***************************************************************
 192.168.56.5 : ok=XXX  changed=YYY  unreachable=0    failed=0    skipped=ZZZ
 ```
 
-### 4. Trust SSL Certificate
+### 6. Trust SSL Certificate
 
 Visit `https://yourproject.test` in your browser. You'll see a security warning (expected for self-signed certificates).
 
@@ -565,6 +620,9 @@ After setup, verify everything works:
 ## Quick Reference
 
 ```bash
+# Initial Setup
+trellis init                          # Initialize Trellis (run once)
+
 # VM Management
 trellis vm start                      # Start VM
 trellis vm stop                       # Stop VM
