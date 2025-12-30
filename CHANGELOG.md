@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.16.1] - 2025-12-30
+
+### Changed
+- Updated PROJECT-SETUP.md to use HTTP by default for local development instead of HTTPS
+- Changed `WP_HOME` example from `https://yourproject.test` to `http://yourproject.test` for simpler local setup
+- Updated all URL examples throughout the guide to use HTTP (with notes on HTTPS if SSL is enabled)
+- Enhanced database pull section with URL search-replace guidance based on local SSL configuration
+- Added dedicated multisite URL update section with WP-CLI `--network` flag examples
+- Expanded troubleshooting section with new entries for 500 errors, WP-CLI autoloader issues, and SSH host key verification
+- Added critical theme setup instructions after database pull (Composer/NPM install and build steps)
+- Enhanced verification checklist to include theme dependency and asset build verification
+- Added method 2 for direct rsync file sync when Ansible playbooks fail
+- Updated quick reference commands to include theme setup workflow
+
+### Added
+- Multisite network URL update documentation with WP-CLI network commands
+- Theme setup section explaining why Composer/NPM builds are required after database pulls
+- Alternative MySQL-only commands for multisite URL updates (with warnings about limitations)
+- SSH known_hosts configuration examples for production server access
+- Theme asset build verification steps in checklist
+- Explanation of Lima VM bidirectional file sync behavior
+
 ## [1.16.0] - 2025-12-30
 
 ### Added
