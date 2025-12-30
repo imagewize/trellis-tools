@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.16.0] - 2025-12-30
+
+### Added
+- New project setup guide (provision/PROJECT-SETUP.md) for cloning and configuring existing Trellis/Bedrock projects
+- Comprehensive project-specific documentation covering repository cloning, dependency installation, and VM provisioning
+- Database and files setup options with Ansible playbook and direct VM command methods
+- Theme development workflow with Vite dev server and HMR setup
+- Production access configuration and deployment instructions
+- Common project workflows including daily development, VM management, and WP-CLI operations
+- Project-specific troubleshooting section with file sync, port conflicts, and SSL certificate issues
+- Verification checklist for confirming successful project setup
+- Quick reference commands for project management
+
+### Changed
+- **Breaking:** Refactored NEW-MACHINE.md to focus exclusively on macOS setup for Trellis development (machine setup only)
+- Removed project-specific content from NEW-MACHINE.md (imagewize.com examples, ACF Pro setup, repository cloning)
+- Generalized NEW-MACHINE.md with placeholder names (your-project, your-theme) for universal applicability
+- Updated NEW-MACHINE.md to reference PROJECT-SETUP.md for next steps after machine configuration
+- Updated main README.md to include both "New Machine Setup" and "Project Setup" guides with clear descriptions
+- Reduced NEW-MACHINE.md from 804 lines to 318 lines for improved clarity and focus
+- NEW-MACHINE.md now serves as a universal reference for any Trellis project
+
+### Improved
+- Clear separation of concerns between machine setup and project setup documentation
+- Better navigation with cross-references between NEW-MACHINE.md and PROJECT-SETUP.md
+- Enhanced reusability - PROJECT-SETUP.md serves as a template for any Trellis project
+- Reduced confusion by eliminating the dual-purpose nature of the original NEW-MACHINE.md
+
 ## [1.15.0] - 2025-12-30
 
 ### Added
