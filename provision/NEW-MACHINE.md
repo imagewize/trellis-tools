@@ -714,11 +714,13 @@ This bypasses theme.json and block theme caching for faster iteration.
 
 The repository also includes a demo site at `demo/` which is a WordPress multisite installation using the Moiraine theme.
 
-**To provision demo site:**
+**To access demo site:**
+
+The demo site is automatically provisioned when you run `trellis provision development`, and its host entry (`demo.imagewize.test`) is automatically added to `/etc/hosts` by Trellis CLI.
 
 ```bash
-# Update /etc/hosts
-sudo sh -c 'echo "192.168.56.5  demo.imagewize.test" >> /etc/hosts'
+# Verify host entry exists
+grep demo.imagewize.test /etc/hosts
 
 # Access at: https://demo.imagewize.test
 ```
