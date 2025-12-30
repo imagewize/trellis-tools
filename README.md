@@ -12,6 +12,7 @@ A collection of tools to enhance your [Roots Trellis](https://roots.io/trellis/)
 | **Migration Tools** | Migrate WordPress sites to Trellis/Bedrock (single and multi-site) | [→ Guide](migration/README.md) |
 | **Image Optimization** | Nginx WebP/AVIF configuration with automatic format serving | [→ Guide](image-optimization/README.md) |
 | **Browser Caching** | Nginx configuration for optimal static asset caching | [→ Guide](browser-caching/README.md) |
+| **New Machine Setup** | Complete guide for setting up Trellis development environment on a new machine | [→ Guide](provision/NEW-MACHINE.md) |
 | **Provisioning Reference** | Common Trellis provisioning commands and workflows | [→ Guide](provision/README.md) |
 | **Diagnostics** | WordPress diagnostic tools for transients, caching, and performance issues | [→ Guide](diagnostics/README.md) |
 | **Troubleshooting** | Diagnose and resolve PHP-FPM, MariaDB, and server issues | [→ Guide](troubleshooting/README.md) |

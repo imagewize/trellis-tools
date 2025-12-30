@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.15.0] - 2025-12-30
+
+### Added
+- Comprehensive new machine setup guide (provision/NEW-MACHINE.md) for setting up Trellis development environment
+- Step-by-step instructions for installing required tools (Trellis CLI, Composer, PHP, Node.js, pnpm)
+- Detailed explanation of host machine vs Trellis VM architecture and tool separation
+- Complete workflow for cloning repository, installing dependencies, and configuring Trellis VM
+- ACF Pro authentication setup instructions for Composer installation
+- Database and files setup options (fresh installation vs production pull)
+- Theme development workflow documentation with Vite dev server and HMR
+- Production SSH access setup and deployment instructions
+- Common development workflows (daily development, creating blocks, VM management)
+- Troubleshooting section covering port conflicts, file sync, SSL certificates, and VM issues
+- Verification checklist and quick reference commands
+- Architecture diagrams explaining host/VM separation and development workflow
+- Documentation on Lima VM vs Vagrant differences and file sync behavior
+
+### Changed
+- Updated main README.md to include "New Machine Setup" in tools table
+
 ## [1.14.0] - 2025-12-26
 
 ### Added
