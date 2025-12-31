@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.1] - 2025-12-31
+
+### Added
+
+- **Repository Logo** - Custom SVG logo with dark mode support:
+  - **[assets/logo.svg](assets/logo.svg)** - Adaptive logo with theme-aware colors (gray-600 light mode, gray-400 dark mode)
+  - Logo design inspired by Opsgenie icon from Blade Icons
+  - Updated main [README.md](README.md) with centered logo header and credits section
+
+- **WordPress Utilities Overview Documentation**:
+  - **[wordpress-utilities/README.md](wordpress-utilities/README.md)** - Comprehensive guide to reusable WordPress components and tools
+  - Detailed documentation for Age Verification, Analytics, and Speed Optimization utilities
+  - Integration examples for theme functions, deployment scripts, and site audits
+  - Best practices for security, performance, and maintenance
+  - Coding standards and file organization guidelines
+  - Contributing guidelines for adding new utilities
+
+### Changed
+
+- Enhanced main [README.md](README.md) header with visual logo and "WP OP" branding
+- Added Credits section to main README acknowledging logo design inspiration
+
 ## [2.2.0] - 2025-12-31
 
 ### Added
