@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.16.3] - 2025-12-31
+
+### Changed
+- Enhanced rsync-theme.sh to preserve theme-repository-only files during sync
+- Added `create-pr.sh` to exclusion list to protect theme repo's PR automation script from deletion
+- Added `.distignore` to exclusion list to preserve WordPress.org deployment configuration in theme repo
+- Updated example paths from 'nynaeve' theme to 'elayne' theme for better documentation clarity
+
+### Fixed
+- Theme sync now preserves files that exist only in standalone theme repository (not in Trellis project)
+
 ## [1.16.2] - 2025-12-31
 
 ### Added

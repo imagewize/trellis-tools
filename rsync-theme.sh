@@ -17,10 +17,12 @@
 # Example theme name used: 'nynaeve' - replace with your actual theme name
 
 rsync -av --delete \
+  --exclude create-pr.sh \
+  --exclude .distignore \
   --exclude 'node_modules/' \
   --exclude 'vendor/' \
   --exclude '.git/' \
   --exclude '.github/' \
-  ~/code/imagewize.com/site/web/app/themes/nynaeve/ \
-  ~/code/nynaeve/
+  ~/code/imagewize.com/demo/web/app/themes/elayne/ \
+  ~/code/elayne/
   
