@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.0] - 2025-12-31
+
+### Added
+
+- **WordPress Utilities Module** - New top-level directory for reusable WordPress components and tools:
+  - **[wordpress-utilities/age-verification/](wordpress-utilities/age-verification/)** - Cookie-based age verification system with modal interface, ACF integration, and dynamic content filtering (JavaScript, CSS, PHP template)
+  - **[wordpress-utilities/analytics/](wordpress-utilities/analytics/)** - Comprehensive analytics implementation guide covering Google Analytics (Site Kit and manual), Matomo (plugin and self-hosted), and detection methods using curl/grep
+  - **[wordpress-utilities/speed-optimization/](wordpress-utilities/speed-optimization/)** - Performance testing tools with TTFB analysis using curl and wget, including Google's web.dev performance guidelines
+
+- **WP-CLI Migration Enhancement**:
+  - **[wp-cli/migration/URL-UPDATE-METHODS.md](wp-cli/migration/URL-UPDATE-METHODS.md)** - Generic WordPress URL update methods covering WP-CLI (recommended), wp-config.php constants, direct database updates, admin panel, and multisite network handling
+
+### Changed
+
+- **Repository Integration** - Merged [wordpress-tools](https://github.com/imagewize/wordpress-tools) repository into wp-ops for unified WordPress operations management
+- Updated main [README.md](README.md) with four new tool entries: Age Verification, Analytics, Speed Optimization, and URL Update Methods
+- Updated [CLAUDE.md](CLAUDE.md) repository structure documentation to reflect new `wordpress-utilities/` directory
+- Created deprecation notice in wordpress-tools repository directing users to wp-ops
+
+### Improved
+
+- Consolidated WordPress operations tooling into single repository for better discoverability and maintenance
+- Clear separation between infrastructure tools (Trellis, Nginx, Ansible) and WordPress application-level utilities
+- Enhanced migration documentation with comprehensive URL update methods for all migration scenarios
+
 ## [2.0.1] - 2025-12-31
 
 ### Added
