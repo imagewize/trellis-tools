@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.16.2] - 2025-12-31
+
+### Added
+- Critical URL sanitization section in PAGE-CREATION.md explaining hardcoded pattern URLs issue
+- Pre-deployment URL audit commands for detecting local development URLs in production
+- Step-by-step URL search-replace workflow with database backup procedures
+- Browser verification steps for mixed content warnings
+- CLAUDE.md section explaining how WordPress pattern URLs get hardcoded in database
+- Search-replace examples for both single-site and multisite WordPress installations
+
+### Changed
+- Enhanced PAGE-CREATION.md with "CRITICAL: URL Sanitization Before Production" section
+- Updated CLAUDE.md "URL Management in Database Operations" with pattern URL hardcoding warning
+- Added cross-reference between CLAUDE.md and PAGE-CREATION.md for URL sanitization workflows
+
 ## [1.16.1] - 2025-12-30
 
 ### Changed

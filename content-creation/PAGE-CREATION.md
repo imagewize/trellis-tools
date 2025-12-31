@@ -197,6 +197,59 @@ rm ~/code/example.com/site/about-page-content.html
 
 ## Production Deployment
 
+### CRITICAL: URL Sanitization Before Production
+
+**IMPORTANT**: When deploying content created locally to production, always check for and fix local development URLs.
+
+**Why this is necessary:**
+- PHP pattern files use `get_template_directory_uri()` which returns environment-specific URLs
+- When patterns are inserted into pages/posts, these URLs get **hardcoded in the database**
+- Content created locally will contain `http://demo.imagewize.test` or `http://example.test` URLs
+- Must be replaced with production URLs before going live to avoid mixed content warnings
+
+**Pre-Deployment URL Audit:**
+```bash
+# STEP 1: Check if any local dev URLs exist in production database
+ssh web@example.com "cd /srv/www/example.com/current && \
+  wp db query \"SELECT ID, post_title, post_name FROM wp_posts \
+  WHERE post_content LIKE '%example.test%' OR post_content LIKE '%.test%';\" \
+  --path=web/wp"
+
+# For multisite (e.g., demo.imagewize.com):
+ssh web@demo.imagewize.com "cd /srv/www/demo.imagewize.com/current && \
+  wp db query \"SELECT ID, post_title, post_name FROM wp_posts \
+  WHERE post_content LIKE '%demo.imagewize.test%';\" \
+  --path=web/wp --url=https://demo.imagewize.com"
+```
+
+**If Dev URLs Found - Fix Before Going Live:**
+```bash
+# STEP 2: Backup database before making changes
+ssh web@example.com "cd /srv/www/example.com/current && \
+  wp db export /tmp/backup_before_url_fix_\$(date +%Y%m%d_%H%M%S).sql.gz --path=web/wp"
+
+# STEP 3: Replace dev URLs with production URLs
+ssh web@example.com "cd /srv/www/example.com/current && \
+  wp search-replace 'http://example.test' 'https://example.com' \
+  --all-tables --precise --path=web/wp"
+
+# For multisite:
+ssh web@demo.imagewize.com "cd /srv/www/demo.imagewize.com/current && \
+  wp search-replace 'http://demo.imagewize.test' 'https://demo.imagewize.com' \
+  --all-tables --precise --path=web/wp --url=https://demo.imagewize.com"
+
+# STEP 4: Flush cache
+ssh web@example.com "cd /srv/www/example.com/current && wp cache flush --path=web/wp"
+```
+
+**STEP 5: Verify in Browser**
+- Open browser console (F12)
+- Check for mixed content warnings (HTTP resources on HTTPS page)
+- Look for any requests to `.test` domains
+- Hard refresh (Cmd+Shift+R) to clear browser cache
+
+---
+
 ### Option 1: Automated Script (Recommended)
 
 Use the provided [page-creation.sh](page-creation.sh) script for automated deployment:
