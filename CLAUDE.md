@@ -16,7 +16,7 @@ This is a collection of tools, scripts, and documentation for WordPress operatio
 - **wp-cli/** - WordPress command-line operations
   - `wp-cli/content-creation/` - WP-CLI content creation and block patterns
   - `wp-cli/diagnostics/` - WordPress diagnostic tools
-  - `wp-cli/migration/` - WordPress migration documentation
+  - `wp-cli/migration/` - WordPress migration documentation and URL update methods
 - **nginx/** - Web server configurations
   - `nginx/browser-caching/` - Browser caching configuration
   - `nginx/image-optimization/` - WebP/AVIF configuration and guides
@@ -27,6 +27,10 @@ This is a collection of tools, scripts, and documentation for WordPress operatio
   - `scripts/create-pr.sh` - AI-powered GitHub PR creation
   - `scripts/release-theme.sh` - WordPress theme release automation
   - `scripts/rsync-theme.sh` - Theme synchronization
+- **wordpress-utilities/** - Reusable WordPress components and utilities
+  - `wordpress-utilities/age-verification/` - Cookie-based age verification system with modal and ACF integration
+  - `wordpress-utilities/analytics/` - Analytics implementation and detection (Google Analytics, Matomo)
+  - `wordpress-utilities/speed-optimization/` - Performance testing and TTFB analysis tools (curl, wget)
 - **troubleshooting/** - Server and WordPress troubleshooting guides
 
 ## Key Technologies

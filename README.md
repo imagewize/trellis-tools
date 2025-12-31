@@ -14,6 +14,7 @@ A collection of tools for WordPress operations, server management, and [Roots Tr
 | **Monitoring** | Nginx log monitoring for traffic analysis and security threat detection | [→ Guide](trellis/monitoring/README.md) |
 | **Content Creation** | Automated page creation and WP-CLI content management workflows | [→ Guide](wp-cli/content-creation/README.md) |
 | **Migration Tools** | Migrate WordPress sites to Trellis/Bedrock (single and multi-site) | [→ Guide](wp-cli/migration/README.md) |
+| **URL Update Methods** | Generic WordPress URL update methods for migrations | [→ Guide](wp-cli/migration/URL-UPDATE-METHODS.md) |
 | **Diagnostics** | WordPress diagnostic tools for transients, caching, and performance issues | [→ Guide](wp-cli/diagnostics/README.md) |
 | **Image Optimization** | Nginx WebP/AVIF configuration with automatic format serving | [→ Guide](nginx/image-optimization/README.md) |
 | **Browser Caching** | Nginx configuration for optimal static asset caching | [→ Guide](nginx/browser-caching/README.md) |
@@ -22,6 +23,9 @@ A collection of tools for WordPress operations, server management, and [Roots Tr
 | **PR Creation Script** | AI-powered GitHub PR descriptions with multi-AI backend support (Claude/Codex) | [→ Guide](CREATE-PR.md) |
 | **Theme Release** | AI-powered version bumping and changelog generation for WordPress themes | [→ Script](scripts/release-theme.sh) |
 | **Theme Sync** | Rsync script for theme synchronization | [→ Script](scripts/rsync-theme.sh) |
+| **Age Verification** | Cookie-based age verification system with modal interface and ACF integration | [→ Guide](wordpress-utilities/age-verification/README.md) |
+| **Analytics** | Implementation and detection of Google Analytics, Matomo, and other analytics tools | [→ Guide](wordpress-utilities/analytics/README.md) |
+| **Speed Optimization** | Performance testing tools and TTFB analysis with curl/wget | [→ Guide](wordpress-utilities/speed-optimization/README.md) |
 
 ## Quick Start
 
