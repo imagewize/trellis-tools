@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.16.3] - 2025-12-31
+
+### Changed
+- Enhanced rsync-theme.sh with additional exclusions for cleaner theme repository syncing
+- Added `create-pr.sh` to exclusion list (Trellis-tools specific script, not needed in theme repos)
+- Added `.distignore` to exclusion list (WordPress.org plugin/theme deployment file)
+- Updated example paths from 'nynaeve' theme to 'elayne' theme for better documentation clarity
+
 ## [1.16.2] - 2025-12-31
 
 ### Added
