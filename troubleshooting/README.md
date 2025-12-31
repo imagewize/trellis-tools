@@ -1,6 +1,6 @@
-# Troubleshooting Trellis Servers
+# Troubleshooting WordPress Servers
 
-This section contains guides for diagnosing and resolving common issues with Trellis-managed WordPress servers.
+This section contains guides for diagnosing and resolving common issues with WordPress servers. While examples reference Trellis-managed servers, the diagnostic techniques and solutions apply to most WordPress hosting environments.
 
 ## Guides
 
