@@ -1,322 +1,354 @@
-# Trellis Site Backup Guide
+# Trellis Tools & Workflows
 
-A comprehensive guide for backing up WordPress sites running on Roots Trellis servers using shell scripts and WP-CLI.
+A comprehensive collection of Ansible playbooks, scripts, and documentation for managing WordPress sites with [Roots Trellis](https://roots.io/trellis/).
 
 ## Overview
 
-This guide covers multiple backup methods for Trellis-managed WordPress sites:
+This directory contains production-ready tools for:
 
-1. **Database Backups** - Using WP-CLI and mysqldump
-2. **File System Backups** - Using rsync and tar
-3. **Complete Site Backups** - Combining database and files
-4. **Automated Backup Scripts** - Scheduled backups with retention
+- **Database & File Synchronization** - Backup, pull, and push operations with automatic URL replacement
+- **Server Monitoring** - Nginx log analysis for traffic patterns and security threats
+- **Provisioning & Setup** - Server configuration, PHP upgrades, and WordPress cron management
+- **Safe Upgrades** - Trellis version updates while preserving custom configurations
 
-## Prerequisites
-
-- SSH access to your Trellis server
-- WP-CLI installed (included with Trellis)
-- Sufficient storage space for backups
-- Basic knowledge of shell commands
-
-## Compression Methods
-
-This guide uses different compression methods optimized for different backup types:
-
-- **Database backups: `.sql.gz`** - Uses `gzip` compression for single SQL files. Faster and more efficient for single-file compression with direct piping (`wp db export - | gzip`).
-- **Directory backups: `.tar.gz`** - Uses `tar` + `gzip` for archiving multiple files and directories. Required for preserving directory structure, file permissions, and handling multiple files efficiently.
-
-## Trellis Directory Structure
-
-In Trellis, the recommended approach is to store backups in the `shared` directory which persists across deployments:
+## Directory Structure
 
 ```
-/srv/www/example.com/
-├── current/           # Current WordPress installation (changes with deployments)
-├── releases/          # Previous releases
-└── shared/           # Persistent data (uploads, logs, configs)
-    ├── uploads/
-    ├── logs/
-    └── database_backup/  # Create this for database backups
+trellis/
+├── backup/          # Database & file sync Ansible playbooks
+├── monitoring/      # Nginx log analysis & security monitoring
+├── provision/       # Server setup & configuration guides
+└── updater/         # Safe Trellis version upgrade tools
 ```
 
-When running commands from `/srv/www/example.com/current`, create a `database_backup/` directory within the current WordPress installation (this matches the Trellis playbook approach).
+## Quick Start
 
-## Method 1: WP-CLI Database Backup
+### Prerequisites
 
-### Basic Database Export
+- Trellis-managed WordPress site
+- Ansible installed (included with Trellis)
+- SSH access to remote servers
+- Site configuration in `group_vars/*/wordpress_sites.yml`
+
+### Common Operations
+
+All Ansible playbooks require `-e site=example.com -e env=<environment>` parameters:
 
 ```bash
-# SSH into your server
-ssh web@your-server.com
+# Database operations
+ansible-playbook trellis/backup/database-backup.yml -e site=example.com -e env=production
+ansible-playbook trellis/backup/database-pull.yml -e site=example.com -e env=production
 
-# Navigate to your site directory
-cd /srv/www/example.com/current
+# File operations
+ansible-playbook trellis/backup/files-backup.yml -e site=example.com -e env=production
+ansible-playbook trellis/backup/files-pull.yml -e site=example.com -e env=production
 
-# Create backup directory in current WordPress directory (matches Trellis playbooks)
-mkdir -p database_backup
+# Monitoring
+ansible-playbook trellis/monitoring/quick-status.yml -e site=example.com -e env=production
+ansible-playbook trellis/monitoring/traffic-report.yml -e site=example.com -e env=production -e hours=6
 
-# Export database (uncompressed)
-wp db export database_backup/database-$(date +%Y%m%d_%H%M%S).sql --add-drop-table
-
-# Export with compression (.gz - optimal for single files)
-wp db export - | gzip > database_backup/database-$(date +%Y%m%d_%H%M%S).sql.gz
+# Trellis upgrade
+./trellis/updater/trellis-updater.sh
 ```
 
-### Database Backup with Search & Replace
+---
+
+## 1. Backup & Synchronization
+
+**Location:** `backup/`
+
+Ansible playbooks for automated database and file operations between Trellis environments.
+
+### Features
+
+- **Database Operations**
+  - Backup: Create timestamped database snapshots
+  - Pull: Download from remote to development with automatic URL replacement
+  - Push: Upload from development to remote with automatic URL replacement
+
+- **File Operations**
+  - Backup: Create timestamped uploads archives
+  - Pull: Download WordPress uploads from remote to development
+  - Push: Upload WordPress uploads from development to remote
+
+- **Safety Features**
+  - Automatic backups before destructive operations (pull/push)
+  - URL search-replace when moving databases between environments
+  - Timestamped backup files: `{site}_{env}_{YYYY_MM_DD}_{HH_MM_SS}.sql.gz`
+  - Automatic cleanup of temporary files
+
+### Available Playbooks
+
+| Playbook | Purpose |
+|----------|---------|
+| `database-backup.yml` | Create database backup on remote server |
+| `database-pull.yml` | Pull database from remote → development |
+| `database-push.yml` | Push database from development → remote |
+| `files-backup.yml` | Create uploads backup on remote server |
+| `files-pull.yml` | Pull uploads from remote → development |
+| `files-push.yml` | Push uploads from development → remote |
+
+### Usage Examples
 
 ```bash
-# Export database and replace URLs for local development
-BACKUP_FILE="database_backup/database-$(date +%Y%m%d_%H%M%S).sql"
-wp db export ${BACKUP_FILE} \
-  --add-drop-table \
-  --search-replace=https://example.com,http://example.test
-gzip ${BACKUP_FILE}
+# Create production database backup
+ansible-playbook backup/database-backup.yml -e site=example.com -e env=production
+
+# Pull production database to development (with URL replacement)
+ansible-playbook backup/database-pull.yml -e site=example.com -e env=production
+
+# Push uploads to staging
+ansible-playbook backup/files-push.yml -e site=example.com -e env=staging
 ```
 
-## Method 2: Shell Script Database Backup
+**See also:** [backup/README.md](backup/README.md) for detailed documentation.
 
-### Using mysqldump
+---
+
+## 2. Server Monitoring
+
+**Location:** `monitoring/`
+
+Ansible playbooks for Nginx log analysis, traffic monitoring, and security threat detection.
+
+### Features
+
+- **Traffic Analysis**
+  - Top requested pages (excluding bots)
+  - Unique visitor counts
+  - Traffic distribution by hour
+  - User agent analysis
+  - Response time statistics
+  - Bandwidth usage
+
+- **Security Monitoring**
+  - DoS/DDoS detection (high request rates)
+  - WordPress attack patterns (wp-login.php, xmlrpc.php brute force)
+  - SQL injection attempts
+  - Directory traversal attempts
+  - Scanner detection (404 patterns)
+  - Suspicious user agents
+  - Referrer spam detection
+
+- **Integration**
+  - Works with Trellis per-site logs: `/srv/www/{site}/logs/access.log`
+  - Complements external updown.io monitoring
+  - Email alerts for security threats
+
+### Available Playbooks
+
+| Playbook | Purpose |
+|----------|---------|
+| `quick-status.yml` | One-minute server health check |
+| `traffic-report.yml` | Generate traffic analysis reports |
+| `security-scan.yml` | Detect attack patterns and threats |
+| `setup-monitoring.yml` | Automated monitoring setup with cron |
+
+### Usage Examples
 
 ```bash
-#!/bin/bash
+# Quick server status check
+ansible-playbook monitoring/quick-status.yml -e site=example.com -e env=production
 
-# Database credentials (from your Trellis vault)
-DB_NAME="example_production"
-DB_USER="example"
-DB_PASSWORD="your_password"
-DB_HOST="localhost"
+# Traffic report for last 6 hours
+ansible-playbook monitoring/traffic-report.yml -e site=example.com -e env=production -e hours=6
 
-# Backup directory
-BACKUP_DIR="/srv/www/example.com/shared/backups"
-DATE=$(date +%Y%m%d_%H%M%S)
+# Security scan with email alerts
+ansible-playbook monitoring/security-scan.yml -e site=example.com -e env=production -e alert_email=admin@example.com
 
-# Create backup directory if it doesn't exist
-mkdir -p $BACKUP_DIR
-
-# Create database backup
-mysqldump \
-  --host=$DB_HOST \
-  --user=$DB_USER \
-  --password=$DB_PASSWORD \
-  --single-transaction \
-  --routines \
-  --triggers \
-  $DB_NAME | gzip > $BACKUP_DIR/database_$DATE.sql.gz
-
-echo "Database backup completed: $BACKUP_DIR/database_$DATE.sql.gz"
+# Setup automated monitoring
+ansible-playbook monitoring/setup-monitoring.yml -e site=example.com -e env=production
 ```
 
-## Method 3: File System Backup
+**See also:**
+- [monitoring/README.md](monitoring/README.md) - Comprehensive monitoring documentation
+- [monitoring/QUICK-REFERENCE.md](monitoring/QUICK-REFERENCE.md) - Command reference
 
-### Using rsync
+---
+
+## 3. Provisioning & Setup
+
+**Location:** `provision/`
+
+Documentation and guides for server provisioning, configuration, and WordPress cron management.
+
+### Documentation
+
+| File | Purpose |
+|------|---------|
+| `README.md` | Quick provisioning command reference |
+| `CRON.md` | WordPress cron system configuration |
+| `NEW-MACHINE.md` | New server setup guide |
+| `PROJECT-SETUP.md` | Initial project setup guide |
+
+### Key Topics
+
+**Provisioning Commands**
+- Development environment setup
+- Staging/production deployment
+- PHP version upgrades with correct tags
+- Nginx configuration updates
+
+**WordPress Cron Configuration**
+- WP-Cron vs system cron
+- Trellis default: system cron every 15 minutes
+- Multisite cron configuration
+- Verification and troubleshooting
+
+**PHP Version Upgrades**
+
+When upgrading PHP, **must** include these tags:
 
 ```bash
-#!/bin/bash
-
-SITE_PATH="/srv/www/example.com"
-BACKUP_DIR="/srv/backups/example.com"
-DATE=$(date +%Y%m%d_%H%M%S)
-
-# Create backup directory
-mkdir -p $BACKUP_DIR
-
-# Backup uploads directory
-rsync -av --exclude=cache/ \
-  $SITE_PATH/shared/uploads/ \
-  $BACKUP_DIR/uploads_$DATE/
-
-# Backup entire site (excluding cache and logs)
-rsync -av \
-  --exclude=shared/cache/ \
-  --exclude=shared/logs/ \
-  --exclude=.git/ \
-  $SITE_PATH/ \
-  $BACKUP_DIR/site_$DATE/
+trellis provision --tags php,nginx,wordpress-setup,users,memcached production
 ```
 
-### Using tar
+Critical tags:
+- `php` - Installs new version
+- `nginx` - Updates PHP-FPM socket configuration
+- `wordpress-setup` - Creates PHP version-specific pool configuration
+- `users` - **Critical**: Updates sudoers for PHP-FPM reload (deployments fail without this)
+- `memcached` - Installs version-specific memcached extension
+
+**See also:** [provision/README.md](provision/README.md) and subdirectory documentation.
+
+---
+
+## 4. Trellis Updater
+
+**Location:** `updater/`
+
+Safe Trellis version upgrades while preserving custom configurations and sensitive data.
+
+### Features
+
+- **Automated Upgrade Process**
+  1. Creates full backup of current Trellis directory → `~/trellis-backup/`
+  2. Clones fresh Trellis to temporary directory → `~/trellis-temp/`
+  3. Generates diff of changes → `~/trellis-diff/changes.txt`
+  4. Updates files using rsync with explicit exclusions
+  5. Verifies critical files were preserved
+  6. Cleans up temporary files
+
+- **What It Preserves (23+ exclusions)**
+  - **Secrets:** `.vault_pass`, `ansible.cfg`, `vault.yml` files (all environments)
+  - **Git/CI:** `.git/`, `.github/`, `.trellis/`
+  - **Site Config:** `wordpress_sites.yml`, `users.yml`, `hosts/` directories
+  - **Custom Settings:** `main.yml` files (PHP memory, timezone, pools), `mail.yml` (SMTP)
+  - **Deploy Hooks:** `deploy-hooks/` directory
+  - **CLI Config:** `trellis.cli.yml`
+
+### Usage
 
 ```bash
-#!/bin/bash
+# Edit script to set PROJECT="site.com"
+cd /path/to/trellis
+chmod +x ../wp-ops/trellis/updater/trellis-updater.sh
+../wp-ops/trellis/updater/trellis-updater.sh
 
-SITE_PATH="/srv/www/example.com"
-BACKUP_DIR="/srv/backups"
-DATE=$(date +%Y%m%d_%H%M%S)
+# Review changes
+cat ~/trellis-diff/changes.txt
 
-# Create compressed archive of uploads
-tar -czf $BACKUP_DIR/uploads_$DATE.tar.gz \
-  -C $SITE_PATH/shared uploads \
-  --exclude=uploads/cache
-
-# Create compressed archive of entire site
-tar -czf $BACKUP_DIR/site_$DATE.tar.gz \
-  -C /srv/www example.com \
-  --exclude=example.com/shared/cache \
-  --exclude=example.com/shared/logs \
-  --exclude=example.com/.git
+# Commit if satisfied
+git add -A
+git commit -m "Update Trellis to latest version"
 ```
 
-## Method 4: Complete Backup Script
+**See also:**
+- [updater/README.md](updater/README.md) - Complete updater documentation
+- [updater/manual-update.md](updater/manual-update.md) - Manual update instructions
 
-Create a comprehensive backup script that combines database and file backups:
+---
+
+## Architecture Patterns
+
+### Ansible Playbook Structure
+
+All Trellis integration playbooks follow this pattern:
+
+1. **Variable validation** - Import `variable-check.yml` to validate required `site` and `env` parameters
+2. **Host targeting** - Target specific environment: `hosts: web:&{{ env }}`
+3. **Remote user** - Use web_user defined in Trellis: `remote_user: "{{ web_user }}"`
+4. **Local delegation** - Tasks for development environment use `delegate_to: localhost` and `become: no`
+5. **Backup before destructive operations** - Pull/push playbooks create backups automatically
+6. **Cleanup** - Temporary files removed after operations
+
+### File Naming Conventions
+
+Backup files use timestamped naming:
+
+- **Database backups**: `{site}_{env}_{YYYY_MM_DD}_{HH_MM_SS}.sql.gz`
+- **Files backups**: `{site}_{env}_uploads_{YYYY_MM_DD}_{HH_MM_SS}.tar.gz`
+
+### Compression Strategy
+
+- **Database backups**: Use `.sql.gz` (gzip) for single SQL files with direct piping for performance
+- **Files backups**: Use `.tar.gz` for directory archives to preserve structure
+
+### URL Management in Database Operations
+
+Pull/push playbooks automatically handle URL replacement using WP-CLI search-replace:
+
+- Development URLs determined from `local_path` configuration
+- Remote URLs extracted from `canonical` hostname in site configuration
+- Replacement happens during database import with `wp search-replace`
+
+**CRITICAL: Pattern URLs Get Hardcoded**
+
+WordPress pattern files that use `get_template_directory_uri()` create **environment-specific URLs that get hardcoded into the database**:
+
+- Pattern created locally: `http://example.test/app/themes/theme-name/patterns/images/image.webp`
+- Saved to database: URL is hardcoded in `wp_posts.post_content`
+- Problem: Moving database to production without search-replace causes mixed content warnings
+
+**Always verify URLs after database operations:**
 
 ```bash
-#!/bin/bash
+# Audit for dev URLs in production
+ssh web@example.com "cd /srv/www/example.com/current && \
+  wp db query \"SELECT COUNT(*) FROM wp_posts WHERE post_content LIKE '%.test%';\" --path=web/wp"
 
-# Configuration
-SITE_NAME="example.com"
-SITE_PATH="/srv/www/$SITE_NAME"
-BACKUP_ROOT="/srv/backups"
-BACKUP_DIR="$BACKUP_ROOT/$SITE_NAME"
-DATE=$(date +%Y%m%d_%H%M%S)
-RETENTION_DAYS=30
-
-# Database credentials
-DB_NAME="example_production"
-DB_USER="example"
-DB_PASSWORD="your_password"
-
-# Create backup directories
-mkdir -p $BACKUP_DIR/{database,files}
-
-echo "Starting backup for $SITE_NAME at $(date)"
-
-# 1. Database backup using WP-CLI
-echo "Backing up database..."
-cd $SITE_PATH/current
-wp db export $BACKUP_DIR/database/db_$DATE.sql --add-drop-table
-gzip $BACKUP_DIR/database/db_$DATE.sql
-
-# 2. File backup
-echo "Backing up files..."
-tar -czf $BACKUP_DIR/files/uploads_$DATE.tar.gz \
-  -C $SITE_PATH/shared uploads \
-  --exclude=uploads/cache
-
-# 3. Configuration backup
-echo "Backing up configurations..."
-tar -czf $BACKUP_DIR/files/config_$DATE.tar.gz \
-  -C $SITE_PATH current/.env \
-  shared/.env
-
-# 4. Clean up old backups
-echo "Cleaning up old backups..."
-find $BACKUP_DIR -name "*.sql.gz" -mtime +$RETENTION_DAYS -delete
-find $BACKUP_DIR -name "*.tar.gz" -mtime +$RETENTION_DAYS -delete
-
-echo "Backup completed at $(date)"
-echo "Backup location: $BACKUP_DIR"
+# If found, run search-replace
+ssh web@example.com "cd /srv/www/example.com/current && \
+  wp search-replace 'http://example.test' 'https://example.com' --all-tables --precise --path=web/wp"
 ```
 
-## Method 5: Remote Backup Script
+---
 
-For backing up to a remote server:
+## Important Considerations
 
-```bash
-#!/bin/bash
+### Trellis Configuration
 
-# Configuration
-LOCAL_BACKUP_DIR="/srv/backups/example.com"
-REMOTE_SERVER="backup.example.com"
-REMOTE_USER="backup"
-REMOTE_PATH="/backups/example.com"
-DATE=$(date +%Y%m%d)
+- Site names in Ansible commands must match keys in `group_vars/*/wordpress_sites.yml`
+- The `local_path` variable defines where the Bedrock site is located
+- Environment-specific vault files contain sensitive credentials
 
-# Create today's backup using previous script
-./site-backup.sh
+### Testing Operations
 
-# Sync to remote server
-echo "Syncing backups to remote server..."
-rsync -av --delete \
-  --exclude='*.tmp' \
-  $LOCAL_BACKUP_DIR/ \
-  $REMOTE_USER@$REMOTE_SERVER:$REMOTE_PATH/
+Before running operations on production:
 
-echo "Remote backup sync completed"
-```
+1. Test on development environment first
+2. Verify backup file creation and location
+3. For pull/push operations, verify URL replacement is correct
+4. Always check disk space before creating backups
 
-## Automation with Cron
+### Security
 
-Add to your server's crontab for automated backups:
+- Backup files contain sensitive data - ensure proper permissions (750 or 700)
+- Database vault passwords are required for remote operations
+- Monitor backup script execution and access to backup files
 
-```bash
-# Edit crontab
-sudo crontab -e
-
-# Add these lines for daily backups at 2 AM
-0 2 * * * /srv/scripts/site-backup.sh > /var/log/backup.log 2>&1
-
-# Weekly cleanup at 3 AM on Sundays
-0 3 * * 0 find /srv/backups -name "*.gz" -mtime +30 -delete
-```
-
-## Restoration Examples
-
-### Database Restoration
-
-```bash
-# Using WP-CLI (uncompressed)
-wp db import database_backup/database_20231201_020000.sql
-
-# Using WP-CLI (compressed tar.gz archive)
-tar -xzf database_backup/database_20231201_020000.tar.gz
-wp db import database_20231201_020000.sql
-
-# Or in one command
-tar -xzOf database_backup/database_20231201_020000.tar.gz | wp db import -
-
-# Using mysql directly (compressed)
-tar -xzOf database_backup/database_20231201_020000.tar.gz | mysql -u username -p database_name
-```
-
-### File Restoration
-
-```bash
-# Restore uploads
-tar -xzf backups/uploads_20231201_020000.tar.gz -C /srv/www/example.com/shared/
-
-# Restore specific files
-rsync -av backups/site_20231201_020000/ /srv/www/example.com/
-```
-
-## Security Considerations
-
-1. **Encrypt sensitive backups**: Use GPG for database backups containing sensitive data
-2. **Secure backup storage**: Ensure backup directories have proper permissions (750 or 700)
-3. **Database credentials**: Store credentials in a secure location, consider using environment variables
-4. **Remote storage**: Use secure transfer methods (SSH/SFTP) for remote backups
-5. **Access logs**: Monitor backup script execution and access to backup files
-
-## Monitoring and Alerts
-
-### Log Monitoring
-
-```bash
-# Check backup logs
-tail -f /var/log/backup.log
-
-# Check for backup failures
-grep -i error /var/log/backup.log
-```
-
-### Disk Space Monitoring
-
-```bash
-# Check backup directory size
-du -sh /srv/backups/*
-
-# Check available disk space
-df -h /srv/backups
-```
+---
 
 ## Troubleshooting
 
 ### Common Issues
 
-1. **Permission denied**: Ensure proper file permissions and ownership
-2. **Disk space**: Monitor available space before running backups
-3. **Database connection**: Verify database credentials and connectivity
-4. **WP-CLI errors**: Ensure you're in the correct WordPress directory
+1. **Variable errors**: Ensure `-e site=example.com -e env=production` parameters are provided
+2. **Permission denied**: Check SSH keys and Trellis `users.yml` configuration
+3. **Disk space**: Monitor available space before running backups
+4. **Database connection**: Verify database credentials in vault files
+5. **WP-CLI errors**: Ensure playbook is targeting correct WordPress directory
 
 ### Testing Backups
 
@@ -327,22 +359,26 @@ Always test your backups by:
 3. Testing database imports for corruption
 4. Checking backup file sizes for consistency
 
+---
+
 ## Best Practices
 
 1. **Regular testing**: Test backup restoration procedures monthly
 2. **Multiple locations**: Store backups in multiple locations (local + remote)
-3. **Version control**: Keep backup scripts in version control
-4. **Documentation**: Document your specific backup procedures and schedules
-5. **Monitoring**: Set up alerts for backup failures
-6. **Retention policy**: Implement appropriate backup retention policies
+3. **Version control**: Keep custom playbooks and configurations in version control
+4. **Documentation**: Document site-specific procedures and schedules
+5. **Monitoring**: Set up alerts for backup failures and security threats
+6. **Retention policy**: Implement appropriate backup retention policies (30 days default)
 
-## Integration with Trellis
+---
 
-For Trellis-specific considerations:
+## Integration Notes
 
-1. **Vault files**: Back up Trellis vault files containing sensitive configuration
-2. **SSL certificates**: Include SSL certificates in file backups
-3. **Nginx configuration**: Back up custom Nginx configurations
-4. **Environment files**: Include all environment-specific configuration files
+These tools are designed to work alongside Trellis's built-in functionality:
 
-This backup strategy ensures your Trellis-managed WordPress sites are protected with reliable, automated backup procedures.
+- **Backup playbooks** complement Trellis deployment for database/file synchronization
+- **Monitoring playbooks** provide server-side analysis alongside external monitoring (updown.io)
+- **Provisioning guides** document Trellis-specific configuration patterns
+- **Updater script** safely upgrades Trellis while preserving customizations
+
+All tools follow Trellis conventions for directory structure, user permissions, and environment configuration.
