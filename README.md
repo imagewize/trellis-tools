@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="assets/logo.svg" alt="WordPress Operations Logo" width="128" height="128">
+</div>
+
 # WordPress Operations (wp-ops)
 
 A collection of tools for WordPress operations, server management, and [Roots Trellis](https://roots.io/trellis/) workflows.
@@ -36,6 +40,10 @@ Choose the tool you need and follow its dedicated guide for detailed setup and u
 
 - **Core**: Git, Bash, rsync
 - **Tool-specific**: See individual documentation for Ansible, WP-CLI, ImageMagick, etc.
+
+## Credits
+
+Logo design inspired by [Opsgenie icon](https://blade-ui-kit.com/blade-icons/si-opsgenie) from [Blade Icons](https://blade-ui-kit.com/blade-icons).
 
 ## License
 
