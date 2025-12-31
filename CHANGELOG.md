@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.2] - 2025-12-31
+
+### Changed
+
+- **Enhanced Trellis Provisioning Documentation**:
+  - **[trellis/provision/README.md](trellis/provision/README.md)** - Added comprehensive Table of Contents with organized sections:
+    - Setup Guides section linking to NEW-MACHINE.md and PROJECT-SETUP.md
+    - Configuration Guides section linking to CRON.md
+    - Command Reference section for general provisioning commands
+  - Added "Quick Command Reference" introduction section explaining the purpose of provisioning commands and when to use them
+  - Improved navigation with clear separation between initial setup guides and day-to-day command reference
+  - Better workflow organization following natural user progression (machine setup → project setup → configuration → commands)
+
 ## [2.2.1] - 2025-12-31
 
 ### Added

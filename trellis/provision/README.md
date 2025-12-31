@@ -1,5 +1,25 @@
 # Provisioning
 
+## Table of Contents
+
+### Setup Guides
+- [New Machine Setup](NEW-MACHINE.md) - Configure Mac for Trellis development (install tools, understand architecture)
+- [Project Setup](PROJECT-SETUP.md) - Clone and setup existing Trellis/Bedrock projects
+
+### Configuration Guides
+- [WordPress Cron](CRON.md) - How Trellis handles WordPress cron with system cron
+
+### Command Reference
+- [General Provisioning](#navigate-to-trellis-directory) - Common provisioning commands (below)
+
+---
+
+## Quick Command Reference
+
+This section provides common Trellis provisioning and deployment commands. These are the day-to-day commands you'll use after your machine and project are set up.
+
+For initial setup, see the [Setup Guides](#setup-guides) above.
+
 ## Navigate to trellis directory
 
 ```bash
