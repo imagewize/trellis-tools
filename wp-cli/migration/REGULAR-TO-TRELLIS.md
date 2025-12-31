@@ -485,7 +485,7 @@ ssh root@your.server.ip.address "lsb_release -a"
 ansible --version
 ```
 
-For detailed provisioning commands and troubleshooting, see the [Provisioning Guide](../provision/README.md).
+For detailed provisioning commands and troubleshooting, see the [Provisioning Guide](../../trellis/provision/README.md).
 
 ### 3. Prepare Your Existing WordPress Site
 
@@ -704,7 +704,7 @@ If you want to use this repository's backup tools for ongoing sync:
 # First, manually copy uploads using rsync or scp (Option A or B above)
 # Then set up automated sync using the backup playbooks
 
-# See: ../backup/README.md for details
+# See: ../../trellis/backup/README.md for details
 ansible-playbook backup/trellis/files-pull.yml -e site=example.com -e env=production
 ```
 
@@ -734,7 +734,7 @@ If you're following **Workflow B** (Local-First Migration) and have set up your 
 1. Local development environment is running (`trellis vm start`)
 2. Database and uploads are already in your local Bedrock installation
 3. Production server is provisioned and deployed
-4. Backup playbooks are available in this repository at `../backup/trellis/`
+4. Backup playbooks are available in this repository at `../../trellis/backup/`
 
 #### Push Database Using Playbook (Alternative to Step 6)
 
@@ -743,7 +743,7 @@ If you're following **Workflow B** (Local-First Migration) and have set up your 
 cd trellis
 
 # Push database from development to production
-ansible-playbook ../backup/trellis/database-push.yml -e site=example.com -e env=production
+ansible-playbook ../../trellis/backup/database-push.yml -e site=example.com -e env=production
 ```
 
 **What this playbook does automatically:**
@@ -762,7 +762,7 @@ ansible-playbook ../backup/trellis/database-push.yml -e site=example.com -e env=
 cd trellis
 
 # Push uploads from development to production
-ansible-playbook ../backup/trellis/files-push.yml -e site=example.com -e env=production
+ansible-playbook ../../trellis/backup/files-push.yml -e site=example.com -e env=production
 ```
 
 **What this playbook does automatically:**
@@ -798,7 +798,7 @@ ansible-playbook ../backup/trellis/files-push.yml -e site=example.com -e env=pro
 5. **Time-Saving**: Faster than manual operations for multiple sites
 6. **Error Handling**: Better error messages and rollback capabilities
 
-For detailed documentation on the backup playbooks, see [backup/README.md](../backup/README.md).
+For detailed documentation on the backup playbooks, see [backup/README.md](../../trellis/backup/README.md).
 
 ### 8. Choose Your Path Migration Strategy
 
@@ -1288,7 +1288,7 @@ sudo grep -i cron /var/log/syslog | tail -20
 sudo systemctl status cron
 ```
 
-For detailed cron documentation, customization, and troubleshooting, see [provision/CRON.md](../provision/CRON.md).
+For detailed cron documentation, customization, and troubleshooting, see [provision/CRON.md](../../trellis/provision/CRON.md).
 
 ### 11. DNS and Go-Live
 
@@ -1561,7 +1561,7 @@ After successful migration, consider these optimizations:
 
 ```bash
 # Use the backup tools in this repository
-# See: ../backup/README.md
+# See: ../../trellis/backup/README.md
 
 # Set up automated database backups
 ansible-playbook backup/trellis/database-backup.yml -e site=example.com -e env=production
@@ -1583,11 +1583,11 @@ wp redis enable
 
 ### 3. Configure Browser Caching
 
-See the [Browser Caching Guide](../browser-caching/README.md) in this repository.
+See the [Browser Caching Guide](../../nginx/browser-caching/README.md) in this repository.
 
 ### 4. Optimize Images
 
-See the [Image Optimization Guide](../image-optimization/README.md) for WebP/AVIF support.
+See the [Image Optimization Guide](../../nginx/image-optimization/README.md) for WebP/AVIF support.
 
 ### 5. Set Up Monitoring
 
@@ -1662,5 +1662,5 @@ Create a maintenance schedule:
 ## Need More Help?
 
 - Review the main [Migration Guide](README.md) for other migration scenarios
-- Check the [Backup Tools](../backup/README.md) for data management
-- See [Provisioning Guide](../provision/README.md) for server setup help
+- Check the [Backup Tools](../../trellis/backup/README.md) for data management
+- See [Provisioning Guide](../../trellis/provision/README.md) for server setup help

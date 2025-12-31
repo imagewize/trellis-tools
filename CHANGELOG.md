@@ -7,6 +7,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0] - 2025-12-31
+
+### Changed
+
+**BREAKING: Repository Restructuring and Rename**
+
+- **Renamed repository** from `trellis-tools` to `wp-ops` to better reflect broader WordPress operations scope
+- **Reorganized directory structure** into technology-based categories:
+  - `trellis/` - Trellis-specific tools (backup, monitoring, provision, updater)
+  - `wp-cli/` - WordPress CLI operations (content-creation, diagnostics, migration)
+  - `nginx/` - Web server configurations (browser-caching, image-optimization, redirects)
+  - `scripts/` - General utilities (create-pr.sh, release-theme.sh, rsync-theme.sh, plus backup and monitoring scripts)
+  - `troubleshooting/` - Server and WordPress troubleshooting guides (remains at root)
+
+### Migration Guide for Existing Users
+
+**If you've cloned this repository:**
+
+1. Update your git remote URL:
+   ```bash
+   cd trellis-tools
+   git remote set-url origin https://github.com/imagewize/wp-ops.git
+   git pull
+   ```
+
+2. Update any references in your scripts or documentation:
+   - Old: `backup/trellis/database-backup.yml` → New: `trellis/backup/database-backup.yml`
+   - Old: `provision/README.md` → New: `trellis/provision/README.md`
+   - Old: `content-creation/` → New: `wp-cli/content-creation/`
+   - Old: `image-optimization/` → New: `nginx/image-optimization/`
+   - Old: `create-pr.sh` → New: `scripts/create-pr.sh`
+
+3. All documentation and internal links have been updated automatically
+
+**Note:** GitHub automatically redirects the old repository name, so existing clones will continue to work, but updating the remote URL is recommended.
+
 ## [1.17.0] - 2025-12-31
 
 ### Added

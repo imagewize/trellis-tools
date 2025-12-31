@@ -1054,5 +1054,5 @@ wp db query "SELECT DATABASE();"
 
 - Review the [core migration guide](REGULAR-TO-TRELLIS.md) for detailed migration steps
 - Check the main [Migration README](README.md) for other scenarios
-- See [Backup Tools](../backup/README.md) for data management
-- Visit [Provisioning Guide](../provision/README.md) for server setup help
+- See [Backup Tools](../../trellis/backup/README.md) for data management
+- Visit [Provisioning Guide](../../trellis/provision/README.md) for server setup help

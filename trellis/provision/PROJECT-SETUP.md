@@ -324,7 +324,7 @@ ansible-playbook database-backup.yml -e env=development -e site=yourproject.com
 ansible-playbook database-pull.yml -e env=production -e site=yourproject.com
 ```
 
-**Note:** This requires the `database-pull.yml` playbook in your Trellis directory. If not present, copy from [trellis-tools/backup/trellis/](../../backup/trellis/).
+**Note:** This requires the `database-pull.yml` playbook in your Trellis directory. If not present, copy from [wp-ops/trellis/backup/](../backup/).
 
 **Method 2: Direct VM Commands**
 
