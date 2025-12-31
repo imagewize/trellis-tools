@@ -1,8 +1,9 @@
 <div align="center">
   <img src="assets/logo.svg" alt="WordPress Operations Logo" width="128" height="128">
+    <h1>WP OP</h1> 
 </div>
 
-# WordPress Operations (wp-ops)
+
 
 A collection of tools for WordPress operations, server management, and [Roots Trellis](https://roots.io/trellis/) workflows.
 
