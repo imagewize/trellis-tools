@@ -1,6 +1,6 @@
 <div align="center">
   <img src="assets/logo.svg" alt="WordPress Operations Logo" width="128" height="128">
-    <h1>WP OP</h1> 
+    <h1>WP OPS</h1> 
 </div>
 
 
