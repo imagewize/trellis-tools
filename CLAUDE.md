@@ -17,6 +17,7 @@ This is a collection of tools, scripts, and documentation for WordPress operatio
   - `wp-cli/content-creation/` - WP-CLI content creation and block patterns
   - `wp-cli/diagnostics/` - WordPress diagnostic tools
   - `wp-cli/migration/` - WordPress migration documentation and URL update methods
+  - `wp-cli/security/` - Malware detection and security scanning
 - **nginx/** - Web server configurations
   - `nginx/browser-caching/` - Browser caching configuration
   - `nginx/image-optimization/` - WebP/AVIF configuration and guides
@@ -92,6 +93,35 @@ wp post update 100 --post_content="$CONTENT" --path=web/wp
 # Remote via Trellis
 trellis vm shell --workdir /srv/www/example.com/current -- wp post list --path=web/wp
 ```
+
+### Security Scanning
+
+WordPress malware detection and security auditing:
+
+```bash
+# Run both scanners (recommended first scan)
+wp eval-file wp-cli/security/scanner-wrapper.php
+
+# Quick weekly check (1-2 seconds)
+wp eval-file wp-cli/security/scanner-targeted.php
+
+# Deep monthly scan (2-3 seconds)
+wp eval-file wp-cli/security/scanner-general.php
+
+# Scan specific directory
+php wp-cli/security/scanner-targeted.php /path/to/wordpress
+
+# Remote scan via Trellis
+trellis ssh production -- "cd /srv/www/example.com/current && \
+  wp eval-file /path/to/scanner-targeted.php"
+```
+
+**Execution methods** (when WP-CLI unavailable):
+- Direct PHP: `php scanner-targeted.php /path/to/wordpress`
+- cPanel/Plesk terminal: Use version-specific PHP binaries (e.g., `/opt/plesk/php/8.2/bin/php`)
+- Browser access: Requires IP whitelist, delete files immediately after use (security risk)
+- Local scan: Download WordPress via FTP and scan locally (safest for restricted hosting)
+- See `wp-cli/security/README.md` for complete installation and troubleshooting guide
 
 ### Image Optimization
 
