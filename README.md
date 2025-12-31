@@ -20,6 +20,7 @@ A collection of tools to enhance your [Roots Trellis](https://roots.io/trellis/)
 | **Monitoring** | Nginx log monitoring for traffic analysis and security threat detection | [→ Guide](monitoring/README.md) |
 | **Redirects** | Nginx redirect configuration for SEO and URL management | [→ Guide](redirects/README.md) |
 | **PR Creation Script** | AI-powered GitHub PR descriptions with multi-AI backend support (Claude/Codex) | [→ Guide](CREATE-PR.md) |
+| **Theme Release** | AI-powered version bumping and changelog generation for WordPress themes | [→ Script](release-theme.sh) |
 | **Theme Sync** | Rsync script for theme synchronization | [→ Script](rsync-theme.sh) |
 
 ## Quick Start
