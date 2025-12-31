@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.17.0] - 2025-12-31
+
+### Added
+- New `release-theme.sh` script for AI-powered WordPress theme releases with Claude CLI integration
+- Automated version bumping across `style.css`, `readme.txt`, and `CHANGELOG.md`
+- Claude AI-powered changelog generation in two formats: detailed Keep a Changelog format and concise WordPress.org format
+- Support for both demo/ and site/ Bedrock installation structures
+- Interactive confirmation prompts and change preview before committing
+- Automatic git diff analysis between current branch and main
+- Optional `--commit` flag for automatic git commits with standardized messages
+- Semantic versioning validation (X.Y.Z format)
+- Dual changelog format generation:
+  - **CHANGELOG.md**: Detailed with sections (Changed, Added, Fixed, Technical) and sub-sections
+  - **readme.txt**: Concise single-line entries with CHANGED/ADDED/FIXED/TECHNICAL prefixes
+
+### Changed
+- Updated main README.md to include Theme Release tool in tools table between PR Creation and Theme Sync
+
 ## [1.16.3] - 2025-12-31
 
 ### Changed
