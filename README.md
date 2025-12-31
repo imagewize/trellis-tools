@@ -16,6 +16,7 @@ A collection of tools for WordPress operations, server management, and [Roots Tr
 | **Migration Tools** | Migrate WordPress sites to Trellis/Bedrock (single and multi-site) | [→ Guide](wp-cli/migration/README.md) |
 | **URL Update Methods** | Generic WordPress URL update methods for migrations | [→ Guide](wp-cli/migration/URL-UPDATE-METHODS.md) |
 | **Diagnostics** | WordPress diagnostic tools for transients, caching, and performance issues | [→ Guide](wp-cli/diagnostics/README.md) |
+| **Security Scanners** | Dual-scanner suite for WordPress malware detection and security auditing | [→ Guide](wp-cli/security/README.md) |
 | **Image Optimization** | Nginx WebP/AVIF configuration with automatic format serving | [→ Guide](nginx/image-optimization/README.md) |
 | **Browser Caching** | Nginx configuration for optimal static asset caching | [→ Guide](nginx/browser-caching/README.md) |
 | **Redirects** | Nginx redirect configuration for SEO and URL management | [→ Guide](nginx/redirects/README.md) |
