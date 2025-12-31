@@ -4,8 +4,9 @@
 </div>
 
 
-
-A collection of tools for WordPress operations, server management, and [Roots Trellis](https://roots.io/trellis/) workflows.
+<div align="center">
+A collection of tools for WordPress operations, server management, and <a href="https://roots.io/trellis/">Roots Trellis</a> workflows.
+</div>
 
 ## Tools
 
