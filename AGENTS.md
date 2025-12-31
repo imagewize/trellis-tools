@@ -1,14 +1,18 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-- Root contains tool-specific folders: `backup`, `browser-caching`, `content-creation`, `migration`, `monitoring`, `provision`, `redirects`, `image-optimization`, `troubleshooting`, and `updater`, each with its own `README.md` and scripts/playbooks.
-- Top-level helpers: `CREATE-PR.md` and `create-pr.sh` (PR helper), `rsync-theme.sh` (theme sync), `LICENSE.md`, `CHANGELOG.md`.
-- Keep new tools self-contained: add a folder with a concise `README.md`, scripts under `scripts/` if multiple files, and example configs.
+- **trellis/** - Trellis-specific: `backup/`, `monitoring/`, `provision/`, `updater/`
+- **wp-cli/** - WordPress CLI tools: `content-creation/`, `diagnostics/`, `migration/`
+- **nginx/** - Server configs: `browser-caching/`, `image-optimization/`, `redirects/`
+- **scripts/** - Utilities: `backup/`, `monitoring/`, `create-pr.sh`, `release-theme.sh`, `rsync-theme.sh`
+- **troubleshooting/** - Cross-cutting server/WP troubleshooting guides
+- **Root docs**: `README.md`, `CLAUDE.md`, `CREATE-PR.md`, `AGENTS.md`, `CHANGELOG.md`, `LICENSE.md`
+- Keep new tools self-contained: add to appropriate category with a concise `README.md` and example configs.
 
 ## Build, Test, and Development Commands
-- Run updater: `bash updater/trellis-updater.sh` (clone latest Trellis, diff, rsync updates); use a throwaway project dir before touching production.
-- Run PR helper: `bash create-pr.sh` (generates PR text via configured AI backends).
-- Most guides describe ad-hoc commands (e.g., `ansible-playbook`, `wp`, `rsync`); mirror the documented invocations inside each tool’s `README.md` when adding or updating steps.
+- Run updater: `bash trellis/updater/trellis-updater.sh` (clone latest Trellis, diff, rsync updates); use a throwaway project dir before touching production.
+- Run PR helper: `bash scripts/create-pr.sh` (generates PR text via configured AI backends).
+- Most guides describe ad-hoc commands (e.g., `ansible-playbook`, `wp`, `rsync`); mirror the documented invocations inside each tool's `README.md` when adding or updating steps.
 
 ## Coding Style & Naming Conventions
 - Scripts: Bash with `#!/bin/bash`; prefer `set -euo pipefail`, double-quoting, and long-form flags. Indent with two spaces for readability.

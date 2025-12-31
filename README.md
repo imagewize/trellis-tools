@@ -1,27 +1,27 @@
-# Trellis Tools
+# WordPress Operations (wp-ops)
 
-A collection of tools to enhance your [Roots Trellis](https://roots.io/trellis/) workflow and configuration.
+A collection of tools for WordPress operations, server management, and [Roots Trellis](https://roots.io/trellis/) workflows.
 
 ## Tools
 
 | Tool | Description | Documentation |
 |------|-------------|---------------|
-| **Trellis Updater** | Safely update Trellis while preserving custom configurations | [→ Guide](updater/README.md) |
-| **Backup Tools** | Ansible playbooks for database and files backup/push/pull operations | [→ Guide](backup/README.md) |
-| **Content Creation** | Automated page creation and WP-CLI content management workflows | [→ Guide](content-creation/README.md) |
-| **Migration Tools** | Migrate WordPress sites to Trellis/Bedrock (single and multi-site) | [→ Guide](migration/README.md) |
-| **Image Optimization** | Nginx WebP/AVIF configuration with automatic format serving | [→ Guide](image-optimization/README.md) |
-| **Browser Caching** | Nginx configuration for optimal static asset caching | [→ Guide](browser-caching/README.md) |
-| **New Machine Setup** | Set up macOS for Trellis development (tools, SSH, VM architecture) | [→ Guide](provision/NEW-MACHINE.md) |
-| **Project Setup** | Clone and configure an existing Trellis/Bedrock project | [→ Guide](provision/PROJECT-SETUP.md) |
-| **Provisioning Reference** | Common Trellis provisioning commands and workflows | [→ Guide](provision/README.md) |
-| **Diagnostics** | WordPress diagnostic tools for transients, caching, and performance issues | [→ Guide](diagnostics/README.md) |
+| **Trellis Updater** | Safely update Trellis while preserving custom configurations | [→ Guide](trellis/updater/README.md) |
+| **Backup Tools** | Ansible playbooks for database and files backup/push/pull operations | [→ Guide](trellis/backup/README.md) |
+| **Provisioning Reference** | Common Trellis provisioning commands and workflows | [→ Guide](trellis/provision/README.md) |
+| **New Machine Setup** | Set up macOS for Trellis development (tools, SSH, VM architecture) | [→ Guide](trellis/provision/NEW-MACHINE.md) |
+| **Project Setup** | Clone and configure an existing Trellis/Bedrock project | [→ Guide](trellis/provision/PROJECT-SETUP.md) |
+| **Monitoring** | Nginx log monitoring for traffic analysis and security threat detection | [→ Guide](trellis/monitoring/README.md) |
+| **Content Creation** | Automated page creation and WP-CLI content management workflows | [→ Guide](wp-cli/content-creation/README.md) |
+| **Migration Tools** | Migrate WordPress sites to Trellis/Bedrock (single and multi-site) | [→ Guide](wp-cli/migration/README.md) |
+| **Diagnostics** | WordPress diagnostic tools for transients, caching, and performance issues | [→ Guide](wp-cli/diagnostics/README.md) |
+| **Image Optimization** | Nginx WebP/AVIF configuration with automatic format serving | [→ Guide](nginx/image-optimization/README.md) |
+| **Browser Caching** | Nginx configuration for optimal static asset caching | [→ Guide](nginx/browser-caching/README.md) |
+| **Redirects** | Nginx redirect configuration for SEO and URL management | [→ Guide](nginx/redirects/README.md) |
 | **Troubleshooting** | Diagnose and resolve PHP-FPM, MariaDB, and server issues | [→ Guide](troubleshooting/README.md) |
-| **Monitoring** | Nginx log monitoring for traffic analysis and security threat detection | [→ Guide](monitoring/README.md) |
-| **Redirects** | Nginx redirect configuration for SEO and URL management | [→ Guide](redirects/README.md) |
 | **PR Creation Script** | AI-powered GitHub PR descriptions with multi-AI backend support (Claude/Codex) | [→ Guide](CREATE-PR.md) |
-| **Theme Release** | AI-powered version bumping and changelog generation for WordPress themes | [→ Script](release-theme.sh) |
-| **Theme Sync** | Rsync script for theme synchronization | [→ Script](rsync-theme.sh) |
+| **Theme Release** | AI-powered version bumping and changelog generation for WordPress themes | [→ Script](scripts/release-theme.sh) |
+| **Theme Sync** | Rsync script for theme synchronization | [→ Script](scripts/rsync-theme.sh) |
 
 ## Quick Start
 

@@ -158,4 +158,4 @@ If you see "Attempting to decrypt but no vault secrets found" when running `trel
 
 ## License
 
-MIT License. See [LICENSE.md](../LICENSE.md) for details.
+MIT License. See [LICENSE.md](../../LICENSE.md) for details.

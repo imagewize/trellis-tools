@@ -4,21 +4,30 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a collection of tools, scripts, and documentation to enhance the [Roots Trellis](https://roots.io/trellis/) workflow for managing WordPress sites. The repository contains Ansible playbooks, shell scripts, Nginx configurations, and comprehensive documentation for WordPress/Trellis operations.
+This is a collection of tools, scripts, and documentation for WordPress operations, server management, and [Roots Trellis](https://roots.io/trellis/) workflows. The repository contains Ansible playbooks, shell scripts, Nginx configurations, WP-CLI utilities, and comprehensive documentation.
 
 ## Repository Structure
 
-- **backup/** - Ansible playbooks and shell scripts for database/files backup operations
-  - `backup/trellis/*.yml` - Ansible playbooks for backup, pull, and push operations
-  - `backup/scripts/*.sh` - Standalone shell scripts for backups
-- **browser-caching/** - Nginx configuration for browser caching of static assets
-- **content-creation/** - Documentation for WP-CLI content creation and block patterns
-- **image-optimization/** - Nginx WebP/AVIF configuration and image conversion guides
-- **migration/** - WordPress migration documentation (regular to Trellis/Bedrock, multi-site)
-- **provision/** - Trellis provisioning command reference
-- **updater/** - Shell script for safely updating Trellis installations
-- **create-pr.sh** - AI-powered GitHub PR creation script with Claude CLI integration
-- **rsync-theme.sh** - Theme synchronization script template
+- **trellis/** - Trellis-specific tools and workflows
+  - `trellis/backup/` - Ansible playbooks for database/files backup, pull, and push operations
+  - `trellis/monitoring/` - Nginx log monitoring and traffic analysis
+  - `trellis/provision/` - Provisioning guides and command reference
+  - `trellis/updater/` - Safe Trellis update scripts
+- **wp-cli/** - WordPress command-line operations
+  - `wp-cli/content-creation/` - WP-CLI content creation and block patterns
+  - `wp-cli/diagnostics/` - WordPress diagnostic tools
+  - `wp-cli/migration/` - WordPress migration documentation
+- **nginx/** - Web server configurations
+  - `nginx/browser-caching/` - Browser caching configuration
+  - `nginx/image-optimization/` - WebP/AVIF configuration and guides
+  - `nginx/redirects/` - SEO and URL redirect management
+- **scripts/** - General utility scripts
+  - `scripts/backup/` - Standalone backup shell scripts
+  - `scripts/monitoring/` - Monitoring helper scripts
+  - `scripts/create-pr.sh` - AI-powered GitHub PR creation
+  - `scripts/release-theme.sh` - WordPress theme release automation
+  - `scripts/rsync-theme.sh` - Theme synchronization
+- **troubleshooting/** - Server and WordPress troubleshooting guides
 
 ## Key Technologies
 
@@ -53,18 +62,18 @@ Ansible playbooks require `-e site=example.com -e env=<environment>` parameters:
 
 ```bash
 # Database backup
-ansible-playbook backup/trellis/database-backup.yml -e site=example.com -e env=production
+ansible-playbook trellis/backup/database-backup.yml -e site=example.com -e env=production
 
 # Database pull (from remote to development)
-ansible-playbook backup/trellis/database-pull.yml -e site=example.com -e env=production
+ansible-playbook trellis/backup/database-pull.yml -e site=example.com -e env=production
 
 # Database push (from development to remote)
-ansible-playbook backup/trellis/database-push.yml -e site=example.com -e env=staging
+ansible-playbook trellis/backup/database-push.yml -e site=example.com -e env=staging
 
 # Files (uploads) operations
-ansible-playbook backup/trellis/files-backup.yml -e site=example.com -e env=production
-ansible-playbook backup/trellis/files-pull.yml -e site=example.com -e env=production
-ansible-playbook backup/trellis/files-push.yml -e site=example.com -e env=staging
+ansible-playbook trellis/backup/files-backup.yml -e site=example.com -e env=production
+ansible-playbook trellis/backup/files-pull.yml -e site=example.com -e env=production
+ansible-playbook trellis/backup/files-push.yml -e site=example.com -e env=staging
 ```
 
 ### WP-CLI Operations
@@ -99,16 +108,16 @@ The create-pr.sh script uses Claude CLI to generate AI-powered PR descriptions:
 
 ```bash
 # Interactive mode with AI description
-./create-pr.sh
+./scripts/create-pr.sh
 
 # Non-interactive with arguments
-./create-pr.sh main "Add feature name"
+./scripts/create-pr.sh main "Add feature name"
 
 # Skip AI generation (0 tokens)
-./create-pr.sh --no-ai
+./scripts/create-pr.sh --no-ai
 
 # Update existing PR
-./create-pr.sh --update
+./scripts/create-pr.sh --update
 ```
 
 ## Architecture and Patterns
@@ -164,7 +173,7 @@ ssh web@example.com "cd /srv/www/example.com/current && \
   wp search-replace 'http://example.test' 'https://example.com' --all-tables --precise --path=web/wp"
 ```
 
-**See also:** `content-creation/PAGE-CREATION.md` section "CRITICAL: URL Sanitization Before Production" for detailed workflows.
+**See also:** `wp-cli/content-creation/PAGE-CREATION.md` section "CRITICAL: URL Sanitization Before Production" for detailed workflows.
 
 ## Important Considerations
 
