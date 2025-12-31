@@ -144,6 +144,28 @@ Pull/push playbooks automatically handle URL replacement using WP-CLI search-rep
 - Remote URLs extracted from `canonical` hostname in site configuration
 - Replacement happens during database import with `wp search-replace`
 
+**CRITICAL: Pattern URLs Get Hardcoded**
+
+WordPress pattern files that use `get_template_directory_uri()` create **environment-specific URLs that get hardcoded into the database**:
+
+- Pattern created locally: `http://example.test/app/themes/theme-name/patterns/images/image.webp`
+- Saved to database: URL is hardcoded in `wp_posts.post_content`
+- Problem: Moving database to production without search-replace causes mixed content warnings
+
+**Always verify URLs after database operations:**
+
+```bash
+# Audit for dev URLs in production
+ssh web@example.com "cd /srv/www/example.com/current && \
+  wp db query \"SELECT COUNT(*) FROM wp_posts WHERE post_content LIKE '%.test%';\" --path=web/wp"
+
+# If found, run search-replace
+ssh web@example.com "cd /srv/www/example.com/current && \
+  wp search-replace 'http://example.test' 'https://example.com' --all-tables --precise --path=web/wp"
+```
+
+**See also:** `content-creation/PAGE-CREATION.md` section "CRITICAL: URL Sanitization Before Production" for detailed workflows.
+
 ## Important Considerations
 
 ### Trellis Configuration
