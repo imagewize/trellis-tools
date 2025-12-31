@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.0] - 2025-12-31
+
+### Added
+
+- **WordPress Security Scanner Suite** - Comprehensive dual-scanner malware detection and security auditing system:
+  - **[wp-cli/security/scanner-targeted.php](wp-cli/security/scanner-targeted.php)** - Site-specific threat detection for common WordPress vulnerabilities (Facebook redirects, file disclosure, SQL injection, PHP malware, code obfuscation) - Fast performance: ~1.7 seconds for 6,600 files
+  - **[wp-cli/security/scanner-general.php](wp-cli/security/scanner-general.php)** - Broad-spectrum malware detection (known malware filenames, pharmaceutical spam, SEO spam, webshells, backdoor functions, encoding layers) - Comprehensive scan: ~2.5 seconds for 7,400 files
+  - **[wp-cli/security/scanner-wrapper.php](wp-cli/security/scanner-wrapper.php)** - Wrapper script that runs both scanners sequentially for complete coverage
+  - **[wp-cli/security/README.md](wp-cli/security/README.md)** - Complete documentation with installation, usage, troubleshooting, and hosting-specific guides (WP-CLI, direct PHP, cPanel/Plesk, browser access)
+  - **[wp-cli/security/SECURITY-GUIDE.md](wp-cli/security/SECURITY-GUIDE.md)** - Detailed usage guide with scanning strategies, integration workflows, and security best practices
+  - **[wp-cli/security/SCANNER-SUMMARY.md](wp-cli/security/SCANNER-SUMMARY.md)** - Quick reference guide for busy developers with common false positives and real threat examples
+  - Multi-execution support: WP-CLI (`wp eval-file`), direct PHP, remote via SSH/Trellis, cron automation
+  - Severity-based reporting (CRITICAL, HIGH, MEDIUM) with colored CLI output
+  - Comprehensive hosting support: VPS/dedicated servers, shared hosting (SSH/FTP), cPanel/Plesk, Trellis/Bedrock
+  - Security-conscious design with IP whitelisting for browser access (not recommended)
+
+### Changed
+
+- Updated main [README.md](README.md) to include Security Scanners tool in tools table
+- Updated [CLAUDE.md](CLAUDE.md) repository structure documentation to include `wp-cli/security/` directory
+- Enhanced [CLAUDE.md](CLAUDE.md) Common Commands section with Security Scanning examples and execution methods
+
+### Improved
+
+- Dual-scanner strategy provides both fast weekly monitoring (targeted) and comprehensive monthly audits (general)
+- Extensive troubleshooting documentation covering WP-CLI installation, hosting restrictions, PHP versions, file permissions, and timeout/memory issues
+- Clear separation between recommended (WP-CLI/direct PHP) and last-resort (browser) execution methods
+- Integration guidance with wp-ops workflows (pre-deployment checks, post-deployment verification, incident response)
+
 ## [2.1.0] - 2025-12-31
 
 ### Added
