@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.1] - 2025-12-31
+
+### Added
+
+- Comprehensive README files for all top-level technology directories:
+  - **[trellis/README.md](trellis/README.md)** - Complete guide to Trellis-specific tools including backup operations, monitoring, provisioning workflows, and Trellis updater
+  - **[nginx/README.md](nginx/README.md)** - Nginx configuration management covering browser caching, image optimization (WebP/AVIF), URL redirects, and Trellis deployment workflows
+  - **[wp-cli/README.md](wp-cli/README.md)** - WordPress CLI operations guide including content creation, diagnostics, and migration tools
+  - **[scripts/README.md](scripts/README.md)** - Automation scripts documentation for GitHub integration, theme management, monitoring, and backup automation
+
+### Changed
+
+- Enhanced [trellis/README.md](trellis/README.md) with expanded sections:
+  - Added detailed backup/restore workflows with example commands
+  - Enhanced monitoring section with traffic analysis and security scanning examples
+  - Improved provisioning quick reference with common command patterns
+  - Updated Trellis updater documentation with troubleshooting guidance
+  - Better organization of tools by functional area
+
+### Improved
+
+- Consistent documentation structure across all top-level directories
+- Better discoverability of tools and features through comprehensive READMEs
+- Cross-references between related tools and workflows
+- Unified quick-start sections for common operations
+- Enhanced navigation with detailed tables of contents
+
 ## [2.0.0] - 2025-12-31
 
 ### Changed
