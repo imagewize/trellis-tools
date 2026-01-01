@@ -8,6 +8,7 @@ This directory contains production-ready tools for:
 
 - **Database & File Synchronization** - Backup, pull, and push operations with automatic URL replacement
 - **Server Monitoring** - Nginx log analysis for traffic patterns and security threats
+- **Security** - WordPress protection via fail2ban automatic IP blocking and manual deny rules
 - **Provisioning & Setup** - Server configuration, PHP upgrades, and WordPress cron management
 - **Safe Upgrades** - Trellis version updates while preserving custom configurations
 
@@ -18,6 +19,7 @@ trellis/
 ├── backup/          # Database & file sync Ansible playbooks
 ├── monitoring/      # Nginx log analysis & security monitoring
 ├── provision/       # Server setup & configuration guides
+├── security/        # WordPress security tools (fail2ban, IP blocking)
 └── updater/         # Safe Trellis version upgrade tools
 ```
 
@@ -166,7 +168,90 @@ ansible-playbook monitoring/setup-monitoring.yml -e site=example.com -e env=prod
 
 ---
 
-## 3. Provisioning & Setup
+## 3. Security
+
+**Location:** `security/`
+
+WordPress security protection through fail2ban automatic IP blocking and manual Nginx deny rules.
+
+### Features
+
+- **fail2ban Integration (Recommended)**
+  - Automatic IP blocking after brute force attempts
+  - Temporary bans (default: 10 minutes)
+  - WordPress wp-login.php protection
+  - XML-RPC abuse protection (optional)
+  - Zero maintenance required
+
+- **Manual IP Blocking (Advanced)**
+  - Permanent Nginx-level IP blocks
+  - Version-controlled deny lists
+  - For extreme high-volume attacks
+  - Works alongside fail2ban
+
+- **Security Monitoring**
+  - View banned IPs and attack patterns
+  - Analyze WordPress login attempts
+  - fail2ban log monitoring
+  - Integration with malware scanners
+
+### Documentation
+
+| File | Purpose |
+|------|---------|
+| `README.md` | Security overview and quick reference |
+| `FAIL2BAN.md` | fail2ban setup, configuration, and monitoring |
+| `MANUAL-IP-BLOCKING.md` | Permanent Nginx IP blocks for extreme cases |
+
+### Quick Start
+
+**Enable fail2ban WordPress protection:**
+
+```bash
+# 1. Edit trellis/group_vars/all/security.yml
+# Set wordpress_wp_login enabled: "true"
+
+# 2. Apply configuration
+cd trellis
+trellis provision --tags fail2ban production
+```
+
+**Monitor security activity:**
+
+```bash
+# Check fail2ban status
+ssh warden@yoursite.com "sudo fail2ban-client status wordpress_wp_login"
+
+# View recent bans
+ssh warden@yoursite.com "sudo tail -50 /var/log/fail2ban.log"
+
+# Analyze attack patterns
+ssh web@yoursite.com "grep 'POST.*wp-login' /srv/www/yoursite.com/logs/access.log | awk '{print \$1}' | sort | uniq -c | sort -rn | head -20"
+```
+
+### Real-World Impact
+
+**Before fail2ban** (November-December 2025):
+- 1,420 wp-login attempts from single IP
+- 860 attempts from another IP
+- 742 attempts from third IP
+- 40+ unique attacker IPs
+- No automatic blocking
+
+**After fail2ban enabled** (2026-01-01):
+- Attackers blocked after 6 failed attempts
+- 10-minute bans deter most attacks
+- Zero maintenance required
+
+**See also:**
+- [security/README.md](security/README.md) - Complete security guide
+- [security/FAIL2BAN.md](security/FAIL2BAN.md) - Automatic IP blocking setup
+- [security/MANUAL-IP-BLOCKING.md](security/MANUAL-IP-BLOCKING.md) - Manual IP blocks
+- [wp-cli/security](../wp-cli/security/) - Malware detection scanners
+
+---
+
+## 4. Provisioning & Setup
 
 **Location:** `provision/`
 
@@ -214,7 +299,7 @@ Critical tags:
 
 ---
 
-## 4. Trellis Updater
+## 5. Trellis Updater
 
 **Location:** `updater/`
 
