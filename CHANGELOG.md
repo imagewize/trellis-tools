@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.1] - 2026-01-01
+
+### Changed
+
+- **Standardized placeholder domain across documentation** - Replaced `imagewize.com` with `example.com` for consistency in all generic examples and documentation:
+  - Updated 13 files across scripts, documentation, and configuration examples
+  - Affected files: PAGE-CREATION.md, MULTI-SITE-MIGRATION.md, CRON.md, PROJECT-SETUP.md, nginx/README.md, nginx/redirects/README.md, scripts/README.md, monitoring scripts, and more
+  - Preserved historical references to `imagewize.com` in CHANGELOG.md to maintain accurate project history
+  - Preserved real-world production data and case studies in security documentation (FAIL2BAN.md, security/README.md, MANUAL-IP-BLOCKING.md) which contain actual attack statistics and production examples
+  - Enhanced documentation clarity by using industry-standard `example.com` placeholder domain (RFC 2606)
+
 ## [2.3.0] - 2026-01-01
 
 ### Added
