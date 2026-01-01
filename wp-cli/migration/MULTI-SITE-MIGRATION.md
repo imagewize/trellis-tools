@@ -290,13 +290,13 @@ For your first site, you can use `trellis new`:
 cd ~/code
 
 # This creates the Trellis project with default 'site/' directory
-trellis new imagewize.com
-cd imagewize.com
+trellis new example.com
+cd example.com
 
 # Your structure:
-# imagewize.com/
+# example.com/
 # ├── trellis/
-# └── site/         # Bedrock for imagewize.com
+# └── site/         # Bedrock for example.com
 ```
 
 **However**, if you know you'll be adding more sites later, it's better to rename `site/` immediately:
@@ -320,7 +320,7 @@ Use Composer to create a new Bedrock installation with a descriptive name:
 
 ```bash
 # Navigate to your Trellis project root
-cd ~/code/imagewize.com  # Your existing Trellis project
+cd ~/code/example.com  # Your existing Trellis project
 
 # Create new Bedrock installation for second site
 composer create-project roots/bedrock site-clientname
@@ -331,7 +331,7 @@ composer create-project roots/bedrock site-name
 
 This creates:
 ```
-imagewize.com/
+example.com/
 ├── trellis/
 ├── site-imagewize/    # First site
 └── site-name/ # Second site
@@ -344,7 +344,7 @@ imagewize.com/
 ```yaml
 wordpress_sites:
   # First site
-  imagewize.com:
+  example.com:
     site_hosts:
       - canonical: imagewize.test
     local_path: ../site-imagewize
@@ -369,13 +369,13 @@ wordpress_sites:
 ```yaml
 wordpress_sites:
   # First site
-  imagewize.com:
+  example.com:
     site_hosts:
-      - canonical: imagewize.com
+      - canonical: example.com
         redirects:
-          - www.imagewize.com
+          - www.example.com
     local_path: ../site-imagewize
-    repo: git@github.com:yourusername/imagewize.com.git
+    repo: git@github.com:yourusername/example.com.git
     repo_subtree_path: site-imagewize
     branch: main
     multisite:
@@ -393,7 +393,7 @@ wordpress_sites:
         redirects:
           - www.jasperfrumau.com
     local_path: ../site-jasperfrumau
-    repo: git@github.com:yourusername/imagewize.com.git  # Same repo!
+    repo: git@github.com:yourusername/example.com.git  # Same repo!
     repo_subtree_path: site-jasperfrumau  # Different path in repo
     branch: main
     multisite:
@@ -421,7 +421,7 @@ Add configuration for the new site:
 ```yaml
 vault_wordpress_sites:
   # First site
-  imagewize.com:
+  example.com:
     env:
       db_password: "secure_password_1"
       # ... salts ...
@@ -447,7 +447,7 @@ Since both sites share the same Trellis configuration, they should be in the sam
 
 ```bash
 # From project root
-cd ~/code/imagewize.com
+cd ~/code/example.com
 
 # Add new Bedrock installation
 git add site-jasperfrumau/
@@ -528,7 +528,7 @@ Follow the same migration steps as the first site:
 Here's what a multi-site Trellis setup looks like:
 
 ```
-imagewize.com/                    # Project root (Git repository)
+example.com/                    # Project root (Git repository)
 ├── .git/
 ├── trellis/                      # Shared Trellis configuration
 │   ├── group_vars/
@@ -564,7 +564,7 @@ Each site gets its own directory structure:
 
 ```
 /srv/www/
-├── imagewize.com/
+├── example.com/
 │   ├── current -> releases/20241023...
 │   ├── releases/
 │   │   └── 20241023.../
@@ -598,7 +598,7 @@ Each site gets its own directory structure:
 
 ```bash
 # Deploy specific site
-trellis deploy production imagewize.com
+trellis deploy production example.com
 
 # Deploy all sites
 trellis deploy production
@@ -608,10 +608,10 @@ trellis provision production
 
 # SSH and access specific site
 ssh admin_user@your.server.ip.address
-cd /srv/www/imagewize.com/current
+cd /srv/www/example.com/current
 
 # WP-CLI for specific site
-wp --path=/srv/www/imagewize.com/current/web plugin list
+wp --path=/srv/www/example.com/current/web plugin list
 wp --path=/srv/www/jasperfrumau.com/current/web plugin list
 ```
 

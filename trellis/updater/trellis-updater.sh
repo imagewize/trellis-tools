@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Set your project slug here like imagewize.com
+# Set your project slug here like example.com
 PROJECT="site.com"
 
 # Paths based on project

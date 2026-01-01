@@ -68,7 +68,7 @@ After upgrading, you should manually review and potentially merge changes from t
 
 1. Edit the script to set your project slug:
 ```bash
-# Set your project slug here like imagewize.com
+# Set your project slug here like example.com
 PROJECT="your-site-name"
 ```
 

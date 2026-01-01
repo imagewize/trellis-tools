@@ -23,6 +23,6 @@ rsync -av --delete \
   --exclude 'vendor/' \
   --exclude '.git/' \
   --exclude '.github/' \
-  ~/code/imagewize.com/demo/web/app/themes/elayne/ \
+  ~/code/example.com/demo/web/app/themes/elayne/ \
   ~/code/elayne/
   

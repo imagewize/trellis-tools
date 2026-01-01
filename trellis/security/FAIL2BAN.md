@@ -6,6 +6,20 @@ Part of the [wp-ops](https://github.com/imagewize/wp-ops) toolkit for WordPress 
 
 ---
 
+## Important: SSH User for Admin Commands
+
+**Note**: This guide uses `admin_user` as a placeholder for your Trellis admin username.
+
+- Trellis creates admin users via `group_vars/{env}/users.yml`
+- Admin users have sudo access (require password for sudo commands)
+- **Replace `admin_user` with your configured username** (e.g., `warden`, `deploy`, your name, etc.)
+- Example: If your admin user is `warden`, use `ssh warden@yoursite.com`
+
+For read-only operations (viewing logs), use the `web` user which doesn't require sudo:
+- `ssh web@yoursite.com` - No sudo access, can read site files and logs
+
+---
+
 ## Overview
 
 **fail2ban** is a log-monitoring tool that automatically blocks IP addresses showing malicious behavior by updating firewall rules. On Trellis-managed servers, fail2ban is **pre-installed** but WordPress-specific jails are disabled by default.
@@ -61,10 +75,10 @@ This will:
 
 ```bash
 # Check fail2ban status
-ssh warden@yoursite.com "sudo fail2ban-client status"
+ssh admin_user@yoursite.com "sudo fail2ban-client status"
 
 # Check WordPress jail specifically
-ssh warden@yoursite.com "sudo fail2ban-client status wordpress_wp_login"
+ssh admin_user@yoursite.com "sudo fail2ban-client status wordpress_wp_login"
 ```
 
 **Expected output:**
@@ -194,12 +208,17 @@ curl -I https://yoursite.com/xmlrpc.php
 
 **Overall fail2ban status:**
 ```bash
-ssh warden@yoursite.com "sudo fail2ban-client status"
+# SSH in first (admin user requires password for sudo)
+ssh admin_user@yoursite.com
+
+# Then run commands
+sudo fail2ban-client status
 ```
 
 **WordPress jail status:**
 ```bash
-ssh warden@yoursite.com "sudo fail2ban-client status wordpress_wp_login"
+ssh admin_user@yoursite.com
+sudo fail2ban-client status wordpress_wp_login
 ```
 
 **Example output:**
@@ -219,41 +238,49 @@ Status for the jail: wordpress_wp_login
 ### View Banned IPs
 
 ```bash
-ssh warden@yoursite.com "sudo fail2ban-client get wordpress_wp_login banip"
+ssh admin_user@yoursite.com
+sudo fail2ban-client get wordpress_wp_login banip
 ```
 
 ### View fail2ban Logs
 
 **Recent activity (last 50 lines):**
 ```bash
-ssh warden@yoursite.com "sudo tail -50 /var/log/fail2ban.log"
+ssh admin_user@yoursite.com
+sudo tail -50 /var/log/fail2ban.log
 ```
 
 **Watch live (real-time monitoring):**
 ```bash
-ssh warden@yoursite.com "sudo tail -f /var/log/fail2ban.log"
+ssh admin_user@yoursite.com
+sudo tail -f /var/log/fail2ban.log
 ```
 
 **Search for specific IP:**
 ```bash
-ssh warden@yoursite.com "sudo grep '167.99.215.209' /var/log/fail2ban.log"
+ssh admin_user@yoursite.com
+sudo grep '167.99.215.209' /var/log/fail2ban.log
 ```
 
 ### Manual IP Management
 
 **Ban an IP immediately:**
 ```bash
-ssh warden@yoursite.com "sudo fail2ban-client set wordpress_wp_login banip 192.168.1.100"
+ssh admin_user@yoursite.com
+sudo fail2ban-client set wordpress_wp_login banip 192.168.1.100
 ```
 
 **Unban an IP (if locked yourself out):**
 ```bash
-ssh warden@yoursite.com "sudo fail2ban-client set wordpress_wp_login unbanip 1.2.3.4"
+# Use server console if completely locked out
+ssh admin_user@yoursite.com
+sudo fail2ban-client set wordpress_wp_login unbanip 1.2.3.4
 ```
 
 **Unban all IPs (emergency):**
 ```bash
-ssh warden@yoursite.com "sudo fail2ban-client unban --all"
+ssh admin_user@yoursite.com
+sudo fail2ban-client unban --all
 ```
 
 ---
@@ -285,7 +312,7 @@ trellis provision --tags fail2ban production
 
 If you have access from another IP:
 ```bash
-ssh warden@yoursite.com "sudo fail2ban-client set wordpress_wp_login unbanip YOUR.IP.HERE"
+ssh admin_user@yoursite.com "sudo fail2ban-client set wordpress_wp_login unbanip YOUR.IP.HERE"
 ```
 
 **Option 2: Disable fail2ban temporarily**
@@ -316,7 +343,8 @@ sudo systemctl restart fail2ban
 ### Check if fail2ban is Running
 
 ```bash
-ssh warden@yoursite.com "sudo systemctl status fail2ban"
+ssh admin_user@yoursite.com
+sudo systemctl status fail2ban
 ```
 
 **Expected:**
@@ -329,19 +357,22 @@ ssh warden@yoursite.com "sudo systemctl status fail2ban"
 ### Restart fail2ban
 
 ```bash
-ssh warden@yoursite.com "sudo systemctl restart fail2ban"
+ssh admin_user@yoursite.com
+sudo systemctl restart fail2ban
 ```
 
 ### Check Configuration Syntax
 
 ```bash
-ssh warden@yoursite.com "sudo fail2ban-client -d"
+ssh admin_user@yoursite.com
+sudo fail2ban-client -d
 ```
 
 ### View Which Logs Are Monitored
 
 ```bash
-ssh warden@yoursite.com "sudo fail2ban-client get wordpress_wp_login logpath"
+ssh admin_user@yoursite.com
+sudo fail2ban-client get wordpress_wp_login logpath
 ```
 
 **Expected:**
@@ -356,7 +387,7 @@ Test if fail2ban can detect failures in your logs:
 
 ```bash
 # On production server
-ssh warden@yoursite.com
+ssh admin_user@yoursite.com
 sudo fail2ban-regex /srv/www/yoursite.com/logs/access.log /etc/fail2ban/filter.d/wordpress-wp-login.conf
 ```
 
@@ -380,16 +411,19 @@ If "matched" shows failed login attempts, filter is working correctly.
 **Solution**:
 ```bash
 # 1. Check jail is enabled
-ssh warden@yoursite.com "sudo fail2ban-client status" | grep wordpress
+ssh admin_user@yoursite.com
+sudo fail2ban-client status | grep wordpress
 
-# 2. Check log file exists and has content
+# 2. Check log file exists and has content (can use web user, no sudo needed)
 ssh web@yoursite.com "tail /srv/www/yoursite.com/logs/access.log"
 
 # 3. Test filter pattern (see above)
-ssh warden@yoursite.com "sudo fail2ban-regex /srv/www/yoursite.com/logs/access.log /etc/fail2ban/filter.d/wordpress-wp-login.conf"
+ssh admin_user@yoursite.com
+sudo fail2ban-regex /srv/www/yoursite.com/logs/access.log /etc/fail2ban/filter.d/wordpress-wp-login.conf
 
 # 4. Check for errors
-ssh warden@yoursite.com "sudo grep ERROR /var/log/fail2ban.log | tail -20"
+ssh admin_user@yoursite.com
+sudo grep ERROR /var/log/fail2ban.log | tail -20
 ```
 
 ---
@@ -404,7 +438,8 @@ fail2ban complements the [wp-cli/security](../../wp-cli/security/) malware scann
 ```bash
 # fail2ban runs automatically, no action needed
 # View activity:
-ssh warden@yoursite.com "sudo tail -20 /var/log/fail2ban.log"
+ssh admin_user@yoursite.com
+sudo tail -20 /var/log/fail2ban.log
 ```
 
 **2. Detect malware (security scanners)**
@@ -477,32 +512,37 @@ cd trellis && trellis provision --tags fail2ban production
 
 ```bash
 # Overall status
-ssh warden@yoursite.com "sudo fail2ban-client status"
+ssh admin_user@yoursite.com
+sudo fail2ban-client status
 
 # WordPress jail
-ssh warden@yoursite.com "sudo fail2ban-client status wordpress_wp_login"
+sudo fail2ban-client status wordpress_wp_login
 
 # View logs
-ssh warden@yoursite.com "sudo tail -50 /var/log/fail2ban.log"
+sudo tail -50 /var/log/fail2ban.log
 ```
 
 ### Manage Bans
 
 ```bash
+# SSH in first (admin user requires password for sudo)
+ssh admin_user@yoursite.com
+
 # Ban IP
-ssh warden@yoursite.com "sudo fail2ban-client set wordpress_wp_login banip 1.2.3.4"
+sudo fail2ban-client set wordpress_wp_login banip 1.2.3.4
 
 # Unban IP
-ssh warden@yoursite.com "sudo fail2ban-client set wordpress_wp_login unbanip 1.2.3.4"
+sudo fail2ban-client set wordpress_wp_login unbanip 1.2.3.4
 
 # Unban all
-ssh warden@yoursite.com "sudo fail2ban-client unban --all"
+sudo fail2ban-client unban --all
 ```
 
 ### Emergency Disable
 
 ```bash
-ssh warden@yoursite.com "sudo systemctl stop fail2ban"
+ssh admin_user@yoursite.com
+sudo systemctl stop fail2ban
 ```
 
 ---

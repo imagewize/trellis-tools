@@ -6,8 +6,8 @@
 #   ./security-monitor.sh [log_file] [hours] [alert_threshold]
 #
 # Examples:
-#   ./security-monitor.sh                                                # Default: imagewize.com, last 24h
-#   ./security-monitor.sh /srv/www/demo.imagewize.com/logs/access.log 1 50     # Demo site, 1 hour, alert > 50
+#   ./security-monitor.sh                                                # Default: example.com, last 24h
+#   ./security-monitor.sh /srv/www/demo.example.com/logs/access.log 1 50     # Demo site, 1 hour, alert > 50
 #   ./security-monitor.sh /var/log/nginx/access.log 24 100                     # Global logs, 24h, alert > 100
 #
 
@@ -19,11 +19,11 @@ set -e
 
 # Default log file - adjust to your site:
 # Per-site logs (Trellis default):
-#   /srv/www/imagewize.com/logs/access.log
-#   /srv/www/demo.imagewize.com/logs/access.log
+#   /srv/www/example.com/logs/access.log
+#   /srv/www/demo.example.com/logs/access.log
 # Global logs (if configured):
 #   /var/log/nginx/access.log
-LOG_FILE="${1:-/srv/www/imagewize.com/logs/access.log}"
+LOG_FILE="${1:-/srv/www/example.com/logs/access.log}"
 HOURS="${2:-24}"
 ALERT_THRESHOLD="${3:-100}"  # Alert if single IP exceeds this many requests
 

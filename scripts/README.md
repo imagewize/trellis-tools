@@ -213,8 +213,8 @@ Edit script to set theme paths:
 
 ```bash
 # Bedrock installation directories
-DEMO_DIR="$HOME/code/imagewize.com/demo/web/app/themes"
-SITE_DIR="$HOME/code/imagewize.com/site/web/app/themes"
+DEMO_DIR="$HOME/code/example.com/demo/web/app/themes"
+SITE_DIR="$HOME/code/example.com/site/web/app/themes"
 ```
 
 #### Example Changelog Output
@@ -278,7 +278,7 @@ Simple rsync wrapper for theme synchronization between Trellis and standalone re
 Edit script with your paths:
 
 ```bash
-SOURCE="$HOME/code/imagewize.com/demo/web/app/themes/elayne/"
+SOURCE="$HOME/code/example.com/demo/web/app/themes/elayne/"
 DESTINATION="$HOME/code/elayne/"
 ```
 
@@ -503,7 +503,7 @@ Real-time Nginx traffic analysis with intelligent bot filtering and comprehensiv
 ./traffic-monitor.sh
 
 # Specific log file and time window
-./traffic-monitor.sh /srv/www/demo.imagewize.com/logs/access.log 6
+./traffic-monitor.sh /srv/www/demo.example.com/logs/access.log 6
 
 # Last 24 hours
 ./traffic-monitor.sh /var/log/nginx/access.log 24

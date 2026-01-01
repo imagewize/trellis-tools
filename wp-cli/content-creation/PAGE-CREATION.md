@@ -215,11 +215,11 @@ ssh web@example.com "cd /srv/www/example.com/current && \
   WHERE post_content LIKE '%example.test%' OR post_content LIKE '%.test%';\" \
   --path=web/wp"
 
-# For multisite (e.g., demo.imagewize.com):
-ssh web@demo.imagewize.com "cd /srv/www/demo.imagewize.com/current && \
+# For multisite (e.g., demo.example.com):
+ssh web@demo.example.com "cd /srv/www/demo.example.com/current && \
   wp db query \"SELECT ID, post_title, post_name FROM wp_posts \
-  WHERE post_content LIKE '%demo.imagewize.test%';\" \
-  --path=web/wp --url=https://demo.imagewize.com"
+  WHERE post_content LIKE '%demo.example.test%';\" \
+  --path=web/wp --url=https://demo.example.com"
 ```
 
 **If Dev URLs Found - Fix Before Going Live:**
@@ -234,9 +234,9 @@ ssh web@example.com "cd /srv/www/example.com/current && \
   --all-tables --precise --path=web/wp"
 
 # For multisite:
-ssh web@demo.imagewize.com "cd /srv/www/demo.imagewize.com/current && \
-  wp search-replace 'http://demo.imagewize.test' 'https://demo.imagewize.com' \
-  --all-tables --precise --path=web/wp --url=https://demo.imagewize.com"
+ssh web@demo.example.com "cd /srv/www/demo.example.com/current && \
+  wp search-replace 'http://demo.example.test' 'https://demo.example.com' \
+  --all-tables --precise --path=web/wp --url=https://demo.example.com"
 
 # STEP 4: Flush cache
 ssh web@example.com "cd /srv/www/example.com/current && wp cache flush --path=web/wp"
@@ -279,8 +279,8 @@ Use the provided [page-creation.sh](page-creation.sh) script for automated deplo
 Edit these variables in the script to match your server:
 ```bash
 SERVER_USER="web"
-SERVER_HOST="imagewize.com"
-SERVER_PATH="/srv/www/imagewize.com/current"
+SERVER_HOST="example.com"
+SERVER_PATH="/srv/www/example.com/current"
 WP_PATH="web/wp"
 ```
 
@@ -301,8 +301,8 @@ WP_PATH="web/wp"
 ================================================
 Page created successfully!
 Page ID: 12345
-URL: https://imagewize.com/about/
-Admin URL: https://imagewize.com/wp/wp-admin/post.php?post=12345&action=edit
+URL: https://example.com/about/
+Admin URL: https://example.com/wp/wp-admin/post.php?post=12345&action=edit
 ================================================
 ```
 
@@ -508,8 +508,8 @@ The [page-creation.sh](page-creation.sh) script provides a streamlined workflow 
 **Server Configuration:**
 ```bash
 SERVER_USER="web"          # SSH user for production server
-SERVER_HOST="imagewize.com"  # Production server hostname
-SERVER_PATH="/srv/www/imagewize.com/current"  # Bedrock root path
+SERVER_HOST="example.com"  # Production server hostname
+SERVER_PATH="/srv/www/example.com/current"  # Bedrock root path
 WP_PATH="web/wp"           # WordPress installation path (Bedrock structure)
 ```
 
@@ -831,8 +831,8 @@ This section covers how to update existing pages with block patterns, useful for
 
 ```bash
 # List pages to find the ID
-trellis vm shell --workdir /srv/www/demo.imagewize.com/current -- \
-  wp post list --post_type=page --url=https://demo.imagewize.test/ \
+trellis vm shell --workdir /srv/www/demo.example.com/current -- \
+  wp post list --post_type=page --url=https://demo.example.test/ \
   --fields=ID,post_title,post_name --path=web/wp
 ```
 
@@ -848,7 +848,7 @@ ID    post_title                post_name
 Create the HTML content file directly in the Trellis VM's `/tmp` directory:
 
 ```bash
-trellis vm shell --workdir /srv/www/demo.imagewize.com/current -- bash << 'VMEOF'
+trellis vm shell --workdir /srv/www/demo.example.com/current -- bash << 'VMEOF'
 cat > /tmp/page-content.html << 'EOF'
 <!-- wp:heading {"textAlign":"center","fontSize":"xxx-large"} -->
 <h2 class="wp-block-heading has-text-align-center has-xxx-large-font-size">Hero Patterns</h2>
@@ -898,7 +898,7 @@ https://demo.imagewize.test/heroes/
 **Use case:** Creating a comprehensive patterns page organized by category.
 
 ```bash
-trellis vm shell --workdir /srv/www/demo.imagewize.com/current -- bash << 'VMEOF'
+trellis vm shell --workdir /srv/www/demo.example.com/current -- bash << 'VMEOF'
 cat > /tmp/patterns-showcase.html << 'EOF'
 <!-- wp:heading {"textAlign":"center","fontSize":"xxx-large"} -->
 <h2 class="wp-block-heading has-text-align-center has-xxx-large-font-size">89+ Professional Patterns</h2>
@@ -949,7 +949,7 @@ find /path/to/theme/patterns -name "*.php" -type f ! -name "template-*" | sort
 grep -h "Slug:" /path/to/theme/patterns/*.php | awk '{print $3}'
 
 # For Elayne theme example:
-find ~/code/imagewize.com/demo/web/app/themes/elayne/patterns \
+find ~/code/example.com/demo/web/app/themes/elayne/patterns \
   -name "*.php" -type f ! -name "template-*" ! -name "header-*" ! -name "footer-*" \
   -exec basename {} .php \;
 ```
@@ -960,7 +960,7 @@ Complete example updating two pages on Elayne demo site:
 
 **1. Heroes page (ID: 1848) - Show all hero patterns:**
 ```bash
-trellis vm shell --workdir /srv/www/demo.imagewize.com/current -- bash << 'VMEOF'
+trellis vm shell --workdir /srv/www/demo.example.com/current -- bash << 'VMEOF'
 cat > /tmp/heroes-content.html << 'EOF'
 <!-- wp:heading {"textAlign":"center","fontSize":"xxx-large"} -->
 <h2 class="wp-block-heading has-text-align-center has-xxx-large-font-size">Hero Patterns</h2>
@@ -1037,21 +1037,21 @@ VMEOF
 **Problem:** Pattern not rendering
 ```bash
 # Verify pattern slug exists
-grep -r "Slug: elayne/hero-modern-dark" ~/code/imagewize.com/demo/web/app/themes/elayne/patterns/
+grep -r "Slug: elayne/hero-modern-dark" ~/code/example.com/demo/web/app/themes/elayne/patterns/
 
 # Check pattern is registered (from VM)
-trellis vm shell --workdir /srv/www/demo.imagewize.com/current -- \
-  wp block-pattern list --url=https://demo.imagewize.test/ --path=web/wp
+trellis vm shell --workdir /srv/www/demo.example.com/current -- \
+  wp block-pattern list --url=https://demo.example.test/ --path=web/wp
 ```
 
 **Problem:** Content not updating
 ```bash
 # Flush WordPress cache
-trellis vm shell --workdir /srv/www/demo.imagewize.com/current -- \
-  wp cache flush --url=https://demo.imagewize.test/ --path=web/wp
+trellis vm shell --workdir /srv/www/demo.example.com/current -- \
+  wp cache flush --url=https://demo.example.test/ --path=web/wp
 
 # For multisite, flush network cache
-trellis vm shell --workdir /srv/www/demo.imagewize.com/current -- \
+trellis vm shell --workdir /srv/www/demo.example.com/current -- \
   wp cache flush --network --path=web/wp
 ```
 

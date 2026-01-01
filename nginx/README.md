@@ -197,7 +197,7 @@ SEO-friendly redirect templates for URL migrations, permalink changes, and canon
 - `wordpress-permalinks.conf.j2` - Common permalink migration patterns
 
 **Real-world example:**
-- `imagewize.com/seo-redirects.conf.j2` - Production redirect patterns
+- `example.com/seo-redirects.conf.j2` - Production redirect patterns
 
 ### Configuration Examples
 
