@@ -5,7 +5,7 @@
 
 
 <div align="center">
-A collection of tools for WordPress operations, server management, and <a href="https://roots.io/trellis/">Roots Trellis</a> workflows.
+Tools, scripts, and guides for modern WordPress development & devops—optimized for <a href="https://roots.io/trellis/">Trellis</a>/<a href="https://roots.io/bedrock/">Bedrock</a> workflows.
 </div>
 
 ## Tools
