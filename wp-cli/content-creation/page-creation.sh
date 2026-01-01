@@ -18,8 +18,8 @@ set -e  # Exit on error
 
 # Configuration
 SERVER_USER="web"
-SERVER_HOST="imagewize.com"
-SERVER_PATH="/srv/www/imagewize.com/current"
+SERVER_HOST="example.com"
+SERVER_PATH="/srv/www/example.com/current"
 WP_PATH="web/wp"
 
 # Color codes for output
@@ -148,12 +148,12 @@ print_info ""
 print_info "================================================"
 print_info "Page created successfully!"
 print_info "Page ID: $PAGE_ID"
-print_info "URL: https://imagewize.com/$PAGE_SLUG/"
-print_info "Admin URL: https://imagewize.com/wp/wp-admin/post.php?post=$PAGE_ID&action=edit"
+print_info "URL: https://example.com/$PAGE_SLUG/"
+print_info "Admin URL: https://example.com/wp/wp-admin/post.php?post=$PAGE_ID&action=edit"
 print_info "================================================"
 print_info ""
 print_info "Next steps:"
-print_info "1. Visit the page: https://imagewize.com/$PAGE_SLUG/"
+print_info "1. Visit the page: https://example.com/$PAGE_SLUG/"
 print_info "2. Review the content and formatting"
 print_info "3. Update SEO metadata (The SEO Framework)"
 print_info "4. Add to navigation menu if needed"

@@ -12,7 +12,7 @@ This directory contains example nginx redirect configurations that can be used i
 redirects/
 ├── README.md                           # This file
 └── examples/
-    ├── imagewize.com/
+    ├── example.com/
     │   └── seo-redirects.conf.j2       # SEO redirect examples
     └── generic/
         ├── wordpress-permalinks.conf.j2 # Common WordPress redirects
@@ -35,8 +35,8 @@ trellis/
 └── nginx-includes/
     ├── all/                          # Global includes (all sites)
     │   └── assets-expiry.conf.j2     # Browser caching rules
-    └── imagewize.com/                # Site-specific includes
-        └── seo-redirects.conf.j2     # SEO redirects (imagewize.com only)
+    └── example.com/                # Site-specific includes
+        └── seo-redirects.conf.j2     # SEO redirects (example.com only)
 ```
 
 ### Deployment Location
@@ -47,8 +47,8 @@ Templates are deployed to `/etc/nginx/includes.d/` on the server:
 /etc/nginx/includes.d/
 ├── all/
 │   └── assets-expiry.conf         # Rendered from all/assets-expiry.conf.j2
-└── imagewize.com/
-    └── seo-redirects.conf         # Rendered from imagewize.com/seo-redirects.conf.j2
+└── example.com/
+    └── seo-redirects.conf         # Rendered from example.com/seo-redirects.conf.j2
 ```
 
 ## Using the Examples
@@ -57,7 +57,7 @@ Templates are deployed to `/etc/nginx/includes.d/` on the server:
 
 ```bash
 # Copy site-specific redirect template
-cp ~/code/trellis-tools/redirects/examples/imagewize.com/seo-redirects.conf.j2 \
+cp ~/code/trellis-tools/redirects/examples/example.com/seo-redirects.conf.j2 \
    ~/code/yourproject.com/trellis/nginx-includes/yoursite.com/
 
 # Or copy to global includes (applies to all sites)

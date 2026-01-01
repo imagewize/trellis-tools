@@ -37,8 +37,8 @@ This sets `DISABLE_WP_CRON` constant to `true` in WordPress configuration.
 
 ```bash
 # Example: /etc/cron.d/wordpress-imagewize_com
-#Ansible: imagewize.com WordPress cron
-*/15 * * * * web cd /srv/www/imagewize.com/current && wp cron event run --due-now > /dev/null 2>&1
+#Ansible: example.com WordPress cron
+*/15 * * * * web cd /srv/www/example.com/current && wp cron event run --due-now > /dev/null 2>&1
 ```
 
 **What this does:**
@@ -54,8 +54,8 @@ For **WordPress multisite** installations, the cron configuration is different t
 
 ```bash
 # Example: /etc/cron.d/wordpress-demo_imagewize_com
-#Ansible: demo.imagewize.com WordPress cron
-*/15 * * * * web cd /srv/www/demo.imagewize.com/current && (wp site list --field=url | xargs -n1 -I % wp --url=% cron event run --due-now) > /dev/null 2>&1
+#Ansible: demo.example.com WordPress cron
+*/15 * * * * web cd /srv/www/demo.example.com/current && (wp site list --field=url | xargs -n1 -I % wp --url=% cron event run --due-now) > /dev/null 2>&1
 ```
 
 **What this does:**
@@ -66,7 +66,7 @@ For **WordPress multisite** installations, the cron configuration is different t
 **Multisite cron log example:**
 
 ```
-2025-11-28T02:30:01 ubuntu CRON[93961]: (web) CMD (cd /srv/www/demo.imagewize.com/current && (wp site list --field=url | xargs -n1 -I % wp --url=% cron event run --due-now) > /dev/null 2>&1)
+2025-11-28T02:30:01 ubuntu CRON[93961]: (web) CMD (cd /srv/www/demo.example.com/current && (wp site list --field=url | xargs -n1 -I % wp --url=% cron event run --due-now) > /dev/null 2>&1)
 ```
 
 ## Verification
@@ -112,9 +112,9 @@ sudo -u web bash -c "cd /srv/www/example.com/current && wp cron event run --due-
 **Example of successful cron execution in logs:**
 
 ```
-2025-11-28T02:15:01 ubuntu CRON[93164]: (web) CMD (cd /srv/www/imagewize.com/current && wp cron event run --due-now > /dev/null 2>&1)
-2025-11-28T02:30:01 ubuntu CRON[93960]: (web) CMD (cd /srv/www/imagewize.com/current && wp cron event run --due-now > /dev/null 2>&1)
-2025-11-28T02:45:01 ubuntu CRON[94288]: (web) CMD (cd /srv/www/imagewize.com/current && wp cron event run --due-now > /dev/null 2>&1)
+2025-11-28T02:15:01 ubuntu CRON[93164]: (web) CMD (cd /srv/www/example.com/current && wp cron event run --due-now > /dev/null 2>&1)
+2025-11-28T02:30:01 ubuntu CRON[93960]: (web) CMD (cd /srv/www/example.com/current && wp cron event run --due-now > /dev/null 2>&1)
+2025-11-28T02:45:01 ubuntu CRON[94288]: (web) CMD (cd /srv/www/example.com/current && wp cron event run --due-now > /dev/null 2>&1)
 ```
 
 If you see entries like these running every 15 minutes, your WordPress cron is working correctly.
@@ -123,7 +123,7 @@ If you see entries like these running every 15 minutes, your WordPress cron is w
 
 ```bash
 # Check only cron logs for a specific site
-sudo grep -i cron /var/log/syslog | grep "imagewize.com" | tail -20
+sudo grep -i cron /var/log/syslog | grep "example.com" | tail -20
 
 # Check cron logs for all sites
 sudo grep -i cron /var/log/syslog | grep "(web) CMD" | tail -20

@@ -193,7 +193,7 @@ If you're setting up an existing project on a new machine, copy the `.vault_pass
 cat /path/to/project/trellis/.vault_pass
 
 # On your new machine
-cd /Users/j/code/imagewize.com/trellis
+cd /Users/j/code/example.com/trellis
 echo "PASTE_PASSWORD_HERE" > .vault_pass
 chmod 600 .vault_pass
 ```
