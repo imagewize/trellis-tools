@@ -18,6 +18,7 @@ A collection of tools for WordPress operations, server management, and <a href="
 | **New Machine Setup** | Set up macOS for Trellis development (tools, SSH, VM architecture) | [→ Guide](trellis/provision/NEW-MACHINE.md) |
 | **Project Setup** | Clone and configure an existing Trellis/Bedrock project | [→ Guide](trellis/provision/PROJECT-SETUP.md) |
 | **Monitoring** | Nginx log monitoring for traffic analysis and security threat detection | [→ Guide](trellis/monitoring/README.md) |
+| **Security** | WordPress protection via fail2ban automatic IP blocking and manual deny rules | [→ Guide](trellis/security/README.md) |
 | **Content Creation** | Automated page creation and WP-CLI content management workflows | [→ Guide](wp-cli/content-creation/README.md) |
 | **Migration Tools** | Migrate WordPress sites to Trellis/Bedrock (single and multi-site) | [→ Guide](wp-cli/migration/README.md) |
 | **URL Update Methods** | Generic WordPress URL update methods for migrations | [→ Guide](wp-cli/migration/URL-UPDATE-METHODS.md) |
