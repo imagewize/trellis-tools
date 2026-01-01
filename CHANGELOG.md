@@ -7,6 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.0] - 2026-01-01
+
+### Added
+
+- **Trellis fail2ban WordPress Protection Documentation**:
+  - **[trellis/security/README.md](trellis/security/README.md)** - Security overview covering fail2ban automatic IP blocking and manual Nginx deny rules
+  - **[trellis/security/FAIL2BAN.md](trellis/security/FAIL2BAN.md)** - Comprehensive fail2ban setup guide with WordPress wp-login.php protection, XML-RPC abuse prevention, configuration examples, monitoring commands, and troubleshooting
+  - **[trellis/security/MANUAL-IP-BLOCKING.md](trellis/security/MANUAL-IP-BLOCKING.md)** - Advanced manual IP blocking via Nginx deny directives for extreme high-volume attacks, with implementation examples and best practices
+  - Automatic IP blocking after brute force attempts (default: 6 failed attempts = 10 minute ban)
+  - Zero-maintenance WordPress security via fail2ban (pre-installed in Trellis, disabled by default)
+  - Real-world attack statistics showing 40+ unique attacker IPs with 20-200 failed login attempts each (Nov-Dec 2025)
+  - Production impact demonstration: 1,420 wp-login attempts from single IP blocked automatically after enabling fail2ban
+  - IP whitelist configuration to prevent self-lockout
+  - Integration with [wp-cli/security](wp-cli/security/) malware scanners for comprehensive security workflow
+
+### Changed
+
+- Enhanced main [trellis/README.md](trellis/README.md) with new Security section (#3) including:
+  - fail2ban WordPress protection features (automatic blocking, temporary bans, zero maintenance)
+  - Manual IP blocking for extreme cases (high-volume attacks, persistent attackers)
+  - Security monitoring tools (banned IPs, attack patterns, fail2ban logs)
+  - Quick start guide for enabling WordPress protection
+  - Real-world impact statistics (before/after fail2ban)
+  - Cross-references to security documentation and malware scanners
+- Renumbered existing sections: Provisioning & Setup (#3 → #4), Trellis Updater (#4 → #5)
+
+### Improved
+
+- Complete fail2ban WordPress jail configuration examples with recommended, stricter, and lenient settings
+- Monitoring and management commands for checking status, viewing banned IPs, and manual IP management
+- Self-lockout prevention with IP whitelist and emergency recovery procedures
+- Detailed troubleshooting for common issues (jail not enabled, filter patterns, log paths)
+- Clear comparison table showing when to use fail2ban vs manual IP blocks
+- Integration workflow combining prevention (fail2ban), detection (malware scanners), and analysis (access logs)
+
 ## [2.2.2] - 2025-12-31
 
 ### Changed
