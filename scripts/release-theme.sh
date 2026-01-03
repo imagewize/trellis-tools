@@ -190,8 +190,9 @@ if [ -z "$CHANGELOG_JSON" ]; then
 fi
 
 # Extract changelog entries using simple text processing (no jq needed)
-CHANGELOG_MD=$(echo "$CHANGELOG_JSON" | grep -o '"changelog_md"[[:space:]]*:[[:space:]]*"[^"]*"' | sed 's/"changelog_md"[[:space:]]*:[[:space:]]*"\(.*\)"/\1/' | sed 's/\\n/\n/g')
-README_TXT=$(echo "$CHANGELOG_JSON" | grep -o '"readme_txt"[[:space:]]*:[[:space:]]*"[^"]*"' | sed 's/"readme_txt"[[:space:]]*:[[:space:]]*"\(.*\)"/\1/' | sed 's/\\n/\n/g')
+# Use awk to properly handle escaped quotes and backslashes in JSON values
+CHANGELOG_MD=$(echo "$CHANGELOG_JSON" | awk -F'"changelog_md"[[:space:]]*:[[:space:]]*"' '{if (NF>1) {gsub(/","readme_txt".*/, "", $2); gsub(/\\n/, "\n", $2); gsub(/\\"/, "\"", $2); print $2}}')
+README_TXT=$(echo "$CHANGELOG_JSON" | awk -F'"readme_txt"[[:space:]]*:[[:space:]]*"' '{if (NF>1) {gsub(/"}$/, "", $2); gsub(/\\n/, "\n", $2); gsub(/\\"/, "\"", $2); print $2}}')
 
 if [ -z "$CHANGELOG_MD" ] || [ -z "$README_TXT" ]; then
     echo -e "${RED}  ✗ Failed to extract changelog entries${NC}"
