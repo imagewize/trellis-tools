@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.2] - 2026-01-03
+
+### Fixed
+
+- **Theme Release Script JSON Parsing** - Enhanced changelog extraction in [scripts/release-theme.sh](scripts/release-theme.sh) to properly handle escaped quotes and backslashes in Claude AI responses:
+  - Replaced fragile `grep`/`sed` approach with robust `awk`-based JSON value extraction
+  - Fixed issue where changelog entries containing escaped quotes (`\"`) would be truncated or malformed
+  - Improved handling of escaped newlines (`\n`) in multi-line changelog content
+  - More reliable parsing of Claude CLI JSON output for both `changelog_md` and `readme_txt` fields
+
 ## [2.3.1] - 2026-01-01
 
 ### Changed
