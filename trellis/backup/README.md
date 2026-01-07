@@ -2,6 +2,38 @@
 
 Ansible playbooks for automated database backup, synchronization, and management across Trellis environments.
 
+## Table of Contents
+
+- [Overview](#overview)
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+- [Usage](#usage)
+  - [Database Backup](#database-backup)
+  - [Database Pull](#database-pull)
+    - [Alternative: Direct Shell Script Method](#alternative-direct-shell-script-method)
+  - [Database Push](#database-push)
+  - [Files Backup](#files-backup)
+  - [Files Pull](#files-pull)
+  - [Files Push](#files-push)
+- [Configuration](#configuration)
+  - [Site Configuration](#site-configuration)
+  - [Backup Directory Structure](#backup-directory-structure)
+- [File Naming Convention](#file-naming-convention)
+- [Compression Methods](#compression-methods)
+- [URL Search and Replace](#url-search-and-replace)
+- [Security Considerations](#security-considerations)
+- [Error Handling](#error-handling)
+- [Automation](#automation)
+  - [Scheduled Backups](#scheduled-backups)
+  - [Cleanup Script](#cleanup-script)
+- [Integration with CI/CD](#integration-with-cicd)
+- [Troubleshooting](#troubleshooting)
+  - [Debug Mode](#debug-mode)
+  - [Manual Verification](#manual-verification)
+  - [Log Monitoring](#log-monitoring)
+- [Best Practices](#best-practices)
+- [Support](#support)
+
 ## Overview
 
 This directory contains Ansible playbooks that integrate with your existing Trellis setup to provide automated database and files operations:
@@ -84,6 +116,90 @@ ansible-playbook database-pull.yml -e site=example.com -e env=staging
 - Cleans up temporary files
 
 **Note:** Cannot pull from development to development (will abort with error).
+
+#### Alternative: Direct Shell Script Method
+
+For interactive development work, you can use a direct shell script approach that runs inside the Trellis VM. This method is **simpler and faster** than the Ansible playbook, using SSH pipes to stream the database directly without intermediate files.
+
+**Standard site example:**
+
+```bash
+cd /path/to/trellis && trellis vm shell --workdir /srv/www/example.com/current -- bash -c "
+echo '=== Backing up current development database ==='
+wp db export /tmp/dev_backup_\$(date +%Y%m%d_%H%M%S).sql.gz --path=web/wp
+
+echo ''
+echo '=== Pulling production database dump ==='
+ssh -o StrictHostKeyChecking=no web@example.com 'cd /srv/www/example.com/current && wp db export - --path=web/wp' | gzip > /tmp/prod_import.sql.gz
+
+echo ''
+echo '=== Importing production database to development ==='
+gunzip < /tmp/prod_import.sql.gz | wp db import - --path=web/wp
+
+echo ''
+echo '=== Running search-replace for URLs ==='
+wp search-replace 'https://example.com' 'https://example.test' --all-tables --precise --path=web/wp
+
+echo ''
+echo '=== Flushing cache ==='
+wp cache flush --path=web/wp
+
+echo ''
+echo '=== Database pull complete! ==='
+"
+```
+
+**Multisite example:**
+
+```bash
+cd /path/to/trellis && trellis vm shell --workdir /srv/www/example.com/current -- bash -c "
+echo '=== Backing up current development database ==='
+wp db export /tmp/dev_backup_\$(date +%Y%m%d_%H%M%S).sql.gz --path=web/wp
+
+echo ''
+echo '=== Pulling production database dump ==='
+ssh -o StrictHostKeyChecking=no web@example.com 'cd /srv/www/example.com/current && wp db export - --path=web/wp' | gzip > /tmp/prod_import.sql.gz
+
+echo ''
+echo '=== Importing production database to development ==='
+gunzip < /tmp/prod_import.sql.gz | wp db import - --path=web/wp
+
+echo ''
+echo '=== Running search-replace for URLs (multisite) ==='
+wp search-replace 'https://example.com' 'http://example.test' --all-tables --precise --path=web/wp --url=https://example.com
+
+echo ''
+echo '=== Flushing cache ==='
+wp cache flush --path=web/wp
+
+echo ''
+echo '=== Database pull complete! ==='
+"
+```
+
+**Advantages of this approach:**
+- Single command execution with full visibility
+- Streams database via SSH pipe (no intermediate transfer files)
+- Includes cache flushing step
+- Progress messages show exactly what's happening
+- Faster than Ansible playbook for quick manual operations
+
+**When to use:**
+- Manual, interactive development work
+- Quick database syncs during active development
+- When you want full visibility into each step
+- Testing or troubleshooting database operations
+
+**When to use Ansible playbooks instead:**
+- Automated/scheduled operations
+- CI/CD pipelines
+- When you need consistent, repeatable automation
+- Managing multiple sites or environments
+
+**Multisite notes:**
+- Include `--url=https://example.com` parameter in `wp search-replace`
+- This ensures WordPress knows which site context to use for the search-replace operation
+- Critical for proper URL replacement across multisite networks
 
 ### Database Push
 

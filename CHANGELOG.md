@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.3] - 2026-01-07
+
+### Added
+
+- **Trellis Backup Documentation Enhancement** - Added alternative direct shell script method for database pull operations:
+  - **[trellis/backup/README.md](trellis/backup/README.md)** - New section documenting shell script approach for interactive development
+  - Standard site example with SSH pipe streaming from production to development
+  - Multisite example with `--url` parameter for proper search-replace context
+  - Comprehensive comparison of when to use shell scripts vs Ansible playbooks
+  - Advantages: Single command execution, full visibility, SSH pipe streaming (no intermediate files), includes cache flushing
+  - Use cases: Manual work, quick syncs, troubleshooting vs automation/CI-CD
+  - Complete Table of Contents for improved navigation
+
+### Changed
+
+- Enhanced [trellis/backup/README.md](trellis/backup/README.md) with comprehensive Table of Contents
+- Improved navigation with hierarchical TOC including all sections (Overview, Configuration, Automation, Troubleshooting)
+- Added new "Alternative: Direct Shell Script Method" subsection under Database Pull with proper TOC linking
+
 ## [2.3.2] - 2026-01-03
 
 ### Fixed
