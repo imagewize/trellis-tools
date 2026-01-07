@@ -169,6 +169,10 @@ echo '=== Running search-replace for URLs (multisite) ==='
 wp search-replace 'https://example.com' 'http://example.test' --all-tables --precise --path=web/wp --url=https://example.com
 
 echo ''
+echo '=== Fixing multisite blog domains ==='
+wp db query \"UPDATE wp_blogs SET domain = REPLACE(domain, 'example.com', 'example.test');\" --path=web/wp
+
+echo ''
 echo '=== Flushing cache ==='
 wp cache flush --path=web/wp
 
@@ -199,7 +203,10 @@ echo '=== Database pull complete! ==='
 **Multisite notes:**
 - Include `--url=https://example.com` parameter in `wp search-replace`
 - This ensures WordPress knows which site context to use for the search-replace operation
-- Critical for proper URL replacement across multisite networks
+- **Critical**: Must update `wp_blogs` table domains separately with direct SQL query
+- The `wp_blogs` table stores the domain for each site in the network
+- Use `wp db query "UPDATE wp_blogs SET domain = REPLACE(domain, 'production.com', 'local.test');"` to update all blog domains
+- Both `wp search-replace` (for content/options) and `wp_blogs` update (for network domains) are required for proper multisite operation
 
 ### Database Push
 
