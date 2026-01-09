@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.4] - 2026-01-09
+
+### Changed
+
+- **Standardized admin username placeholder across documentation** - Replaced hardcoded usernames with `admin_user` placeholder for better clarity and universality:
+  - **[trellis/README.md](trellis/README.md)** - Updated fail2ban examples to use `admin_user` placeholder with note explaining to replace with configured username
+  - **[trellis/provision/PROJECT-SETUP.md](trellis/provision/PROJECT-SETUP.md)** - Replaced `warden` references with `admin_user` throughout SSH and provisioning examples
+  - **[trellis/security/MANUAL-IP-BLOCKING.md](trellis/security/MANUAL-IP-BLOCKING.md)** - Standardized all SSH commands to use `admin_user` placeholder with explanation
+  - **[troubleshooting/MAIL.md](troubleshooting/MAIL.md)** - Added comprehensive SSH user access guide explaining `web`, `admin_user`, and `root` user roles with usage recommendations
+
+### Added
+
+- **Mail Troubleshooting Enhancement** - Expanded [troubleshooting/MAIL.md](troubleshooting/MAIL.md) with comprehensive WordPress email bounce diagnosis and solutions:
+  - New "SSH User Access" section explaining when to use `web`, `admin_user`, and `root` users
+  - New "Issue 2: WordPress Email Bounces - Non-Existent Admin Email" section covering:
+    - Multisite network admin email configuration issues
+    - WP-CLI commands for diagnosing and updating admin emails across sites
+    - Comprehensive testing procedures for server-level and WordPress email functionality
+    - Prevention best practices for initial setup and regular audits
+    - Common pitfalls to avoid (non-existent subdomains, `.test` domains in production)
+  - Detailed examples for single sites and multisite networks
+  - Bulk operations for updating multiple subsites
+  - Email monitoring and documentation recommendations
+
+### Improved
+
+- Better documentation clarity by using consistent placeholder usernames (`admin_user`) instead of specific usernames (`warden`, `admin`, `deploy`)
+- Enhanced troubleshooting workflow with clear user role separation and appropriate permissions
+- All SSH command examples now include contextual notes about which user to use and why
+
 ## [2.3.3] - 2026-01-07
 
 ### Added

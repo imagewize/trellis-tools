@@ -4,6 +4,8 @@ Guide for cloning and setting up an existing Trellis/Bedrock WordPress project o
 
 **Prerequisites:** Your machine must already be configured for Trellis development. If not, see [NEW-MACHINE.md](NEW-MACHINE.md) first.
 
+**Note**: Commands in this guide use `admin_user` as a placeholder for your Trellis admin username (configured in `group_vars/all/users.yml`). Replace `admin_user` with your actual configured username (e.g., `admin`, `deploy`, `warden`, your name, etc.).
+
 ## Table of Contents
 
 - [Clone Repository](#clone-repository)
@@ -577,7 +579,7 @@ trellis provision --tags users production
 **What this does:**
 - Fetches SSH keys from GitHub URLs configured in `users.yml`
 - Updates `/home/web/.ssh/authorized_keys` (for web user)
-- Updates `/home/warden/.ssh/authorized_keys` (for admin user)
+- Updates `/home/admin_user/.ssh/authorized_keys` (for admin user)
 - **Does NOT update** `/root/.ssh/authorized_keys` (root SSH disabled for security)
 
 **Expected output:**
@@ -600,13 +602,13 @@ ssh web@yourproject.com
 # If successful: web@yourproject:~$
 
 # Test SSH connection as admin user
-ssh warden@yourproject.com
+ssh admin_user@yourproject.com
 
 # Should get shell access
-# If successful: warden@yourproject:~$
+# If successful: admin_user@yourproject:~$
 ```
 
-**Note:** Root SSH access is disabled for security. Use `warden` (admin user) for sudo access.
+**Note:** Root SSH access is disabled for security. Use your configured admin user for sudo access.
 
 #### Troubleshooting
 
@@ -616,7 +618,7 @@ ssh warden@yourproject.com
 1. Verify your key is on GitHub: `curl https://github.com/YOUR_USERNAME.keys`
 2. Wait 1-2 minutes for GitHub to update its cache
 3. Re-run provisioning: `trellis provision --tags users production`
-4. Check if key was added: `ssh warden@yourproject.com "cat /home/web/.ssh/authorized_keys"`
+4. Check if key was added: `ssh admin_user@yourproject.com "cat /home/web/.ssh/authorized_keys"`
 
 ### Deploy to Production
 
