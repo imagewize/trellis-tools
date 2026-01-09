@@ -4,6 +4,11 @@ Permanent IP blocking at the Nginx level for extreme cases.
 
 Part of the [wp-ops](https://github.com/imagewize/wp-ops) toolkit for WordPress operations and server management.
 
+**Note**: Commands in this guide use `admin_user` as a placeholder for your Trellis admin username.
+
+- **Replace `admin_user` with your configured username** (e.g., `admin`, `deploy`, `warden`, your name, etc.)
+- Example: If your admin user is `admin`, use `ssh admin@yoursite.com`
+
 ---
 
 ## Overview
@@ -89,7 +94,7 @@ This will:
 **Verify:**
 ```bash
 # Check Nginx reloaded successfully
-ssh warden@yoursite.com "sudo systemctl status nginx"
+ssh admin_user@yoursite.com "sudo systemctl status nginx"
 
 # Test blocked IP (from your machine, not the blocked IP!)
 curl -I https://yoursite.com -H "X-Forwarded-For: 62.60.130.228"
@@ -258,7 +263,7 @@ location ~ ^/wp-admin {
 ### View Active deny Rules
 
 ```bash
-ssh warden@yoursite.com "cat /etc/nginx/includes.d/all/deny-ips.conf"
+ssh admin_user@yoursite.com "cat /etc/nginx/includes.d/all/deny-ips.conf"
 ```
 
 ### Check Nginx Error Log
@@ -266,7 +271,7 @@ ssh warden@yoursite.com "cat /etc/nginx/includes.d/all/deny-ips.conf"
 When an IP is blocked, Nginx logs it:
 
 ```bash
-ssh warden@yoursite.com "sudo grep 'access forbidden' /var/log/nginx/error.log | tail -20"
+ssh admin_user@yoursite.com "sudo grep 'access forbidden' /var/log/nginx/error.log | tail -20"
 ```
 
 **Example log entry:**
@@ -279,7 +284,7 @@ client: 62.60.130.228, server: imagewize.com, request: "POST /wp-login.php HTTP/
 
 ```bash
 # How many requests were blocked from each IP
-ssh warden@yoursite.com "sudo grep 'access forbidden' /var/log/nginx/error.log | awk '{print \$13}' | sort | uniq -c | sort -rn"
+ssh admin_user@yoursite.com "sudo grep 'access forbidden' /var/log/nginx/error.log | awk '{print \$13}' | sort | uniq -c | sort -rn"
 ```
 
 **Example output:**
@@ -353,7 +358,7 @@ fail2ban supports IP whitelisting via `ip_whitelist` in `security.yml` (see [FAI
 **Solution**:
 ```bash
 # Test Nginx config before deploying
-ssh warden@yoursite.com "sudo nginx -t"
+ssh admin_user@yoursite.com "sudo nginx -t"
 
 # Look for error message
 # Example: "unknown directive" means syntax error
@@ -384,7 +389,7 @@ deny 1.2.3.4;
 # Example: 5.6.7.8
 
 # Check if it's in deny list
-ssh warden@yoursite.com "grep '5.6.7.8' /etc/nginx/includes.d/all/deny-ips.conf"
+ssh admin_user@yoursite.com "grep '5.6.7.8' /etc/nginx/includes.d/all/deny-ips.conf"
 ```
 
 **If found, remove it:**
@@ -399,7 +404,7 @@ ssh warden@yoursite.com "grep '5.6.7.8' /etc/nginx/includes.d/all/deny-ips.conf"
 
 **Check deployed config:**
 ```bash
-ssh warden@yoursite.com "cat /etc/nginx/includes.d/all/deny-ips.conf | grep '62.60.130.228'"
+ssh admin_user@yoursite.com "cat /etc/nginx/includes.d/all/deny-ips.conf | grep '62.60.130.228'"
 ```
 
 **If not there:**
@@ -494,10 +499,10 @@ Before making large changes:
 
 ```bash
 # Backup current config
-ssh warden@yoursite.com "sudo cp /etc/nginx/includes.d/all/deny-ips.conf /tmp/deny-ips.conf.backup"
+ssh admin_user@yoursite.com "sudo cp /etc/nginx/includes.d/all/deny-ips.conf /tmp/deny-ips.conf.backup"
 
 # If something breaks
-ssh warden@yoursite.com "sudo cp /tmp/deny-ips.conf.backup /etc/nginx/includes.d/all/deny-ips.conf && sudo systemctl reload nginx"
+ssh admin_user@yoursite.com "sudo cp /tmp/deny-ips.conf.backup /etc/nginx/includes.d/all/deny-ips.conf && sudo systemctl reload nginx"
 ```
 
 ---
@@ -524,19 +529,19 @@ trellis provision --tags nginx production
 ### View Current Blocks
 
 ```bash
-ssh warden@yoursite.com "cat /etc/nginx/includes.d/all/deny-ips.conf"
+ssh admin_user@yoursite.com "cat /etc/nginx/includes.d/all/deny-ips.conf"
 ```
 
 ### Test Nginx Config
 
 ```bash
-ssh warden@yoursite.com "sudo nginx -t"
+ssh admin_user@yoursite.com "sudo nginx -t"
 ```
 
 ### Monitor Blocked Requests
 
 ```bash
-ssh warden@yoursite.com "sudo grep 'access forbidden' /var/log/nginx/error.log | tail -20"
+ssh admin_user@yoursite.com "sudo grep 'access forbidden' /var/log/nginx/error.log | tail -20"
 ```
 
 ---
