@@ -2,6 +2,8 @@
 
 A comprehensive collection of Ansible playbooks, scripts, and documentation for managing WordPress sites with [Roots Trellis](https://roots.io/trellis/).
 
+**Note**: Commands in this guide use `admin_user` as a placeholder for your Trellis admin username. Replace with your configured username (e.g., `admin`, `deploy`, `warden`, your name).
+
 ## Overview
 
 This directory contains production-ready tools for:
@@ -220,10 +222,10 @@ trellis provision --tags fail2ban production
 
 ```bash
 # Check fail2ban status
-ssh warden@yoursite.com "sudo fail2ban-client status wordpress_wp_login"
+ssh admin_user@yoursite.com "sudo fail2ban-client status wordpress_wp_login"
 
 # View recent bans
-ssh warden@yoursite.com "sudo tail -50 /var/log/fail2ban.log"
+ssh admin_user@yoursite.com "sudo tail -50 /var/log/fail2ban.log"
 
 # Analyze attack patterns
 ssh web@yoursite.com "grep 'POST.*wp-login' /srv/www/yoursite.com/logs/access.log | awk '{print \$1}' | sort | uniq -c | sort -rn | head -20"
