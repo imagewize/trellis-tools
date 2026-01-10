@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.5] - 2026-01-10
+
+### Added
+
+- **Theme Release Script Multi-AI Support** - Enhanced [scripts/release-theme.sh](scripts/release-theme.sh) with flexible AI backend selection:
+  - Added `--ai=claude|codex` flag for explicit AI tool selection
+  - Interactive AI tool selection when both Claude and Codex CLIs are available
+  - Environment variable support for custom CLI command names (`CLAUDE_COMMAND`, `CODEX_COMMAND`)
+  - Support for custom AI CLI arguments via `CLAUDE_CLI_ARGS` and `CODEX_CLI_ARGS` environment variables
+  - Improved error handling with detailed AI CLI failure messages
+
+### Changed
+
+- **Enhanced Theme Release Documentation** - Updated [scripts/README.md](scripts/README.md) with multi-AI backend documentation:
+  - Updated release-theme.sh description to mention both Claude CLI and Codex support
+  - Added `--ai` flag examples in Usage section
+  - Enhanced Requirements section with both Claude and Codex installation instructions
+  - Clarified AI-Generated Changelogs feature supports multiple AI backends
+
+### Improved
+
+- Refactored release-theme.sh option parsing to use `case` statement for better maintainability
+- Enhanced AI CLI detection to check for both Claude and Codex availability
+- More flexible AI tool configuration with environment variable overrides
+- Better user experience with automatic AI tool selection based on availability
+
 ## [2.3.4] - 2026-01-09
 
 ### Changed
