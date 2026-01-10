@@ -162,7 +162,7 @@ pip install openai-codex
 
 ### release-theme.sh (346 lines)
 
-Automates WordPress theme version releases with Claude AI-generated changelogs.
+Automates WordPress theme version releases with AI-generated changelogs (Claude CLI or Codex).
 
 #### Features
 
@@ -177,6 +177,7 @@ Automates WordPress theme version releases with Claude AI-generated changelogs.
   - Supports pre-release suffixes (1.2.3-beta)
 
 - **AI-Generated Changelogs**:
+  - Supports Claude CLI or Codex for changelog generation
   - Analyzes git diff since last tag
   - Generates two changelog formats:
     - **CHANGELOG.md**: Detailed Keep a Changelog format (Changed, Added, Fixed, Technical)
@@ -201,6 +202,10 @@ Automates WordPress theme version releases with Claude AI-generated changelogs.
 
 # Release with automatic commit
 ./release-theme.sh theme-name 1.0.0 --commit
+
+# Specify AI tool
+./release-theme.sh theme-name 1.2.5 --ai=codex
+./release-theme.sh theme-name 1.0.0 --commit --ai=claude
 
 # Examples
 ./release-theme.sh elayne 1.2.5
@@ -251,11 +256,15 @@ SITE_DIR="$HOME/code/example.com/site/web/app/themes"
 #### Requirements
 
 ```bash
-# Claude CLI required
+# Install Claude CLI (recommended)
 npm install -g @anthropics/claude-cli
 
 # Configure API key
 export ANTHROPIC_API_KEY="your-key-here"
+
+# Or install Codex CLI (alternative)
+npm install -g @openai/codex
+export OPENAI_API_KEY="your-key-here"
 ```
 
 ---

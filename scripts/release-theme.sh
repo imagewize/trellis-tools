@@ -1,24 +1,24 @@
 #!/bin/bash
 
-# WordPress Theme Release Script with Claude AI Integration
+# WordPress Theme Release Script with AI Integration (Claude/Codex)
 # Automates version bumping and changelog updates for theme releases
 # Supports both demo/ and site/ Bedrock installations
 #
 # Usage:
-#   ./release-theme.sh <theme-name> <version> [--commit]
+#   ./release-theme.sh <theme-name> <version> [--commit] [--ai=claude|codex]
 #   ./release-theme.sh elayne 1.2.5          # Demo site theme
 #   ./release-theme.sh nynaeve 1.0.0 --commit # Main site theme
 #
 # What it does:
 # 1. Compares current branch to main branch
-# 2. Uses Claude CLI to analyze changes and generate changelog
+# 2. Uses AI CLI (Claude or Codex) to analyze changes and generate changelog
 # 3. Updates version in style.css, readme.txt, and CHANGELOG.md
 # 4. Creates professional changelog entries in both formats
 # 5. Shows git diff for review
 # 6. Optionally commits changes with standardized message
 #
 # Requirements:
-# - claude CLI installed and authenticated
+# - claude or codex CLI installed and authenticated
 # - git repository with main branch
 
 set -e  # Exit on error
@@ -30,27 +30,105 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Check requirements
-if ! command -v claude &> /dev/null; then
+# CLI command names can be overridden via environment if needed
+CLAUDE_COMMAND=${CLAUDE_COMMAND:-claude}
+CODEX_COMMAND=${CODEX_COMMAND:-codex}
+
+# Parse options
+AUTO_COMMIT=false
+AI_TOOL="claude"
+AI_TOOL_SPECIFIED=false
+ARGS=()
+while [ $# -gt 0 ]; do
+    case "$1" in
+    --commit)
+        AUTO_COMMIT=true
+        ;;
+    --ai=*)
+        AI_TOOL="${1#--ai=}"
+        AI_TOOL_SPECIFIED=true
+        ;;
+    --ai)
+        if [ -n "${2:-}" ]; then
+            AI_TOOL="$2"
+            AI_TOOL_SPECIFIED=true
+            shift
+        else
+            echo -e "${RED}Error: --ai requires a value (claude or codex).${NC}"
+            exit 1
+        fi
+        ;;
+    *)
+        ARGS+=("$1")
+        ;;
+    esac
+    shift
+done
+set -- "${ARGS[@]}"
+
+AI_TOOL=$(echo "$AI_TOOL" | tr '[:upper:]' '[:lower:]')
+if [ "$AI_TOOL" != "claude" ] && [ "$AI_TOOL" != "codex" ]; then
+    echo -e "${RED}Error: Unsupported AI tool '$AI_TOOL'. Use 'claude' or 'codex'.${NC}"
+    exit 1
+fi
+
+# Prompt for AI tool if not specified and multiple CLIs are available
+AVAILABLE_AI_TOOLS=()
+command -v "$CLAUDE_COMMAND" &> /dev/null && AVAILABLE_AI_TOOLS+=("claude")
+command -v "$CODEX_COMMAND" &> /dev/null && AVAILABLE_AI_TOOLS+=("codex")
+
+if [ ${#AVAILABLE_AI_TOOLS[@]} -eq 0 ]; then
+    echo -e "${RED}Error: No AI CLI found (checked for '$CLAUDE_COMMAND' and '$CODEX_COMMAND').${NC}"
+    exit 1
+fi
+
+if [ "$AI_TOOL_SPECIFIED" = false ]; then
+    if [ ${#AVAILABLE_AI_TOOLS[@]} -gt 1 ]; then
+        echo ""
+        echo "Available AI tools: ${AVAILABLE_AI_TOOLS[*]}"
+        read -p "Choose AI tool [default: $AI_TOOL]: " chosen_ai_tool
+        if [ -n "$chosen_ai_tool" ]; then
+            chosen_ai_tool=$(echo "$chosen_ai_tool" | tr '[:upper:]' '[:lower:]')
+            if [[ " ${AVAILABLE_AI_TOOLS[*]} " =~ " ${chosen_ai_tool} " ]]; then
+                AI_TOOL="$chosen_ai_tool"
+            else
+                echo -e "${YELLOW}⚠️  '$chosen_ai_tool' not available. Using '$AI_TOOL'.${NC}"
+            fi
+        fi
+    else
+        AI_TOOL="${AVAILABLE_AI_TOOLS[0]}"
+    fi
+fi
+
+# Capitalized label for display (bash 3.2 compatible)
+AI_TOOL_DISPLAY=$(printf '%s' "$AI_TOOL" | awk '{print toupper(substr($0,1,1)) substr($0,2)}')
+
+if [ "$AI_TOOL" = "claude" ] && ! command -v "$CLAUDE_COMMAND" &> /dev/null; then
     echo -e "${RED}Error: Claude CLI is required but not installed${NC}"
     echo "Install with: npm install -g @anthropic-ai/claude-cli"
     echo "Or see: https://github.com/anthropics/claude-cli"
     exit 1
 fi
 
+if [ "$AI_TOOL" = "codex" ] && ! command -v "$CODEX_COMMAND" &> /dev/null; then
+    echo -e "${RED}Error: Codex CLI is required but not installed${NC}"
+    echo "Install with: npm install -g @openai/codex"
+    exit 1
+fi
+
 # Check if theme name argument is provided
 if [ -z "$1" ]; then
     echo -e "${RED}Error: Theme name and version required${NC}"
-    echo "Usage: $0 <theme-name> <version> [--commit]"
+    echo "Usage: $0 <theme-name> <version> [--commit] [--ai=claude|codex]"
     echo "Example: $0 elayne 1.2.5"
-    echo "Example: $0 moiraine 2.1.0 --commit"
+    echo "Example: $0 moiraine 2.1.0 --commit --ai=codex"
     exit 1
 fi
 
 # Check if version argument is provided
 if [ -z "$2" ]; then
     echo -e "${RED}Error: Version number required${NC}"
-    echo "Usage: $0 <theme-name> <version> [--commit]"
+    echo "Usage: $0 <theme-name> <version> [--commit] [--ai=claude|codex]"
     echo "Example: $0 elayne 1.2.5"
     exit 1
 fi
@@ -93,7 +171,7 @@ if ! [[ "$NEW_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
 fi
 
 THEME_DISPLAY_NAME=$(echo "$THEME_NAME" | awk '{print toupper(substr($0,1,1)) tolower(substr($0,2))}')
-echo -e "${BLUE}=== $THEME_DISPLAY_NAME Theme Release Tool with Claude AI ===${NC}"
+echo -e "${BLUE}=== $THEME_DISPLAY_NAME Theme Release Tool with ${AI_TOOL_DISPLAY} AI ===${NC}"
 echo ""
 
 # Get current version from style.css
@@ -134,10 +212,10 @@ fi
 
 echo "  ✓ Retrieved changes from git diff"
 
-echo -e "${BLUE}Step 2: Using Claude AI to generate changelog...${NC}"
+echo -e "${BLUE}Step 2: Using ${AI_TOOL_DISPLAY} AI to generate changelog...${NC}"
 
-# Create prompt for Claude CLI
-CLAUDE_PROMPT="You are analyzing changes for the $THEME_DISPLAY_NAME WordPress theme release version $NEW_VERSION (previous version: $CURRENT_VERSION).
+# Create prompt for AI CLI
+AI_PROMPT="You are analyzing changes for the $THEME_DISPLAY_NAME WordPress theme release version $NEW_VERSION (previous version: $CURRENT_VERSION).
 
 Based on the git diff below, generate TWO changelog formats:
 
@@ -170,22 +248,57 @@ Return ONLY valid JSON in this exact format (no markdown code blocks):
 
 Be concise but informative. Focus on user-visible changes."
 
-# Call Claude CLI
-CLAUDE_RESPONSE=$(echo "$CLAUDE_PROMPT" | claude --print 2>&1)
+# Call selected AI CLI
+AI_RESPONSE=""
+AI_EXIT_CODE=0
+AI_TMP_ERROR=$(mktemp)
 
-if [ $? -ne 0 ]; then
-    echo -e "${RED}  ✗ Claude CLI call failed${NC}"
-    echo "Error: $CLAUDE_RESPONSE"
-    exit 1
+if [ "$AI_TOOL" = "codex" ]; then
+    AI_COMMAND="$CODEX_COMMAND"
+    AI_ARGS=()
+    if [ -n "${CODEX_CLI_ARGS:-}" ]; then
+        # shellcheck disable=SC2206
+        AI_ARGS=($CODEX_CLI_ARGS)
+    fi
+    AI_TMP_OUTPUT=$(mktemp)
+    set +e
+    echo "$AI_PROMPT" | "$AI_COMMAND" "${AI_ARGS[@]}" exec --skip-git-repo-check --output-last-message "$AI_TMP_OUTPUT" - >"$AI_TMP_ERROR" 2>&1
+    AI_EXIT_CODE=$?
+    set -e
+    if [ $AI_EXIT_CODE -eq 0 ]; then
+        AI_RESPONSE=$(cat "$AI_TMP_OUTPUT")
+    fi
+    rm -f "$AI_TMP_OUTPUT"
+else
+    AI_COMMAND="$CLAUDE_COMMAND"
+    AI_ARGS=()
+    if [ -n "${CLAUDE_CLI_ARGS:-}" ]; then
+        # shellcheck disable=SC2206
+        AI_ARGS=($CLAUDE_CLI_ARGS)
+    else
+        AI_ARGS=(--print)
+    fi
+    set +e
+    AI_RESPONSE=$(echo "$AI_PROMPT" | "$AI_COMMAND" "${AI_ARGS[@]}" 2>"$AI_TMP_ERROR")
+    AI_EXIT_CODE=$?
+    set -e
 fi
 
-# Parse JSON from Claude's response
-# Claude may wrap JSON in markdown code blocks, so extract it
-CHANGELOG_JSON=$(echo "$CLAUDE_RESPONSE" | sed -n '/^{/,/^}/p')
+if [ $AI_EXIT_CODE -ne 0 ]; then
+    echo -e "${RED}  ✗ ${AI_TOOL_DISPLAY} CLI call failed${NC}"
+    echo "Error: $(cat "$AI_TMP_ERROR")"
+    rm -f "$AI_TMP_ERROR"
+    exit 1
+fi
+rm -f "$AI_TMP_ERROR"
+
+# Parse JSON from AI response
+# AI may wrap JSON in markdown code blocks, so extract it
+CHANGELOG_JSON=$(echo "$AI_RESPONSE" | sed -n '/^{/,/^}/p')
 
 if [ -z "$CHANGELOG_JSON" ]; then
-    echo -e "${RED}  ✗ Failed to parse Claude's response${NC}"
-    echo "Claude returned: $CLAUDE_RESPONSE"
+    echo -e "${RED}  ✗ Failed to parse ${AI_TOOL_DISPLAY}'s response${NC}"
+    echo "${AI_TOOL_DISPLAY} returned: $AI_RESPONSE"
     exit 1
 fi
 
@@ -200,7 +313,7 @@ if [ -z "$CHANGELOG_MD" ] || [ -z "$README_TXT" ]; then
     exit 1
 fi
 
-echo "  ✓ Generated changelog with Claude AI"
+echo "  ✓ Generated changelog with ${AI_TOOL_DISPLAY} AI"
 
 # Date formats
 CHANGELOG_DATE=$(date +%Y-%m-%d)  # 2025-12-31
@@ -335,7 +448,7 @@ echo -e "   ${GREEN}./create-pr.sh main \"$THEME_DISPLAY_NAME Version $NEW_VERSI
 echo ""
 
 # Optional auto-commit
-if [ "$3" = "--commit" ]; then
+if [ "$AUTO_COMMIT" = true ]; then
     echo -e "${BLUE}Auto-committing changes...${NC}"
     git add "$THEME_DIR/style.css" "$THEME_DIR/readme.txt" "$THEME_DIR/CHANGELOG.md"
     git commit -m "$THEME_DISPLAY_NAME Version $NEW_VERSION"
